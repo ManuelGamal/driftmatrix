@@ -1,0 +1,15 @@
+# Captured run data lives on the WSL-native filesystem, never committed
+data/
+*.parquet
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Analysis outputs are regenerated from data/
+outputs/
