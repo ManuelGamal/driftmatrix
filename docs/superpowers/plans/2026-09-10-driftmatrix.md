@@ -83,6 +83,8 @@ Implemented test-first; the fake server in `tests/test_g1.py` models micro-batch
 
 ### Task 7R: Chat-templated traces, natural and snapped boundaries, per-model tool calls
 
+**Status: code done; server check pending.** Renderer, boundary helpers and the three parsers are under test. Offline rendering of all three embedded templates with tools succeeds, and each template's own serialisation of a tool call parses back with its model's parser. Remaining: `scripts/g2_render_check.py` against each model's server, then the G2 tool-call-rate gate.
+
 **Revised after checking the server and the templates.** `llama-server`'s
 `/apply-template` accepts `messages` only, not `tools`, so rendering is offline
 from each GGUF's embedded `tokenizer.chat_template`. The three models emit tool

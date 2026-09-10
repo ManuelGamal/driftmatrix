@@ -125,6 +125,10 @@ class ServerClient:
     def props(self):
         return self._req("GET", "/props")
 
+    def apply_template(self, messages):
+        """The server's own chat-template rendering. Accepts no tools."""
+        return self._req("POST", "/apply-template", {"messages": messages})["prompt"]
+
     def tokenize(self, text: str, add_special: bool = True):
         resp = self._req("POST", "/tokenize", {"content": text, "add_special": add_special})
         return [t["id"] if isinstance(t, dict) else t for t in resp["tokens"]]
