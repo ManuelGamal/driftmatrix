@@ -63,13 +63,22 @@ class FloorTest:
     n_neg: int
 
 
-def test_against_floor(treatment, floor) -> FloorTest:
-    """Does restore diverge more than the recompute floor on the same turns?"""
+def test_against_floor(treatment, floor, floor_exact: bool | None = None) -> FloorTest:
+    """Does restore diverge more than the recompute floor on the same turns?
+
+    floor_exact says whether the two recomputes were bit-exact on every turn. The
+    pre-registration switches tests on that, not on the outcome compared: two
+    recomputes can differ in logprobs while taking the same action, and then the
+    action floor is all zeros but the engine is not deterministic. When omitted,
+    it is inferred from the floor values.
+    """
     t, f = np.asarray(treatment, dtype=np.float64), np.asarray(floor, dtype=np.float64)
     if t.size == 0:
         raise ValueError("no turns")
+    if floor_exact and np.any(f):
+        raise ValueError("floor_exact contradicts a nonzero floor")
     n_pos, n_neg = signs(t, f)
-    if not np.any(f):
+    if (not np.any(f)) if floor_exact is None else floor_exact:
         return FloorTest(0.0 if np.any(t) else 1.0, "zero_floor", int(t.size), n_pos, n_neg)
     return FloorTest(sign_test(n_pos, n_neg, "greater"), "sign_test", int(t.size), n_pos, n_neg)
 

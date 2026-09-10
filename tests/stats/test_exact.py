@@ -58,3 +58,14 @@ def test_nonzero_floor_falls_back_to_the_one_sided_sign_test():
 def test_against_floor_needs_turns():
     with pytest.raises(ValueError):
         test_against_floor([], [])
+
+
+def test_an_inexact_floor_uses_the_sign_test_even_when_its_outcome_is_all_zero():
+    # recomputes differed in logprobs but took the same action on every turn
+    r = test_against_floor([1, 0, 0, 0], [0, 0, 0, 0], floor_exact=False)
+    assert r.method == "sign_test" and r.p_value == pytest.approx(0.5)
+
+
+def test_floor_exact_cannot_contradict_the_floor():
+    with pytest.raises(ValueError, match="contradicts"):
+        test_against_floor([1, 0], [0, 1], floor_exact=True)

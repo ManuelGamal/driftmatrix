@@ -17,6 +17,7 @@ this renderer reproduces the server's own rendering byte for byte.
 """
 from __future__ import annotations
 
+import functools
 import json
 
 from jinja2.exceptions import TemplateError
@@ -44,6 +45,7 @@ def _environment():
 
 
 _ENV = _environment()
+_compile = functools.lru_cache(maxsize=16)(_ENV.from_string)   # templates are long; analysis renders thousands of calls
 
 
 def load_template(gguf_path) -> str:
@@ -79,7 +81,7 @@ def render(template: str, messages, tools=None, *, add_generation_prompt: bool =
         ctx["enable_thinking"] = enable_thinking
     if tools is not None:
         ctx["tools"] = tools
-    return _ENV.from_string(template).render(**ctx)
+    return _compile(template).render(**ctx)
 
 
 def snap(k: int, ubatch: int) -> int:
