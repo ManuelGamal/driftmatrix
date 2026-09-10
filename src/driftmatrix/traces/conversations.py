@@ -2,16 +2,28 @@
 
 Each conversation is a system prompt, a history of completed tool round trips
 (user request, assistant tool call, tool result, assistant summary), and a
-final user request that needs a tool. The expected tool and arguments are kept
-so a completion can be scored for whether it called the right thing.
+final user request.
 
 Two wire formats exist for the same conversation:
 - template form (the default): tool-call arguments are dicts, which is what
   chat templates need - Spark's raises on anything else;
 - OpenAI form (to_oai): arguments are JSON strings, as /v1/chat/completions
   expects. The string is json.dumps(args, ensure_ascii=False), which produces
-  the same bytes as the renderer's tojson, so both paths can render the same
-  prompt if the server converts faithfully. G2 checks that it does.
+  the same bytes as the renderer's tojson.
+
+Two strata (spec v4.2):
+- explicit: the final request names one tool and its arguments. Generation is
+  unchanged from the G2 run, so its committed reports stay reproducible.
+- ambiguous: the explicit twin with only the final request replaced by one that
+  is still answerable with a tool call but leaves a real choice - more than one
+  plausible tool, or an argument to infer from history. Both strata therefore
+  share the same history, which pairs the stratum contrast. There is no single
+  correct call, so expected_tool and expected_args are None.
+
+The five ambiguous request types rotate evenly across conversations, so no
+single phrasing dominates the stratum. How ambiguous any one instance is varies
+with its history; that variation is what the recompute-arm decision margin
+measures (spec 5.1), not something the generator tries to control.
 """
 from __future__ import annotations
 
@@ -26,6 +38,8 @@ SYSTEM = ("You are an operations assistant with access to tools. When a request 
           "data or a computation, call the appropriate tool instead of answering from "
           "memory.")
 
+STRATA = ("explicit", "ambiguous")
+
 
 def openai_tools():
     return [{"type": "function", "function": copy.deepcopy(s)} for s in TOOL_SCHEMAS]
@@ -36,10 +50,12 @@ class Conversation:
     conv_id: str
     messages: list
     tools: list
-    expected_tool: str
-    expected_args: dict
+    expected_tool: str | None
+    expected_args: dict | None
+    stratum: str = "explicit"
 
 
+# ---------------------------------------------------------------- explicit requests
 def _lookup(rng):
     args = {"record_id": rng.randrange(0, 200)}
     return "lookup_record", args, f"Look up record {args['record_id']} and tell me its field."
@@ -58,7 +74,7 @@ def _report(rng):
 _REQUESTS = (_lookup, _sum, _report)
 
 
-def generate_conversations(n: int, history_turns: int, seed: int):
+def _explicit(n: int, history_turns: int, seed: int):
     rng = random.Random(seed)
     tools = openai_tools()
     out = []
@@ -77,6 +93,47 @@ def generate_conversations(n: int, history_turns: int, seed: int):
         name, args, request = rng.choice(_REQUESTS)(rng)
         msgs.append({"role": "user", "content": request})
         out.append(Conversation(f"c{seed}_{c:03d}", msgs, tools, name, args))
+    return out
+
+
+# --------------------------------------------------------------- ambiguous requests
+def _amb_that_record(rng):
+    return "Pull up that record again, the one from before."           # which one?
+
+
+def _amb_something_on_record(rng):
+    return f"Give me something on record {rng.randrange(0, 200)}."     # look up, or report?
+
+
+def _amb_total_records(rng):
+    a, b = rng.randrange(0, 200), rng.randrange(0, 200)
+    return f"Can you total up records {a} and {b}?"                   # look up first, or sum?
+
+
+def _amb_add_earlier(rng):
+    return "Add up the numbers from earlier."                          # which numbers?
+
+
+def _amb_write_up(rng):
+    return "Write that up for me."                                     # what title and body?
+
+
+AMBIGUOUS_TYPES = (_amb_that_record, _amb_something_on_record, _amb_total_records,
+                   _amb_add_earlier, _amb_write_up)
+
+
+def generate_conversations(n: int, history_turns: int, seed: int, stratum: str = "explicit"):
+    if stratum not in STRATA:
+        raise ValueError(f"unknown stratum: {stratum}")
+    explicit = _explicit(n, history_turns, seed)
+    if stratum == "explicit":
+        return explicit
+    out = []
+    for i, conv in enumerate(explicit):
+        rng = random.Random(f"{seed}:ambiguous:{conv.conv_id}")
+        request = AMBIGUOUS_TYPES[i % len(AMBIGUOUS_TYPES)](rng)
+        msgs = copy.deepcopy(conv.messages[:-1]) + [{"role": "user", "content": request}]
+        out.append(Conversation("a" + conv.conv_id[1:], msgs, conv.tools, None, None, "ambiguous"))
     return out
 
 

@@ -3,7 +3,8 @@
 For each conversation, with tools on and thinking off:
 
   1. render offline, tokenize with the server, complete through /completion -
-     the study's own path - and parse the output with the model's parser;
+     the study's own path, with no restore involved - and parse the output with
+     the model's parser. Top-k logprobs give the decision margin (spec 5.1);
   2. send the same conversation to /v1/chat/completions, where the server
      renders it itself and parses tool calls with llama.cpp's parser.
 
@@ -22,14 +23,18 @@ Checks, in verdict order:
                  so the model output is the same text in both paths.
   tool-call rate share of outputs that parse as a tool call; gate >= 0.90.
 
-Correct-tool and correct-arguments rates are reported but do not gate: the
-study measures whether restore changes the call, not whether the call is right.
+Correct-tool and correct-arguments rates are reported for explicit requests
+but do not gate, and are undefined for ambiguous ones. stratum_check compares
+two strata's reports: the ambiguous stratum must lower the median decision
+margin, or it is not creating the near-ties it exists for (spec v4.2).
 """
 from __future__ import annotations
 
 import json
+import statistics
 
 from .metrics.behavioral import ToolCall
+from .metrics.margin import BIN_LABELS, decision_margin, margin_bin
 from .runner.llamaserver import ServerError
 from .traces.conversations import to_oai
 from .traces.render import render
@@ -76,6 +81,11 @@ def _rate(values):
     return sum(1 for v in vals if v) / len(vals) if vals else None
 
 
+def _median(values):
+    vals = [v for v in values if v is not None]
+    return statistics.median(vals) if vals else None
+
+
 def g2_verdict(summary: dict) -> str:
     if summary.get("chat_errors", 0):
         return "CHAT_PATH_ERROR"
@@ -88,8 +98,23 @@ def g2_verdict(summary: dict) -> str:
     return "G2_TOOLCALLS_PASS"
 
 
+def stratum_check(explicit: dict, ambiguous: dict) -> dict:
+    """Does the ambiguous stratum lower the median decision margin?"""
+    e, a = explicit.get("median_margin"), ambiguous.get("median_margin")
+    out = {"explicit_median_margin": e, "ambiguous_median_margin": a,
+           "explicit_tool_call_rate": explicit.get("tool_call_rate"),
+           "ambiguous_tool_call_rate": ambiguous.get("tool_call_rate")}
+    if e is None or a is None:
+        out["verdict"] = "MARGIN_UNAVAILABLE"
+    elif a < e:
+        out["verdict"] = "STRATUM_LOWERS_MARGIN"
+    else:
+        out["verdict"] = "STRATUM_DOES_NOT_LOWER_MARGIN"
+    return out
+
+
 def run_g2(client, conversations, template: str, fmt: str, specials=None,
-           n_predict: int = 192) -> dict:
+           n_predict: int = 192, n_probs: int = 10) -> dict:
     specials = specials or {}
     rows = []
     for conv in conversations:
@@ -97,9 +122,10 @@ def run_g2(client, conversations, template: str, fmt: str, specials=None,
                       enable_thinking=False, **specials)
         toks = client.tokenize(text)
         client.slot_erase()
-        comp = client.complete(toks, n_predict, 0, cache_prompt=False)
+        comp = client.complete(toks, n_predict, n_probs, cache_prompt=False)
         output = comp.raw.get("content") or ""
         ours = parse_tool_call(output, fmt)
+        margin, margin_pos = decision_margin(comp.top, comp.pieces)
 
         client.slot_erase()
         try:
@@ -111,10 +137,12 @@ def run_g2(client, conversations, template: str, fmt: str, specials=None,
         theirs = server_tool_call(chat)
         n_server = server_prompt_tokens(chat)
         prompt_match = None if chat_error else n_server == len(toks)
-        expected = ToolCall.from_payload(conv.expected_tool, conv.expected_args)
+        expected = (ToolCall.from_payload(conv.expected_tool, conv.expected_args)
+                    if conv.expected_tool else None)
 
         rows.append({
             "conv_id": conv.conv_id,
+            "stratum": getattr(conv, "stratum", "explicit"),
             "offline_prompt_tokens": len(toks),
             "server_prompt_tokens": n_server,
             "chat_error": chat_error,
@@ -123,19 +151,28 @@ def run_g2(client, conversations, template: str, fmt: str, specials=None,
             "parser_agrees": (ours == theirs) if prompt_match else None,
             "ours": None if ours is None else {"name": ours.name, "args_hash": ours.args_hash},
             "theirs": None if theirs is None else {"name": theirs.name, "args_hash": theirs.args_hash},
-            "expected_tool_called": ours is not None and ours.name == conv.expected_tool,
-            "expected_call_exact": ours == expected,
+            "expected_tool_called": (None if expected is None
+                                     else ours is not None and ours.name == conv.expected_tool),
+            "expected_call_exact": None if expected is None else ours == expected,
+            "decision_margin": margin,
+            "margin_position": margin_pos,
+            "margin_bin": margin_bin(margin),
             "output": output[:400],
         })
 
+    bins = {label: sum(1 for r in rows if r["margin_bin"] == label) for label in BIN_LABELS}
+    bins["unavailable"] = sum(1 for r in rows if r["margin_bin"] is None)
     summary = {
         "n": len(rows),
+        "strata": sorted({r["stratum"] for r in rows}),
         "chat_errors": sum(1 for r in rows if r["chat_error"]),
         "prompt_match_rate": _rate(r["prompt_match"] for r in rows),
         "parser_agreement_rate": _rate(r["parser_agrees"] for r in rows),
         "tool_call_rate": _rate(r["tool_call_made"] for r in rows),
         "expected_tool_rate": _rate(r["expected_tool_called"] for r in rows),
         "expected_call_exact_rate": _rate(r["expected_call_exact"] for r in rows),
+        "median_margin": _median(r["decision_margin"] for r in rows),
+        "margin_bins": bins,
     }
     summary["verdict"] = g2_verdict(summary)
     return {"summary": summary, "rows": rows}

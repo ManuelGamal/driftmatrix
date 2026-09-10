@@ -5,7 +5,7 @@ A state-fidelity audit of prompt-cache reuse in llama.cpp across dense,
 sliding-window and hybrid recurrent architectures, under agent-shaped traffic.
 
 Date: 2026-09-10
-Status: v4.1 — gates G0 and G1 passed; G2 checks passed, pre-registration pending
+Status: v4.2 — gates G0 and G1 passed; G2 passed on explicit requests; ambiguous stratum and pre-registration pending
 Author: Manuel Gamal
 
 ---
@@ -19,6 +19,7 @@ Author: Manuel Gamal
 | v3 | llama.cpp, explicit state save/restore, three-level architecture ladder | Hardware: IQ4_XS GGUF on an 8 GB GPU; exact arms instead of inferred ones |
 | **v4** | **Mechanism located at the physical micro-batch; chat-templated traces; quantization-matched ladder; mitigation arm** | **G0 results — see §1.3 and `docs/findings/2026-09-10-g0.md`** |
 | v4.1 | G1 passed; magnitude restated over 16 positions (controls: small, not negligible); offline chat-template rendering; per-model tool-call parsers | G1 results (`docs/findings/2026-09-10-g1.md`); `/apply-template` accepts no `tools` |
+| v4.2 | Request stratum S (explicit / ambiguous) replaces continuation C; recompute-arm decision margin as a pre-registered covariate; generation runs to the end of the turn | G2: 90/90 explicit requests gave the exact expected call, so decisions were near-certain; tool calls ended the turn at 81–151 characters, so a 32-token continuation truncates them |
 
 ---
 
@@ -243,7 +244,7 @@ to isolate the k=1024 anomaly by varying `n_ubatch` independently of its window.
 | **T** | Arm (treatment) | restore · recompute |
 | **B** | Reuse boundary | **natural** (end of the previous turn, wherever it falls) · **snapped** (natural boundary rounded down to a multiple of `n_ubatch`) |
 | **P** | Prefix length | short (~1K tokens) · long (~6K tokens) |
-| **C** | Continuation | short (32 tokens) · long (256 tokens) |
+| **S** | Request stratum | **explicit** (one tool and its arguments are unambiguous) · **ambiguous** (more than one plausible tool, or an under-specified argument) |
 | **A** | Architecture (blocking) | levels 3, 2, 1 |
 
 2 × 2 × 2 = 8 conditions per architecture, each with both arms, each
@@ -251,6 +252,16 @@ replicated twice. **B** carries the mitigation: a snapped boundary re-evaluates
 `b mod n_ubatch` extra prompt tokens (≤ `n_ubatch − 1`) and should make restore
 exact. Every natural boundary also records `k mod n_ubatch`, so the analysis
 can split natural boundaries by their actual alignment.
+
+**Why S replaced the continuation factor.** Continuation length stopped making
+sense once traces became tool calls: G2's completions were bare tool calls of
+81–151 characters that end the turn, so a 32-token continuation truncates many
+of them and a 256-token one is never reached. Generation now runs to the end of
+the turn, capped at 192 tokens, and compounding is measured across positions
+within the output. The freed factor carries the stratum: G2 found explicit
+requests produce near-certain decisions (90 of 90 exact), and G1 showed restore
+flips a decision only near a tie, so an explicit-only study risks a behavioural
+null caused by trace design rather than by the mechanism.
 
 ### 4.3 Forcing and proving the arms
 
@@ -279,6 +290,17 @@ with its tool-call format**, so the model is in tool-calling mode:
 | Natural boundary | Token length of the rendered conversation before the current turn |
 | Prefix length | Padded history to satisfy **P** |
 
+**Strata.** An ambiguous conversation is its explicit twin with only the final
+user request replaced, so both strata share the same history and the stratum
+contrast is paired. Explicit requests name one tool and its arguments ("Look up
+record 153"). Ambiguous requests stay answerable with a tool call but leave a
+real choice: more than one plausible tool ("Give me something on record 42"),
+or an argument to infer from history ("Add up the numbers from earlier"). They
+have no single correct call, so correctness is not scored for them; the
+recompute arm's own call is the reference. The stratum must earn its place: G2
+requires ambiguous requests to keep at least 90% tool calls **and** to show a
+lower median decision margin than explicit ones.
+
 **Rendering.** `llama-server`'s `/apply-template` accepts `messages` only, not
 `tools`, so prompts are rendered offline from the chat template embedded in each
 GGUF (`tokenizer.chat_template`) with jinja2, configured the way HuggingFace
@@ -286,7 +308,7 @@ renders chat templates: `trim_blocks` and `lstrip_blocks` on, loop controls
 enabled, `raise_exception` provided, and a `tojson` filter that does **not**
 HTML-escape. (jinja2's built-in `tojson` escapes `<`, `>` and `&`, which would
 silently change the rendered tool schemas.) Thinking is disabled
-(`enable_thinking = false`) so the continuation budget reaches the tool call.
+(`enable_thinking = false`) so the generation budget reaches the tool call.
 Before use, the renderer must reproduce `/apply-template` byte for byte on
 tool-less conversations for every model.
 
@@ -310,12 +332,13 @@ VALUE
 Argument values are canonicalised — JSON-decoded where they parse, keys sorted —
 before hashing, so an identical call always hashes identically.
 
-~60 sessions × ~6 turns ≈ 360 turns per model, frozen and content-hashed.
+360 turns per model — 90 in each prefix-length × stratum cell — frozen and content-hashed.
 
 ### 4.5 Two measurement modes
 
-**Free-running (headline):** both arms generate at temperature 0; record
-exact-match, first-divergence position, **parsed tool call**, final answer.
+**Free-running (headline):** both arms generate at temperature 0 until the end
+of the turn, capped at 192 tokens; record exact-match, first-divergence position,
+**parsed tool call**, final answer.
 
 **Teacher-forced (instrument):** each arm scores the other's output, giving
 per-position distribution differences under identical context.
@@ -328,8 +351,14 @@ per-position distribution differences under identical context.
 
 - **Tool-call agreement** — same tool name and same canonicalised arguments.
 - **Exact-match rate** of the completion.
-- **First-divergence position**, right-censored at the continuation length.
+- **First-divergence position**, right-censored when the two outputs are identical.
 - **Final-answer agreement** on the verifiable subset.
+- **Decision margin (covariate).** On the recompute arm only: the smallest gap
+  between the top-1 and top-2 logprobs at any generated position through the end
+  of the first complete tool call. Pre-registered bins: **near-tie** below 0.5
+  nats, **contested** 0.5 to 2 nats, **confident** 2 nats or more. Taken from the
+  recompute arm so that stratifying by it never selects on the treatment's
+  outcome. (G0's hybrid flipped a token whose recompute-arm margin was 1.13 nats.)
 
 ### 5.2 Distributional (supporting)
 
@@ -383,7 +412,7 @@ nulls.
 |---|---|---|
 | A — behavioural divergence | 8 conditions × 3 architectures | 24 |
 | B — distributional effects | 8 conditions × 2 statistics (mean, max JSD), level 3 | 16 |
-| C — mechanism contrasts | snapping effect; snapping × architecture; hybrid vs dense magnitude at natural boundaries; P compounding; C compounding | 5 |
+| C — mechanism contrasts | snapping effect; snapping × architecture; hybrid vs dense magnitude at natural boundaries; P compounding; stratum effect (ambiguous vs explicit) | 5 |
 
 ### 6.3 The contrasts that carry the contribution
 
@@ -392,8 +421,11 @@ nulls.
    exceeds the dense baseline — and the sliding-window control sits with the
    dense one, which is what attributes it to recurrent state rather than to
    interleaved layer structure.
-3. **Compounding:** divergence grows with prefix length and continuation length
-   on the hybrid.
+3. **Compounding:** on the hybrid, divergence grows with prefix length and
+   across positions within the output.
+4. **Stratum and margin:** tool-call changes concentrate in the ambiguous stratum
+   and in the near-tie and contested margin bins. The margin analysis is a
+   pre-registered secondary analysis reported with CIs, outside the Holm families.
 
 Interaction claims are stated relative to an additive null on the JSD scale.
 
@@ -401,12 +433,14 @@ Interaction claims are stated relative to an additive null on the JSD scale.
 
 Analysis plan, family membership and thresholds committed and tagged **after G1
 and after the floor is measured, before any main-study treatment effect is
-examined.**
+examined.** It fixes the ambiguous request templates, the margin definition
+and the margin bins.
 
 ### 6.5 Power, and designing for a null
 
 Detect a per-turn divergence rate of **2% at 80% power, α = 0.05** against a
-zero floor: 80 turns required; 360 planned gives 99.9%. Achieved power is
+zero floor: 80 turns required; 360 planned gives 99.9% overall and
+84% within each of the four prefix-length × stratum cells of 90 turns. Achieved power is
 reported with the result.
 
 A null is pre-committed as publishable: *at natural agent-turn boundaries on
@@ -482,7 +516,7 @@ leakage; GGUF reading against a synthetic file; the gate against golden files.
 |---|---|
 | Tiling is not the mechanism | G1 is designed to falsify it before the main study |
 | Chat templates don't put all three models into tool-calling mode | Resolved in G2: 100% tool-call rate on all three models |
-| Tool decisions too confident for restore to flip them | G2: 90 of 90 explicit requests produced exactly the expected call, so the behavioural headline risks a null caused by trace design. Decision pending before pre-registration (see `docs/findings/2026-09-10-g2.md`) |
+| Tool decisions too confident for restore to flip them | G2: 90 of 90 explicit requests produced exactly the expected call. Addressed in v4.2 by an ambiguous stratum and a decision-margin covariate; G2 checks the stratum actually lowers margins |
 | Dense and sliding-window divergence changes tool calls at scale | Then the claim is architecture-general; reported as such, with magnitudes |
 | Few natural boundaries are misaligned-and-divergent | Natural boundaries are misaligned with probability ≈ (U−1)/U; power reported per alignment class |
 | VRAM at `-ub 1024` | Reduce `-c`; record it |
@@ -495,7 +529,7 @@ leakage; GGUF reading against a synthetic file; the gate against golden files.
 |---|---|---|
 | **G0** ✅ 2026-09-10 | State API round-trips with both arms proven | — passed; divergence observed |
 | **G1** ✅ 2026-09-10 | Exact set tracks `n_ubatch` on Ornith Q4_K_M and Qwen3-4B | — passed: 66/66 restores matched the prediction |
-| **G2** ◐ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Pending:** trace-difficulty decision, then pre-registration |
+| **G2** ◐ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Pending:** ambiguous stratum keeps at least 90% tool calls with a lower median decision margin than explicit, then pre-registration |
 | **G3** | Positive control diverges; snapped boundaries exact | Stop; the harness is unvalidated |
 
 ---
@@ -524,7 +558,7 @@ boundaries to micro-batch multiples.
 
 > On llama.cpp build X, restoring saved state is bit-exact exactly when the
 > reuse boundary is a multiple of `n_ubatch`. At natural agent-turn boundaries,
-> restore changed the tool call in *W*% of turns on a hybrid recurrent model
+> restore changed the tool call in *W*% of ambiguous-request turns (explicit: *W′*%) on a hybrid recurrent model
 > (95% CI [*a*, *b*]) versus *~0*% on quantization-matched dense and
 > sliding-window models; snapping boundaries to micro-batch multiples, at a cost
 > of at most `n_ubatch − 1` re-evaluated tokens, reduced it to *~0*%.

@@ -34,20 +34,23 @@ class Completion:
     prompt_n: int         # prompt tokens the server actually evaluated
     tokens_cached: int
     raw: dict
+    pieces: tuple = ()    # per position: the generated token's text, when reported
 
 
 def parse_completion(resp: dict) -> Completion:
     """Accept both the current and the legacy completion_probabilities shape."""
-    top, ids_from_probs = [], []
+    top, ids_from_probs, pieces = [], [], []
     for entry in resp.get("completion_probabilities") or []:
         if "top_logprobs" in entry:
             top.append([(t.get("id", t.get("token")), float(t["logprob"]))
                         for t in entry["top_logprobs"]])
             if "id" in entry:
                 ids_from_probs.append(entry["id"])
+            pieces.append(entry.get("token", ""))
         elif "probs" in entry:
             top.append([(t.get("tok_str"), math.log(max(float(t["prob"]), 1e-300)))
                         for t in entry["probs"]])
+            pieces.append(entry.get("content", ""))
     tokens = resp.get("tokens") or ids_from_probs
     timings = resp.get("timings") or {}
     return Completion(
@@ -56,6 +59,7 @@ def parse_completion(resp: dict) -> Completion:
         prompt_n=int(timings.get("prompt_n", resp.get("tokens_evaluated", -1))),
         tokens_cached=int(resp.get("tokens_cached", -1)),
         raw=resp,
+        pieces=tuple(pieces),
     )
 
 

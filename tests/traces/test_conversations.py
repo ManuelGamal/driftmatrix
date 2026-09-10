@@ -1,11 +1,16 @@
 import json
+from collections import Counter
+
+import pytest
 
 from driftmatrix.traces.conversations import (
-    SYSTEM, generate_conversations, openai_tools, to_oai,
+    AMBIGUOUS_TYPES, STRATA, SYSTEM, generate_conversations, openai_tools, to_oai,
 )
 from driftmatrix.traces.tools import TOOL_SCHEMAS, call_tool
 
 NAMES = {s["name"] for s in TOOL_SCHEMAS}
+AMBIGUOUS_PREFIXES = ("Pull up that record", "Give me something on record", "Can you total up records",
+                      "Add up the numbers", "Write that up")
 
 
 def test_generation_is_deterministic_per_seed():
@@ -37,6 +42,52 @@ def test_expected_call_is_valid_for_the_mock_tools():
 
 def test_all_three_tools_appear_as_expected_calls():
     assert {c.expected_tool for c in generate_conversations(30, 1, seed=11)} == NAMES
+
+
+def test_explicit_generation_unchanged_from_the_g2_run():
+    # pins the conversations behind the committed G2 reports (seed 2026, 3 round trips)
+    convs = generate_conversations(2, 3, seed=2026)
+    assert convs[0].conv_id == "c2026_000" and convs[0].stratum == "explicit"
+    assert convs[0].messages[-1]["content"] == "Look up record 153 and tell me its field."
+    assert convs[1].messages[-1]["content"] == "Look up record 0 and tell me its field."
+
+
+def test_ambiguous_twin_shares_history_and_replaces_only_the_final_request():
+    explicit = generate_conversations(10, 3, seed=5)
+    ambiguous = generate_conversations(10, 3, seed=5, stratum="ambiguous")
+    for e, a in zip(explicit, ambiguous):
+        assert a.messages[:-1] == e.messages[:-1]
+        assert a.messages[-1]["role"] == "user"
+        assert a.messages[-1]["content"] != e.messages[-1]["content"]
+        assert a.stratum == "ambiguous"
+        assert a.expected_tool is None and a.expected_args is None
+        assert a.conv_id == "a" + e.conv_id[1:]
+
+
+def test_ambiguous_request_types_rotate_evenly():
+    ambiguous = generate_conversations(30, 3, seed=2026, stratum="ambiguous")
+    counts = Counter(next(p for p in AMBIGUOUS_PREFIXES if c.messages[-1]["content"].startswith(p))
+                     for c in ambiguous)
+    assert len(AMBIGUOUS_TYPES) == len(AMBIGUOUS_PREFIXES)
+    assert counts == {p: 6 for p in AMBIGUOUS_PREFIXES}
+
+
+def test_ambiguous_generation_is_deterministic_and_varied():
+    a1 = generate_conversations(30, 3, seed=9, stratum="ambiguous")
+    assert a1 == generate_conversations(30, 3, seed=9, stratum="ambiguous")
+    assert len({c.messages[-1]["content"] for c in a1}) >= 5
+
+
+def test_ambiguous_generation_does_not_mutate_the_explicit_twin():
+    before = generate_conversations(5, 2, seed=13)
+    generate_conversations(5, 2, seed=13, stratum="ambiguous")
+    assert generate_conversations(5, 2, seed=13) == before
+
+
+def test_unknown_stratum_raises():
+    assert STRATA == ("explicit", "ambiguous")
+    with pytest.raises(ValueError, match="unknown stratum"):
+        generate_conversations(1, 1, seed=1, stratum="hard")
 
 
 def test_openai_tools_wrap_each_schema():

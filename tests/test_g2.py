@@ -1,20 +1,26 @@
 """G2 tool-call logic against a fake server exposing both paths."""
-from driftmatrix.g2 import g2_verdict, run_g2, server_prompt_tokens, server_tool_call
+import pytest
+
+from driftmatrix.g2 import (
+    g2_verdict, run_g2, server_prompt_tokens, server_tool_call, stratum_check,
+)
 from driftmatrix.metrics.behavioral import ToolCall
-from driftmatrix.runner.llamaserver import Completion, ServerError
+from driftmatrix.runner.llamaserver import Completion, ServerError, parse_completion
 from driftmatrix.traces.conversations import generate_conversations
 
 TEMPLATE = ("{% for m in messages %}{{ m.role }}: {{ m.content }} {% endfor %}"
             "{% if tools %}tools: {{ tools | length }}{% endif %}")
 CONVS = generate_conversations(10, 2, seed=1)
 CALL_TEXT = '<tool_call>\n{"name": "lookup_record", "arguments": {"record_id": 7}}\n</tool_call>'
+CALL_PIECES = ("<tool_call>", '\n{"name": "lookup_record", ', '"arguments": {"record_id": 7}}\n</tool', "_call>")
 LOOKUP_7 = ToolCall.from_payload("lookup_record", {"record_id": 7})
 
 
 class FakeServer:
     def __init__(self, emits=None, prompt_offset=0, server_parses=True, chat_raises=False,
-                 flat_shape=False):
+                 flat_shape=False, margins=None):
         self.emits = emits or [True]
+        self.margins = margins or [3.0]
         self.offset, self.server_parses = prompt_offset, server_parses
         self.chat_raises, self.flat_shape = chat_raises, flat_shape
         self.i, self.last_len, self.last_emit = 0, 0, True
@@ -29,9 +35,14 @@ class FakeServer:
 
     def complete(self, toks, n_predict, n_probs=0, cache_prompt=False, slot=0, seed=1234):
         self.last_emit = self.emits[self.i % len(self.emits)]
+        margin = self.margins[self.i % len(self.margins)]
         self.i += 1
-        content = CALL_TEXT if self.last_emit else "Record 7 is alpha."
-        return Completion([], [], len(toks), 0, {"content": content})
+        if self.last_emit:
+            content, pieces = CALL_TEXT, CALL_PIECES
+        else:
+            content, pieces = "Record 7 is alpha.", ("Record 7 is alpha.",)
+        top = [[(1, -0.05), (2, -0.05 - margin)] for _ in pieces] if n_probs else []
+        return Completion([], top, len(toks), 0, {"content": content}, pieces if n_probs else ())
 
     def chat(self, messages, tools=None, *, max_tokens=192, chat_template_kwargs=None, seed=1234):
         if self.chat_raises:
@@ -51,7 +62,7 @@ def test_passes_when_prompts_match_parsers_agree_and_calls_are_made():
     s = run_g2(FakeServer(), CONVS, TEMPLATE, "qwen_json")["summary"]
     assert s["verdict"] == "G2_TOOLCALLS_PASS"
     assert s["prompt_match_rate"] == s["parser_agreement_rate"] == s["tool_call_rate"] == 1.0
-    assert s["chat_errors"] == 0
+    assert s["chat_errors"] == 0 and s["strata"] == ["explicit"]
 
 
 def test_flat_tool_call_shape_from_llama_cpp_docs_is_understood():
@@ -90,6 +101,43 @@ def test_correctness_rates_are_reported_but_do_not_gate():
     lookups = sum(1 for c in CONVS if c.expected_tool == "lookup_record")
     assert r["summary"]["expected_tool_rate"] == lookups / len(CONVS)
     assert r["summary"]["verdict"] == "G2_TOOLCALLS_PASS"
+
+
+def test_decision_margin_recorded_and_summarised():
+    r = run_g2(FakeServer(margins=[0.3, 1.0, 3.0]), CONVS, TEMPLATE, "qwen_json")
+    s = r["summary"]
+    assert s["median_margin"] == pytest.approx(1.0)
+    assert s["margin_bins"] == {"near_tie": 4, "contested": 3, "confident": 3, "unavailable": 0}
+    assert r["rows"][0]["margin_bin"] == "near_tie" and r["rows"][0]["margin_position"] == 0
+
+
+def test_no_tool_call_means_no_margin():
+    r = run_g2(FakeServer(emits=[False]), CONVS, TEMPLATE, "qwen_json")
+    assert r["summary"]["median_margin"] is None
+    assert r["summary"]["margin_bins"]["unavailable"] == len(CONVS)
+
+
+def test_ambiguous_conversations_have_no_correctness_scores():
+    ambiguous = generate_conversations(10, 2, seed=1, stratum="ambiguous")
+    r = run_g2(FakeServer(), ambiguous, TEMPLATE, "qwen_json")
+    s = r["summary"]
+    assert s["strata"] == ["ambiguous"]
+    assert s["expected_tool_rate"] is None and s["expected_call_exact_rate"] is None
+    assert s["verdict"] == "G2_TOOLCALLS_PASS"
+
+
+def test_stratum_check_verdicts():
+    assert stratum_check({"median_margin": 3.0}, {"median_margin": 0.8})["verdict"] == "STRATUM_LOWERS_MARGIN"
+    assert stratum_check({"median_margin": 0.8}, {"median_margin": 0.8})["verdict"] == "STRATUM_DOES_NOT_LOWER_MARGIN"
+    assert stratum_check({"median_margin": None}, {"median_margin": 0.8})["verdict"] == "MARGIN_UNAVAILABLE"
+
+
+def test_parse_completion_keeps_each_positions_token_text():
+    resp = {"tokens": [7, 8],
+            "completion_probabilities": [
+                {"id": 7, "token": "<tool_call>", "logprob": -0.1, "top_logprobs": [{"id": 7, "logprob": -0.1}]},
+                {"id": 8, "token": "</tool_call>", "logprob": -0.2, "top_logprobs": [{"id": 8, "logprob": -0.2}]}]}
+    assert parse_completion(resp).pieces == ("<tool_call>", "</tool_call>")
 
 
 def test_server_tool_call_accepts_string_and_object_arguments_in_both_shapes():

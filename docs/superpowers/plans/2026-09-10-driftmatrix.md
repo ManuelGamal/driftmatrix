@@ -162,7 +162,38 @@ pre-registration committed and tagged.
 
 ---
 
+### Task 27: Ambiguous request stratum and decision-margin covariate (spec v4.2)
+
+**Why:** all 90 explicit G2 requests produced exactly the expected call, and G1
+showed restore flips only near-tie decisions. The stratum S replaces the
+continuation factor C, because tool calls end the turn at 81–151 characters.
+
+**Files:**
+- Modify: `src/driftmatrix/traces/conversations.py` — `Conversation.stratum`, `generate_conversations(..., stratum=...)`
+- Create: `src/driftmatrix/metrics/margin.py`
+- Modify: `src/driftmatrix/runner/llamaserver.py` — `Completion.pieces`
+- Modify: `src/driftmatrix/g2.py` — margins per row, `stratum_check`
+- Modify: `scripts/g2_toolcalls.py` — `--stratum`; Create: `scripts/g2_strata.py`
+- Test: `tests/traces/test_conversations.py`, `tests/metrics/test_margin.py`, `tests/test_g2.py`
+
+**Interfaces:**
+- `generate_conversations(n, history_turns, seed, stratum="explicit")`. Explicit output is unchanged from the G2 run (same ids, same requests). An ambiguous conversation is its explicit twin with only the final user request replaced; its `expected_tool` and `expected_args` are `None`.
+- `decision_margin(top, pieces) -> (margin or None, position or None)`: the smallest top-1 minus top-2 logprob gap over positions through the end of the first complete tool call.
+- `MARGIN_BINS = (0.5, 2.0)`; `margin_bin(m)` returns `near_tie`, `contested`, `confident` or `None`.
+- `stratum_check(explicit_summary, ambiguous_summary)` returns a dict whose verdict is one of `STRATUM_LOWERS_MARGIN`, `STRATUM_DOES_NOT_LOWER_MARGIN`, `MARGIN_UNAVAILABLE`.
+
+**Required tests (write first):** ambiguous twins share history and differ only in the final request; explicit conversation `c2026_000` still ends with "Look up record 153 and tell me its field."; the tool-call span end is found when `</tool_call>` is split across pieces; margins after the span are ignored; unsorted candidate lists are handled; bin edges 0.5 and 2.0 fall in the upper bin; `stratum_check` reports all three verdicts; `parse_completion` keeps each position's token text.
+
+**Run:** for each model, `python scripts/g2_toolcalls.py --model M --gguf G --stratum explicit` and `--stratum ambiguous`, then `python scripts/g2_strata.py`.
+
+**Gate G2 addition:** on every model, the ambiguous stratum keeps at least 90% tool calls, and its median recompute-arm decision margin is below the explicit stratum's.
+
+---
+
 ### Task 22R: Main-study grid against `llama-server`
+
+**Amended by spec v4.2:** conditions are B × P × S (the continuation factor is gone); generation runs to the end of the turn, capped at 192 tokens; each row records the stratum and the recompute arm's decision margin. This task introduces the new condition encoding; `config.Condition`, which still carries the continuation band for the off-path Python engine, is left untouched.
+
 
 **Files:** Create `src/driftmatrix/servergrid.py`; Test `tests/test_servergrid.py`.
 
