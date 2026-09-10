@@ -58,3 +58,28 @@ def top1_agree(a: TokenDist, b: TokenDist) -> bool:
 def per_position_jsd(a, b) -> np.ndarray:
     n = min(len(a), len(b))
     return np.array([jsd(*align_supports(a[i], b[i])) for i in range(n)])
+
+
+def _as_dist(pos) -> TokenDist:
+    return TokenDist([i for i, _ in pos], [lp for _, lp in pos])
+
+
+def context_matched_drift(a_top, b_top, first_div, max_positions: int = 8):
+    """JSD and TV at each position whose context is identical in both arms.
+
+    Context at position p is prompt + generated[:p]. It is identical in both
+    arms through the first divergence, so positions 0..first_div compare like
+    for like; after that the arms condition on different text.
+
+    Returns (jsd_per_position, tv_per_position). Deliberately probability-
+    weighted: the maximum logprob difference over the top-k is dominated by
+    tail tokens and must not be used to compare arms.
+    """
+    limit = max_positions if first_div is None else min(first_div + 1, max_positions)
+    upto = min(limit, len(a_top), len(b_top))
+    js, tv = [], []
+    for p in range(upto):
+        P, Q = align_supports(_as_dist(a_top[p]), _as_dist(b_top[p]))
+        js.append(jsd(P, Q))
+        tv.append(total_variation(P, Q))
+    return js, tv

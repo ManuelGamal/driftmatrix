@@ -45,3 +45,25 @@ def test_per_position_jsd_length_matches_shorter_sequence():
     a = [d([1], [1.0])] * 5
     b = [d([1], [1.0])] * 3
     assert per_position_jsd(a, b).shape == (3,)
+
+
+def test_context_matched_drift_identical_arms_are_zero_everywhere():
+    from driftmatrix.metrics.distributional import context_matched_drift
+    top = [[(1, -0.1), (2, -2.5)]] * 6
+    js, tv = context_matched_drift(top, top, None, max_positions=6)
+    assert len(js) == 6 and max(js) == 0.0 and max(tv) == 0.0
+
+
+def test_context_matched_drift_stops_after_first_divergence():
+    from driftmatrix.metrics.distributional import context_matched_drift
+    a = [[(1, -0.1), (2, -2.5)]] * 6
+    b = [[(1, -0.1), (2, -2.5)], [(2, -0.1), (1, -2.5)]] + [[(1, -0.1)]] * 4
+    js, _ = context_matched_drift(a, b, 1, max_positions=6)
+    assert len(js) == 2 and js[0] == 0.0 and js[1] > 0.1
+
+
+def test_context_matched_drift_respects_the_position_cap():
+    from driftmatrix.metrics.distributional import context_matched_drift
+    top = [[(1, -0.1)]] * 20
+    js, _ = context_matched_drift(top, top, 15, max_positions=8)
+    assert len(js) == 8

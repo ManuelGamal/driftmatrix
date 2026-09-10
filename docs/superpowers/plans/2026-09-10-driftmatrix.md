@@ -28,6 +28,112 @@
 
 ---
 
+## Amendment 1 — after gate G0 (2026-09-10)
+
+Spec revised to v4. This amendment **supersedes** the tasks named below; where
+it and an original task disagree, this wins.
+
+### Status of original tasks
+
+| Task | Status |
+|---|---|
+| 0 G0 spike | **Done.** Executed via `llama-server` (`src/driftmatrix/g0.py`, `scripts/g0_server.py`). Findings: `docs/findings/2026-09-10-g0.md` |
+| 1–6, 8–10, 13–16, 19–21 | Done (GPU-free analysis layers, under test) |
+| 7 Trace generator | Done, but **amended by Task 7R** — output must be chat-templated |
+| 11 llama-cpp-python adapter | Done; **off the measurement path** (kept for unit tests) |
+| 12 GDN chunk-size sweep | **Superseded by Task 12R** — the period is `n_ubatch`, not a kernel chunk |
+| 17 Pre-registration | Moves to **after G1** (spec §6.4) |
+| 18 Synthetic positive control | Kept for harness tests only; the measurement positive control is natural misaligned restore on the hybrid (spec §8) |
+| 22 Grid on the Python engine | **Superseded by Task 22R** (grid against `llama-server`) |
+| 23 README | Update after G1 |
+
+### Global constraints added
+
+- Measurement engine is `llama-server`; every arm proven by `timings.prompt_n` (restore = suffix; recompute = whole prompt); every saved slot = `k`.
+- Server flags: `-c 8192 -ngl 99 -np 1 -b 2048 -ub <U> --cache-ram 0 --ctx-checkpoints 0 --slot-save-path <dir>`, plus `--swa-full` for Spark and `--jinja` for chat rendering. Never `--spec-type`, never `-ctk/-ctv`.
+- Architecture comparison is quantization-matched at **Q4_K_M**.
+- Drift is JSD/TV (context-matched, union support + `<other>`). **Never** max logprob difference over the top-k.
+
+---
+
+### Task 12R: G1 — does the exact set track `n_ubatch`?
+
+**Files:**
+- Create: `src/driftmatrix/g1.py`
+- Modify: `src/driftmatrix/metrics/distributional.py` (add `context_matched_drift`)
+- Modify: `scripts/g0_analyze.py` (use `context_matched_drift`)
+- Create: `scripts/g1_server.py`, `scripts/g1_analyze.py`
+- Test: `tests/test_g1.py`, `tests/metrics/test_distributional.py`
+
+**Interfaces:**
+- Consumes: `ServerClient`, `first_divergence`, `restore_was_used` (`runner.llamaserver`); `recompute_was_clean`, `SLACK` (`g0`).
+- Produces: `SPLITS: tuple[int, ...]`; `completions_exact(a: Completion, b: Completion) -> bool`; `run_g1(client, prompt_text, ubatch, splits=SPLITS, n_predict=16, n_probs=10) -> dict`; `g1_verdict(report) -> str` in {`RECOMPUTE_NOT_CLEAN`, `NONDETERMINISTIC_FLOOR`, `STATE_API_ERROR`, `RESTORE_NOT_VALID`, `SPLITS_DO_NOT_DISCRIMINATE`, `PREDICTION_HOLDS`, `ALIGNED_NOT_ALWAYS_EXACT`, `MISALIGNED_SOMETIMES_EXACT`, `PREDICTION_FAILS`}; `cross_ubatch_summary(reports) -> dict` with `grid`, `exact_set_tracks_ubatch`, `discriminating_splits`; `context_matched_drift(a_top, b_top, first_div, max_positions) -> (list[float], list[float])`.
+
+Implemented test-first; the fake server in `tests/test_g1.py` models micro-batch tiling directly (restore tiles `[0,k)` then `[k,n)`, recompute tiles `[0,n)`), so the prediction logic is verified against an engine where tiling is the only mechanism, one where every restore diverges, and one where none does.
+
+**Run:** for `U` in 256, 512, 1024 — start the server with `-ub U`, then
+`python scripts/g1_server.py --ubatch U --label <model>`. Then
+`python scripts/g1_analyze.py --label <model>`.
+
+**Gate G1:** `exact_set_tracks_ubatch` true on Ornith Q4_K_M and Qwen3-4B.
+
+---
+
+### Task 7R: Chat-templated traces with natural and snapped boundaries
+
+**Files:** Create `src/driftmatrix/traces/render.py`; Test `tests/traces/test_render.py`.
+
+**Interfaces:**
+- Produces: `Conversation(messages: list[dict], tools: list[dict])`; `render(client_or_renderer, conversation) -> str`; `natural_boundary(renderer, tokenizer, conversation) -> int` (token length of the rendered conversation before the final user turn); `snap(k: int, ubatch: int) -> int` returning `k - k % ubatch`; `parse_tool_call(text: str, model_family: str) -> ToolCall | None`.
+
+**Required tests (write first):**
+
+```python
+def test_snap_rounds_down_to_ubatch_multiple():
+    assert snap(1390, 512) == 1024 and snap(1024, 512) == 1024 and snap(511, 512) == 0
+
+def test_snapped_boundary_costs_at_most_ubatch_minus_one_tokens():
+    for k in range(0, 5000, 37):
+        assert 0 <= k - snap(k, 512) <= 511
+
+def test_natural_boundary_is_prefix_of_full_render(fake_renderer, tok):
+    conv = sample_conversation()
+    full = tok.encode(render(fake_renderer, conv))
+    k = natural_boundary(fake_renderer, tok, conv)
+    prev = tok.encode(render(fake_renderer, conv.without_last_user_turn()))
+    assert full[:k] == prev and 0 < k < len(full)
+
+def test_parse_tool_call_qwen_format():
+    txt = '<tool_call>\n{"name": "lookup_record", "arguments": {"record_id": 7}}\n</tool_call>'
+    assert parse_tool_call(txt, "qwen") == ToolCall.from_payload("lookup_record", {"record_id": 7})
+
+def test_parse_tool_call_returns_none_for_plain_text():
+    assert parse_tool_call("The record says alpha.", "qwen") is None
+```
+
+**Verification step before use:** confirm `llama-server --jinja` exposes a render endpoint that accepts `tools`; if not, render offline with the model's Jinja template. Record which path was used. **Gate G2** requires ≥ 90% of recompute-arm turns to parse as tool calls on every model.
+
+---
+
+### Task 22R: Main-study grid against `llama-server`
+
+**Files:** Create `src/driftmatrix/servergrid.py`; Test `tests/test_servergrid.py`.
+
+**Interfaces:**
+- Consumes: `ServerClient` (or a fake with the same methods), `traces.render`, `capture.write_parquet`.
+- Produces: `run_servergrid(client, spec, conversations, ubatch, meta, out_dir, replicates=2) -> tuple[Path, Path]` writing `generations.parquet` and `statebytes.parquet`.
+
+**Required tests (write first):** every row carries `k`, `k_mod_ubatch`, `ubatch`, `boundary` ∈ {natural, snapped}, `prompt_n`, `arm_valid`; an arm with `prompt_n` inconsistent with its role is written with `outcome = restore_not_used` or `recompute_not_clean` and excluded from effects but counted; snapped rows satisfy `k_mod_ubatch == 0`; against the tiling fake, snapped restores are exact and natural misaligned restores are not.
+
+---
+
+### Task 26: State bytes comparison
+
+**Files:** Modify `src/driftmatrix/servergrid.py`; Test `tests/test_servergrid.py`.
+
+After both arms of a turn, save the slot from each to `<tag>_restore.bin` / `<tag>_recompute.bin` and record `state_bytes_equal` and `state_bytes_differing`. Test: identical fake slot files → equal, zero differing; one flipped byte → not equal, one differing.
+
+
 ## Task 0: G0 viability spike — does state save/restore work at all?
 
 This is a **spike**, not TDD. Its output is an answer plus a committed findings note. Every later task is gated on it. If the state API does not round-trip on a `qwen3_5` model, that is a finding (llama.cpp #20225 is the context) and the project re-scopes per spec §10.1.

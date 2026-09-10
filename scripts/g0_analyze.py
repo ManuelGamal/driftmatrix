@@ -19,9 +19,7 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
 from driftmatrix.gguf import decode, read_metadata  # noqa: E402
-from driftmatrix.metrics.distributional import (  # noqa: E402
-    TokenDist, align_supports, jsd, total_variation,
-)
+from driftmatrix.metrics.distributional import context_matched_drift  # noqa: E402
 
 DEFAULT_REPORTS = {
     lab: REPO / "docs" / "findings" / "g0" / f"g0_{lab}_report.json"
@@ -29,25 +27,10 @@ DEFAULT_REPORTS = {
 }
 
 
-def _dist(pos):
-    return TokenDist([i for i, _ in pos], [lp for _, lp in pos])
-
-
 def drift(case):
-    """Per-position JSD and TV while both arms still share the same context.
-
-    Context at position p is prompt + generated[:p], identical in both arms
-    through the first divergence, so positions 0..first_divergence compare.
-    """
-    fd = case["first_divergence"]
-    upto = min(8 if fd is None else fd + 1,
-               len(case["restore_top"]), len(case["recompute_top"]))
-    js, tv = [], []
-    for p in range(upto):
-        P, Q = align_supports(_dist(case["restore_top"][p]), _dist(case["recompute_top"][p]))
-        js.append(jsd(P, Q))
-        tv.append(total_variation(P, Q))
-    return js, tv
+    """Context-matched JSD/TV, shared with G1 (metrics.distributional)."""
+    return context_matched_drift(case["restore_top"], case["recompute_top"],
+                                 case["first_divergence"], max_positions=8)
 
 
 def _kv(text):
