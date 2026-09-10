@@ -294,7 +294,8 @@ Writing the plan exposed three problems, fixed before the freeze:
 - **Blinded runner:** it computes no exactness, drift or action outcome, and its progress lines report arm validity only.
 - Refuses to run if the server's build is not `b10839-0cae43063` or its loaded model is not the named GGUF.
 - `src/driftmatrix/g3.py` — `g3_check`: arm proofs, snapped exactness in both replicates, positive control on the hybrid only.
-- `scripts/run_study.py` (`--pilot` for G3), `tests/test_servergrid.py` (fake server where tiling is the only cause).
+- `scripts/run_study.py` (`--pilot` for G3), `scripts/g3_check.py`, `tests/test_servergrid.py` (fake server where tiling is the only cause).
+- **G3 passed 2026-09-10** on all three models: 20 pilot turns and 120 valid arms each, every snapped restore bit-exact in both replicates, Ornith drift at the natural boundary on 20 of 20 turns. Findings: `docs/findings/2026-09-10-g3.md`.
 
 
 **Files:** Create `src/driftmatrix/servergrid.py`; Test `tests/test_servergrid.py`.

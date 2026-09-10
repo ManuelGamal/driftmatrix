@@ -5,7 +5,7 @@ A state-fidelity audit of prompt-cache reuse in llama.cpp across dense,
 sliding-window and hybrid recurrent architectures, under agent-shaped traffic.
 
 Date: 2026-09-10
-Status: v4.5 — gates G0, G1 and G2 passed; analysis plan pre-registered (`docs/preregistration/2026-09-10-analysis-plan.md`, tag `prereg-2026-09-10`)
+Status: v4.5 — gates G0–G3 passed; analysis plan pre-registered (`docs/preregistration/2026-09-10-analysis-plan.md`, tag `prereg-2026-09-10`); main study pending
 Author: Manuel Gamal
 
 ---
@@ -567,7 +567,7 @@ leakage; GGUF reading against a synthetic file; the gate against golden files.
 | **G0** ✅ 2026-09-10 | State API round-trips with both arms proven | — passed; divergence observed |
 | **G1** ✅ 2026-09-10 | Exact set tracks `n_ubatch` on Ornith Q4_K_M and Qwen3-4B | — passed: 66/66 restores matched the prediction |
 | **G2** ✅ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Passed** on both strata: ambiguous median action margin below explicit on all three models (4.02 vs 6.92, 7.47 vs 9.76, 2.67 vs 7.77), ambiguous calls 87%/67%/83%, 161/161 parsed calls round-trip, one disagreement attributed to llama.cpp. Pre-registration tagged `prereg-2026-09-10` |
-| **G3** | On pilot turns (separate seed, never confirmatory): every arm proof holds, snapped boundaries exact, positive control diverges | Stop; the harness is unvalidated |
+| **G3** ✅ 2026-09-10 | On pilot turns (separate seed, never confirmatory): every arm proof holds, snapped boundaries exact, positive control diverges | Passed on all three models: 20 turns and 120 valid arms each, every snapped restore bit-exact in both replicates, Ornith drifted at the natural boundary on 20 of 20 turns (`docs/findings/2026-09-10-g3.md`) |
 
 ---
 
