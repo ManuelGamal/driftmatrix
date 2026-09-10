@@ -17,18 +17,21 @@ question or text answer). Checks, in verdict order:
   prompt_match   the server's prompt token count equals our offline render's.
                  /apply-template cannot render tools, so this is the only
                  end-to-end check that prompts carrying tools match the server's.
-  parser_agrees  our parse of the /completion output equals llama.cpp's parsed
-                 tool_calls from the chat path, including agreeing that there is
-                 no call. Same prompt, greedy decoding, same output text.
+  round trip     every call we parse must reproduce the model's own <tool_call>
+                 text when serialised back through its chat template (v4.4).
+                 This validates our parser against the model's format itself.
+  parsers        disagreements with llama.cpp's parser are adjudicated by the
+                 same round trip. If our reading reproduces the model's text and
+                 llama.cpp's does not, the disagreement is llama.cpp's loss and
+                 does not fail the gate; anything else does.
   call rate      share of outputs that are tool calls. Explicit requests must
                  reach 90%: they validate the tool-call pipeline. Ambiguous
-                 requests are held to a 50% floor instead - the requests that
-                 create near-tie decisions also sometimes end in a clarifying
-                 question, and that outcome is part of what is measured (v4.3).
+                 requests are held to a 50% floor: the requests that create
+                 near-tie decisions also sometimes end in a clarifying question,
+                 and that outcome is part of what is measured (v4.3).
 
-Correct-call rates are reported for explicit requests only; ambiguous requests
-have no single correct action. stratum_check compares two strata's reports: the
-ambiguous stratum must lower the median action margin.
+adjudicate_rows and summarise work on saved report rows as well as fresh ones,
+so reports can be re-scored offline (scripts/g2_rescore.py).
 """
 from __future__ import annotations
 
@@ -40,7 +43,8 @@ from .metrics.margin import BIN_LABELS, decision_margin, margin_bin, position_ga
 from .runner.llamaserver import ServerError
 from .traces.conversations import to_oai
 from .traces.render import render
-from .traces.toolcalls import parse_tool_call
+from .traces.roundtrip import in_emitted_order, round_trips
+from .traces.toolcalls import parse_tool_call, parse_tool_call_ordered
 
 TOOL_CALL_GATE = 0.90
 AMBIGUOUS_CALL_FLOOR = 0.50
@@ -98,7 +102,13 @@ def g2_verdict(summary: dict) -> str:
         return "CHAT_PATH_ERROR"
     if summary["prompt_match_rate"] != 1.0:
         return "RENDER_WITH_TOOLS_MISMATCH"
-    if summary["parser_agreement_rate"] != 1.0:
+    roundtrip = summary.get("our_roundtrip_rate")
+    if roundtrip is not None and roundtrip < 1.0:
+        return "OUR_PARSE_NOT_FAITHFUL"
+    if "unresolved_disagreements" in summary:
+        if summary["unresolved_disagreements"]:
+            return "PARSER_DISAGREES"
+    elif summary["parser_agreement_rate"] != 1.0:
         return "PARSER_DISAGREES"
     if summary["tool_call_rate"] < call_threshold(summary.get("strata")):
         return "TOOL_CALL_RATE_BELOW_GATE"
@@ -118,6 +128,60 @@ def stratum_check(explicit: dict, ambiguous: dict) -> dict:
     else:
         out["verdict"] = "STRATUM_DOES_NOT_LOWER_MARGIN"
     return out
+
+
+def adjudicate_rows(rows, template: str, fmt: str, specials=None):
+    """Round-trip every parsed call and adjudicate parser disagreements, in place."""
+    specials = specials or {}
+    for row in rows:
+        parsed = parse_tool_call_ordered(row["output"], fmt)
+        row["our_roundtrip"] = None if parsed is None else round_trips(
+            template, parsed[2], parsed[0], parsed[1], **specials)
+        row["adjudication"] = None
+        if row["parser_agrees"] is not False:
+            continue
+        theirs = row["theirs"]
+        if parsed is None or (theirs is not None and theirs.get("args") is None):
+            row["adjudication"] = "unresolved"       # a call we did not find, or no arguments to test
+            continue
+        name, args, block = parsed
+        theirs_roundtrip = theirs is not None and round_trips(
+            template, block, theirs["name"], in_emitted_order(theirs["args"], list(args)), **specials)
+        if row["our_roundtrip"] and not theirs_roundtrip:
+            row["adjudication"] = "server_parser_lossy"
+        elif theirs_roundtrip and not row["our_roundtrip"]:
+            row["adjudication"] = "our_parser_lossy"
+        else:
+            row["adjudication"] = "unresolved"
+    return rows
+
+
+def summarise(rows) -> dict:
+    strata = sorted({r["stratum"] for r in rows})
+    calls = [r for r in rows if r["tool_call_made"]]
+    bins = {label: sum(1 for r in rows if r["margin_bin"] == label) for label in BIN_LABELS}
+    bins["unavailable"] = sum(1 for r in rows if r["margin_bin"] is None)
+    summary = {
+        "n": len(rows),
+        "strata": strata,
+        "chat_errors": sum(1 for r in rows if r["chat_error"]),
+        "prompt_match_rate": _rate(r["prompt_match"] for r in rows),
+        "parser_agreement_rate": _rate(r["parser_agrees"] for r in rows),
+        "our_roundtrip_rate": _rate(r.get("our_roundtrip") for r in calls),
+        "parser_disagreements": sum(1 for r in rows if r["parser_agrees"] is False),
+        "server_parser_lossy": sum(1 for r in rows if r.get("adjudication") == "server_parser_lossy"),
+        "unresolved_disagreements": sum(1 for r in rows
+                                        if r.get("adjudication") in ("unresolved", "our_parser_lossy")),
+        "tool_call_rate": _rate(r["tool_call_made"] for r in rows),
+        "no_call_rate": _rate(not r["tool_call_made"] for r in rows),
+        "call_threshold": call_threshold(strata),
+        "expected_tool_rate": _rate(r["expected_tool_called"] for r in rows),
+        "expected_call_exact_rate": _rate(r["expected_call_exact"] for r in rows),
+        "median_margin": _median(r["decision_margin"] for r in rows),
+        "margin_bins": bins,
+    }
+    summary["verdict"] = g2_verdict(summary)
+    return summary
 
 
 def _call_dict(call):
@@ -171,25 +235,8 @@ def run_g2(client, conversations, template: str, fmt: str, specials=None,
             "margin_position": margin_pos,
             "margin_bin": margin_bin(margin),
             "gaps": [None if g is None else round(g, 4) for g in position_gaps(comp.top)],
-            "output": output[:400],
+            "output": output,
         })
 
-    strata = sorted({r["stratum"] for r in rows})
-    bins = {label: sum(1 for r in rows if r["margin_bin"] == label) for label in BIN_LABELS}
-    bins["unavailable"] = sum(1 for r in rows if r["margin_bin"] is None)
-    summary = {
-        "n": len(rows),
-        "strata": strata,
-        "chat_errors": sum(1 for r in rows if r["chat_error"]),
-        "prompt_match_rate": _rate(r["prompt_match"] for r in rows),
-        "parser_agreement_rate": _rate(r["parser_agrees"] for r in rows),
-        "tool_call_rate": _rate(r["tool_call_made"] for r in rows),
-        "no_call_rate": _rate(not r["tool_call_made"] for r in rows),
-        "call_threshold": call_threshold(strata),
-        "expected_tool_rate": _rate(r["expected_tool_called"] for r in rows),
-        "expected_call_exact_rate": _rate(r["expected_call_exact"] for r in rows),
-        "median_margin": _median(r["decision_margin"] for r in rows),
-        "margin_bins": bins,
-    }
-    summary["verdict"] = g2_verdict(summary)
-    return {"summary": summary, "rows": rows}
+    adjudicate_rows(rows, template, fmt, specials)
+    return {"summary": summarise(rows), "rows": rows}

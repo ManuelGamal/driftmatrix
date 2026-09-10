@@ -4,7 +4,7 @@
     python scripts/g2_types.py --dir docs/findings/g2
 
 For each model and each ambiguous request type: how many turns produced a tool
-call, and the median decision margin among those calls. The request type of a
+call, and the median action margin over all turns, calls or not. The request type of a
 conversation is its index modulo the number of types - the rotation
 generate_conversations uses, pinned by tests/traces/test_conversations.py.
 """
@@ -57,7 +57,7 @@ def main() -> int:
         for kind, rows in by_kind.items():
             print(f"  {summarise('all ' + kind, rows)}")
         print(f"  {summarise('explicit', explicit)}")
-    print("\ncalls = turns producing a parseable tool call; margin = median recompute-arm decision margin (nats) among calls")
+    print("\ncalls = turns producing a parseable tool call; margin = median recompute-arm action margin (nats) over all turns")
     return 0
 
 

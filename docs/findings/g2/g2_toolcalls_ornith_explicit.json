@@ -7,7 +7,13 @@
     "chat_errors": 0,
     "prompt_match_rate": 1.0,
     "parser_agreement_rate": 1.0,
+    "our_roundtrip_rate": 1.0,
+    "parser_disagreements": 0,
+    "server_parser_lossy": 0,
+    "unresolved_disagreements": 0,
     "tool_call_rate": 1.0,
+    "no_call_rate": 0.0,
+    "call_threshold": 0.9,
     "expected_tool_rate": 1.0,
     "expected_call_exact_rate": 1.0,
     "median_margin": 6.917360303981695,
@@ -42,7 +48,9 @@
       "decision_margin": 7.409349300607573,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n153\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n153\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_001",
@@ -66,7 +74,9 @@
       "decision_margin": 6.094928913516924,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n0\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n0\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_002",
@@ -90,7 +100,9 @@
       "decision_margin": 6.931138942483813,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n175\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n175\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_003",
@@ -114,7 +126,9 @@
       "decision_margin": 8.721105526899919,
       "margin_position": 19,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n185\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n185\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_004",
@@ -138,7 +152,9 @@
       "decision_margin": 0.946987122297287,
       "margin_position": 10,
       "margin_bin": "contested",
-      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 74\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 74\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_005",
@@ -162,7 +178,9 @@
       "decision_margin": 6.903581665479578,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n108\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n108\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_006",
@@ -186,7 +204,9 @@
       "decision_margin": 1.3532886356115341,
       "margin_position": 10,
       "margin_bin": "contested",
-      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 62\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 62\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_007",
@@ -210,7 +230,9 @@
       "decision_margin": 7.883771014166996,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n12\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n12\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_008",
@@ -234,7 +256,9 @@
       "decision_margin": 7.248854534584098,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[31, 10, 31]\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[31, 10, 31]\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_009",
@@ -258,7 +282,9 @@
       "decision_margin": 1.7292461395263672,
       "margin_position": 10,
       "margin_bin": "contested",
-      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 33\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 33\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_010",
@@ -282,7 +308,9 @@
       "decision_margin": 1.8464564085006714,
       "margin_position": 10,
       "margin_bin": "contested",
-      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 90\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 90\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_011",
@@ -306,7 +334,9 @@
       "decision_margin": 6.5291308051673695,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 59\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 59\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_012",
@@ -330,7 +360,9 @@
       "decision_margin": 7.726063912501559,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[36, 43, 3]\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[36, 43, 3]\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_013",
@@ -354,7 +386,9 @@
       "decision_margin": 6.794981207116507,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 62\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 62\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_014",
@@ -378,7 +412,9 @@
       "decision_margin": 7.942742622341029,
       "margin_position": 6,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[10, 29, 1]\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[10, 29, 1]\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_015",
@@ -402,7 +438,9 @@
       "decision_margin": 7.463714699144475,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n30\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n30\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_016",
@@ -426,7 +464,9 @@
       "decision_margin": 1.8894882947206497,
       "margin_position": 10,
       "margin_bin": "contested",
-      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 46\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 46\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_017",
@@ -450,7 +490,9 @@
       "decision_margin": 6.87071407714393,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 29\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 29\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_018",
@@ -474,7 +516,9 @@
       "decision_margin": 7.7967186739551835,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n34\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n34\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_019",
@@ -498,7 +542,9 @@
       "decision_margin": 3.6486777774989605,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[1, 7, 25]\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[1, 7, 25]\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_020",
@@ -522,7 +568,9 @@
       "decision_margin": 7.954258980462328,
       "margin_position": 6,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[21, 44, 20]\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[21, 44, 20]\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_021",
@@ -546,7 +594,9 @@
       "decision_margin": 5.763359021162614,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 27\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 27\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_022",
@@ -570,7 +620,9 @@
       "decision_margin": 8.653171682497486,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n140\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n140\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_023",
@@ -594,7 +646,9 @@
       "decision_margin": 7.658777286065742,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n115\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n115\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_024",
@@ -618,7 +672,9 @@
       "decision_margin": 1.6740742325782776,
       "margin_position": 10,
       "margin_bin": "contested",
-      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 28\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 28\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_025",
@@ -642,7 +698,9 @@
       "decision_margin": 7.065964203560725,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[28, 35, 27]\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[28, 35, 27]\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_026",
@@ -666,7 +724,9 @@
       "decision_margin": 7.961201528902166,
       "margin_position": 6,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[30, 12, 21]\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[30, 12, 21]\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_027",
@@ -690,7 +750,9 @@
       "decision_margin": 6.556472995085642,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n23\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n23\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_028",
@@ -714,7 +776,9 @@
       "decision_margin": 8.037938759662211,
       "margin_position": 6,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[11, 23, 36]\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[11, 23, 36]\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_029",
@@ -738,7 +802,9 @@
       "decision_margin": 2.4016724303364754,
       "margin_position": 10,
       "margin_bin": "confident",
-      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 36\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>"
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nBatch 36\n</parameter>\n<parameter=body>\nstatus nominal\n</parameter>\n</function>\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     }
   ],
   "model": "ornith",

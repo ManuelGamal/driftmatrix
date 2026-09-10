@@ -7,17 +7,23 @@
     "chat_errors": 0,
     "prompt_match_rate": 1.0,
     "parser_agreement_rate": 1.0,
+    "our_roundtrip_rate": 1.0,
+    "parser_disagreements": 0,
+    "server_parser_lossy": 0,
+    "unresolved_disagreements": 0,
     "tool_call_rate": 0.6666666666666666,
+    "no_call_rate": 0.3333333333333333,
+    "call_threshold": 0.5,
     "expected_tool_rate": null,
     "expected_call_exact_rate": null,
-    "median_margin": 9.185709968176525,
+    "median_margin": 7.47037799708778,
     "margin_bins": {
-      "near_tie": 1,
-      "contested": 2,
-      "confident": 17,
-      "unavailable": 10
+      "near_tie": 2,
+      "contested": 5,
+      "confident": 23,
+      "unavailable": 0
     },
-    "verdict": "TOOL_CALL_RATE_BELOW_GATE"
+    "verdict": "G2_TOOLCALLS_PASS"
   },
   "rows": [
     {
@@ -27,22 +33,55 @@
       "server_prompt_tokens": 585,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "f22e6021b1efe55c"
+        "args_hash": "f22e6021b1efe55c",
+        "args": {
+          "record_id": 81
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "f22e6021b1efe55c"
+        "args_hash": "f22e6021b1efe55c",
+        "args": {
+          "record_id": 81
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 3.11666489392519,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 81}}\n</tool_call>"
+      "gaps": [
+        3.1167,
+        23.5492,
+        18.2333,
+        24.7042,
+        19.9445,
+        31.524,
+        15.1843,
+        11.2117,
+        19.5728,
+        28.7386,
+        16.5075,
+        18.5592,
+        18.697,
+        20.2292,
+        22.3901,
+        20.2196,
+        36.8384,
+        27.993,
+        28.9017,
+        16.741,
+        13.5037,
+        14.0955
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 81}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_001",
@@ -51,22 +90,55 @@
       "server_prompt_tokens": 569,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "c5b08685974f920b"
+        "args_hash": "c5b08685974f920b",
+        "args": {
+          "record_id": 53
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "c5b08685974f920b"
+        "args_hash": "c5b08685974f920b",
+        "args": {
+          "record_id": 53
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 10.676738295267569,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 53}}\n</tool_call>"
+      "gaps": [
+        10.6767,
+        26.4536,
+        21.6344,
+        25.2312,
+        21.3889,
+        34.0768,
+        14.6976,
+        11.8836,
+        20.87,
+        25.385,
+        15.4062,
+        19.0911,
+        20.0675,
+        20.583,
+        20.5112,
+        20.9108,
+        33.1681,
+        32.6478,
+        31.2201,
+        16.1861,
+        13.4413,
+        13.8016
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 53}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_002",
@@ -75,22 +147,66 @@
       "server_prompt_tokens": 590,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "compute_sum",
-        "args_hash": "841fbad128e102ee"
+        "args_hash": "841fbad128e102ee",
+        "args": {
+          "values": [
+            198,
+            29
+          ]
+        }
       },
       "theirs": {
         "name": "compute_sum",
-        "args_hash": "841fbad128e102ee"
+        "args_hash": "841fbad128e102ee",
+        "args": {
+          "values": [
+            198,
+            29
+          ]
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 7.388326752290595,
       "margin_position": 23,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [198, 29]}}\n</tool_call>"
+      "gaps": [
+        9.6933,
+        27.4997,
+        18.4573,
+        24.1571,
+        22.0961,
+        33.4097,
+        14.7183,
+        15.614,
+        18.8721,
+        29.1629,
+        16.1592,
+        18.9082,
+        17.9742,
+        21.1444,
+        19.1945,
+        25.137,
+        24.661,
+        28.9989,
+        32.4388,
+        36.7413,
+        45.1184,
+        29.3471,
+        29.2744,
+        7.3883,
+        14.6277,
+        13.889,
+        14.0507
+      ],
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [198, 29]}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_003",
@@ -99,16 +215,43 @@
       "server_prompt_tokens": 555,
       "chat_error": null,
       "prompt_match": true,
+      "action": "no_call",
       "tool_call_made": false,
       "parser_agrees": true,
       "ours": null,
       "theirs": null,
       "expected_tool_called": null,
       "expected_call_exact": null,
-      "decision_margin": null,
-      "margin_position": null,
-      "margin_bin": null,
-      "output": "I don't have access to the numbers from earlier. Please provide the specific numbers you want to add."
+      "decision_margin": 1.6190185248851776,
+      "margin_position": 0,
+      "margin_bin": "contested",
+      "gaps": [
+        1.619,
+        0.7519,
+        16.6172,
+        15.2757,
+        9.7486,
+        29.7685,
+        0.2661,
+        9.4214,
+        16.4831,
+        15.7875,
+        3.7752,
+        1.912,
+        13.2165,
+        15.106,
+        2.2892,
+        11.9682,
+        11.1206,
+        0.7986,
+        8.0489,
+        1.3538,
+        4.7404,
+        11.2713
+      ],
+      "output": "I don't have access to the numbers from earlier. Please provide the specific numbers you want to add.",
+      "our_roundtrip": null,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_004",
@@ -117,16 +260,30 @@
       "server_prompt_tokens": 560,
       "chat_error": null,
       "prompt_match": true,
+      "action": "no_call",
       "tool_call_made": false,
       "parser_agrees": true,
       "ours": null,
       "theirs": null,
       "expected_tool_called": null,
       "expected_call_exact": null,
-      "decision_margin": null,
-      "margin_position": null,
-      "margin_bin": null,
-      "output": "# Batch 91\n\nstatus nominal"
+      "decision_margin": 12.47912192343847,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "gaps": [
+        12.4791,
+        15.5919,
+        25.3635,
+        29.4812,
+        28.7944,
+        24.6913,
+        14.3498,
+        19.1045,
+        10.7955
+      ],
+      "output": "# Batch 91\n\nstatus nominal",
+      "our_roundtrip": null,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_005",
@@ -135,22 +292,54 @@
       "server_prompt_tokens": 555,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "f0e30bdd8c04717b"
+        "args_hash": "f0e30bdd8c04717b",
+        "args": {
+          "record_id": 1
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "f0e30bdd8c04717b"
+        "args_hash": "f0e30bdd8c04717b",
+        "args": {
+          "record_id": 1
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 3.5868378579616547,
       "margin_position": 17,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 1}}\n</tool_call>"
+      "gaps": [
+        4.3678,
+        22.723,
+        19.1809,
+        24.7874,
+        20.9733,
+        31.6209,
+        14.371,
+        11.7597,
+        22.5014,
+        26.0328,
+        15.3582,
+        19.8162,
+        14.8572,
+        18.624,
+        20.9855,
+        20.6819,
+        4.4554,
+        3.5868,
+        8.2794,
+        13.1159,
+        14.1297
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 1}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_006",
@@ -159,22 +348,56 @@
       "server_prompt_tokens": 576,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "1ccca60dd94de344"
+        "args_hash": "1ccca60dd94de344",
+        "args": {
+          "record_id": 186
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "1ccca60dd94de344"
+        "args_hash": "1ccca60dd94de344",
+        "args": {
+          "record_id": 186
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 10.666288284526672,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 186}}\n</tool_call>"
+      "gaps": [
+        10.6663,
+        25.6118,
+        20.2844,
+        25.486,
+        21.1115,
+        34.0674,
+        14.6444,
+        11.686,
+        20.6915,
+        24.8679,
+        15.2487,
+        18.807,
+        19.8845,
+        20.7389,
+        20.8214,
+        20.468,
+        37.1901,
+        30.8058,
+        30.8595,
+        29.939,
+        15.0482,
+        13.544,
+        13.8061
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 186}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_007",
@@ -183,22 +406,66 @@
       "server_prompt_tokens": 594,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "compute_sum",
-        "args_hash": "10c1b565c5aeb3f1"
+        "args_hash": "10c1b565c5aeb3f1",
+        "args": {
+          "values": [
+            39,
+            102
+          ]
+        }
       },
       "theirs": {
         "name": "compute_sum",
-        "args_hash": "10c1b565c5aeb3f1"
+        "args_hash": "10c1b565c5aeb3f1",
+        "args": {
+          "values": [
+            39,
+            102
+          ]
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 7.5524292418849654,
       "margin_position": 23,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [39, 102]}}\n</tool_call>"
+      "gaps": [
+        9.0937,
+        26.8403,
+        17.5826,
+        23.8908,
+        22.3529,
+        33.9627,
+        8.8484,
+        15.0116,
+        19.4049,
+        28.7762,
+        16.3798,
+        18.7956,
+        17.6796,
+        20.8697,
+        19.4099,
+        24.4913,
+        21.9857,
+        33.2687,
+        34.3093,
+        44.4758,
+        28.868,
+        29.0234,
+        29.5021,
+        7.5524,
+        13.9841,
+        13.9219,
+        14.1153
+      ],
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [39, 102]}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_008",
@@ -207,16 +474,61 @@
       "server_prompt_tokens": 583,
       "chat_error": null,
       "prompt_match": true,
+      "action": "no_call",
       "tool_call_made": false,
       "parser_agrees": true,
       "ours": null,
       "theirs": null,
       "expected_tool_called": null,
       "expected_call_exact": null,
-      "decision_margin": null,
-      "margin_position": null,
-      "margin_bin": null,
-      "output": "I need to sum the numbers from the previous reports. However, I don't have access to the actual numerical values in the reports. Could you please provide the specific numbers you want to sum?"
+      "decision_margin": 1.1004410088062286,
+      "margin_position": 0,
+      "margin_bin": "contested",
+      "gaps": [
+        1.1004,
+        0.8485,
+        3.0124,
+        2.5466,
+        3.9649,
+        17.013,
+        14.3652,
+        0.2319,
+        2.4984,
+        3.8582,
+        8.5532,
+        3.8828,
+        28.6951,
+        1.263,
+        5.1517,
+        17.2303,
+        8.2514,
+        4.1127,
+        30.041,
+        6.9628,
+        0.2586,
+        0.1551,
+        2.5766,
+        0.8596,
+        18.8391,
+        3.6553,
+        10.3302,
+        3.4498,
+        19.2739,
+        1.8548,
+        11.4667,
+        10.3062,
+        4.0128,
+        14.1057,
+        10.5246,
+        3.9584,
+        8.3634,
+        4.118,
+        11.9526,
+        10.3095
+      ],
+      "output": "I need to sum the numbers from the previous reports. However, I don't have access to the actual numerical values in the reports. Could you please provide the specific numbers you want to sum?",
+      "our_roundtrip": null,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_009",
@@ -225,16 +537,43 @@
       "server_prompt_tokens": 572,
       "chat_error": null,
       "prompt_match": true,
+      "action": "no_call",
       "tool_call_made": false,
       "parser_agrees": true,
       "ours": null,
       "theirs": null,
       "expected_tool_called": null,
       "expected_call_exact": null,
-      "decision_margin": null,
-      "margin_position": null,
-      "margin_bin": null,
-      "output": "The sum of 44, 31, and 46 is 121."
+      "decision_margin": 10.065784691640147,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "gaps": [
+        10.0658,
+        18.8813,
+        22.7285,
+        14.6354,
+        25.7283,
+        32.4124,
+        34.1076,
+        41.4713,
+        28.1334,
+        35.2186,
+        32.3668,
+        29.5504,
+        38.2914,
+        28.6686,
+        30.7774,
+        25.7604,
+        14.9935,
+        28.3743,
+        27.0355,
+        32.2441,
+        21.7236,
+        12.4212
+      ],
+      "output": "The sum of 44, 31, and 46 is 121.",
+      "our_roundtrip": null,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_010",
@@ -243,16 +582,57 @@
       "server_prompt_tokens": 587,
       "chat_error": null,
       "prompt_match": true,
+      "action": "no_call",
       "tool_call_made": false,
       "parser_agrees": true,
       "ours": null,
       "theirs": null,
       "expected_tool_called": null,
       "expected_call_exact": null,
-      "decision_margin": null,
-      "margin_position": null,
-      "margin_bin": null,
-      "output": "It seems you are referring to the previous record, but you haven't provided the specific integer ID of the record you want to fetch. Could you please provide the record ID?"
+      "decision_margin": 1.2992858588695526,
+      "margin_position": 0,
+      "margin_bin": "contested",
+      "gaps": [
+        1.2993,
+        9.4316,
+        5.2518,
+        1.779,
+        8.7984,
+        20.3993,
+        1.8798,
+        2.3966,
+        1.8449,
+        3.5831,
+        12.9435,
+        3.9589,
+        1.397,
+        16.5641,
+        1.2171,
+        0.1473,
+        6.6283,
+        1.7231,
+        5.1584,
+        4.7936,
+        24.1438,
+        17.8925,
+        3.4119,
+        2.1917,
+        15.837,
+        0.4897,
+        17.9148,
+        7.992,
+        16.5003,
+        11.4005,
+        2.0808,
+        24.1211,
+        3.7434,
+        13.2477,
+        1.7903,
+        4.4065
+      ],
+      "output": "It seems you are referring to the previous record, but you haven't provided the specific integer ID of the record you want to fetch. Could you please provide the record ID?",
+      "our_roundtrip": null,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_011",
@@ -261,22 +641,55 @@
       "server_prompt_tokens": 563,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "a3d245a569fb42fd"
+        "args_hash": "a3d245a569fb42fd",
+        "args": {
+          "record_id": 19
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "a3d245a569fb42fd"
+        "args_hash": "a3d245a569fb42fd",
+        "args": {
+          "record_id": 19
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 9.539344546537905,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 19}}\n</tool_call>"
+      "gaps": [
+        10.342,
+        27.2138,
+        21.5835,
+        26.2011,
+        20.5115,
+        33.3461,
+        15.3731,
+        9.5393,
+        20.7341,
+        26.105,
+        14.4577,
+        18.1971,
+        18.5414,
+        20.6497,
+        18.6344,
+        19.9917,
+        43.4008,
+        28.5222,
+        29.8524,
+        16.6739,
+        13.0614,
+        13.8169
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 19}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_012",
@@ -285,22 +698,79 @@
       "server_prompt_tokens": 571,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "ffbafe302feb41f1"
+        "args_hash": "ffbafe302feb41f1",
+        "args": {
+          "record_id": 156
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "ffbafe302feb41f1"
+        "args_hash": "ffbafe302feb41f1",
+        "args": {
+          "record_id": 156
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 7.067253225133754,
       "margin_position": 6,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 156}}\n</tool_call>\n<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 198}}\n</tool_call>"
+      "gaps": [
+        9.2801,
+        28.6781,
+        22.1934,
+        24.9974,
+        21.8497,
+        32.8693,
+        7.0673,
+        12.6099,
+        20.4391,
+        28.6381,
+        14.158,
+        19.7558,
+        15.6771,
+        19.8529,
+        21.1643,
+        20.2511,
+        34.1284,
+        30.7017,
+        31.1395,
+        31.5939,
+        13.7631,
+        11.3229,
+        10.6229,
+        8.705,
+        29.7055,
+        23.5631,
+        24.8806,
+        20.1811,
+        25.6791,
+        15.4943,
+        11.7955,
+        20.3183,
+        28.5116,
+        14.2058,
+        19.1879,
+        18.8485,
+        19.6016,
+        14.1045,
+        19.2155,
+        43.1264,
+        28.459,
+        31.5234,
+        32.144,
+        16.6317,
+        12.7067,
+        11.9736
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 156}}\n</tool_call>\n<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 198}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_013",
@@ -309,16 +779,34 @@
       "server_prompt_tokens": 553,
       "chat_error": null,
       "prompt_match": true,
+      "action": "no_call",
       "tool_call_made": false,
       "parser_agrees": true,
       "ours": null,
       "theirs": null,
       "expected_tool_called": null,
       "expected_call_exact": null,
-      "decision_margin": null,
-      "margin_position": null,
-      "margin_bin": null,
-      "output": "The sum of the numbers from earlier is 69."
+      "decision_margin": 0.30054861307144165,
+      "margin_position": 0,
+      "margin_bin": "near_tie",
+      "gaps": [
+        0.3005,
+        0.68,
+        21.0952,
+        24.5586,
+        18.6824,
+        15.5713,
+        15.1204,
+        8.9169,
+        19.4572,
+        16.7989,
+        29.6617,
+        19.0392,
+        9.5919
+      ],
+      "output": "The sum of the numbers from earlier is 69.",
+      "our_roundtrip": null,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_014",
@@ -327,22 +815,74 @@
       "server_prompt_tokens": 572,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "format_report",
-        "args_hash": "1539246bf9a512d7"
+        "args_hash": "1539246bf9a512d7",
+        "args": {
+          "body": "record 191: field=delta value=67",
+          "title": "Record Information"
+        }
       },
       "theirs": {
         "name": "format_report",
-        "args_hash": "1539246bf9a512d7"
+        "args_hash": "1539246bf9a512d7",
+        "args": {
+          "body": "record 191: field=delta value=67",
+          "title": "Record Information"
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 0.0424003005027771,
       "margin_position": 17,
       "margin_bin": "near_tie",
-      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Record Information\", \"body\": \"record 191: field=delta value=67\"}}\n</tool_call>"
+      "gaps": [
+        5.867,
+        23.5649,
+        17.8577,
+        24.2768,
+        21.0978,
+        33.3257,
+        19.9847,
+        15.7196,
+        21.0616,
+        31.0262,
+        15.5856,
+        20.1519,
+        18.633,
+        21.2396,
+        21.97,
+        29.8385,
+        13.4528,
+        0.0424,
+        21.204,
+        29.5963,
+        21.426,
+        21.0776,
+        24.0117,
+        6.0538,
+        45.7676,
+        30.6315,
+        27.5529,
+        30.7997,
+        32.006,
+        18.7855,
+        21.6488,
+        15.7673,
+        22.3268,
+        32.5892,
+        28.5998,
+        31.814,
+        11.8,
+        12.5716,
+        12.505
+      ],
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Record Information\", \"body\": \"record 191: field=delta value=67\"}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_015",
@@ -351,22 +891,54 @@
       "server_prompt_tokens": 565,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "6f3c98e8d1e7d5de"
+        "args_hash": "6f3c98e8d1e7d5de",
+        "args": {
+          "record_id": 0
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "6f3c98e8d1e7d5de"
+        "args_hash": "6f3c98e8d1e7d5de",
+        "args": {
+          "record_id": 0
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 9.246383178571705,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 0}}\n</tool_call>"
+      "gaps": [
+        9.2464,
+        24.8785,
+        18.9236,
+        25.2054,
+        19.9787,
+        32.531,
+        15.145,
+        10.3033,
+        19.8739,
+        29.7604,
+        15.9204,
+        18.3412,
+        18.2282,
+        19.6677,
+        20.5483,
+        20.6439,
+        39.7201,
+        26.715,
+        16.2811,
+        13.7395,
+        13.7676
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 0}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_016",
@@ -375,22 +947,56 @@
       "server_prompt_tokens": 582,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "78f12f962d9cedb5"
+        "args_hash": "78f12f962d9cedb5",
+        "args": {
+          "record_id": 180
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "78f12f962d9cedb5"
+        "args_hash": "78f12f962d9cedb5",
+        "args": {
+          "record_id": 180
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 10.096736521751154,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 180}}\n</tool_call>"
+      "gaps": [
+        10.0967,
+        25.0007,
+        17.3316,
+        24.3105,
+        21.1884,
+        33.0889,
+        14.7098,
+        11.2692,
+        20.53,
+        25.3621,
+        15.5042,
+        19.1083,
+        20.0317,
+        19.8962,
+        20.3896,
+        20.1605,
+        32.1744,
+        30.6872,
+        31.3506,
+        31.1816,
+        16.8138,
+        13.6909,
+        12.0081
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 180}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_017",
@@ -399,22 +1005,78 @@
       "server_prompt_tokens": 564,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "c9ceb56e493e76ad"
+        "args_hash": "c9ceb56e493e76ad",
+        "args": {
+          "record_id": 22
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "c9ceb56e493e76ad"
+        "args_hash": "c9ceb56e493e76ad",
+        "args": {
+          "record_id": 22
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 9.280079360367381,
       "margin_position": 6,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 22}}\n</tool_call>\n<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 163}}\n</tool_call>"
+      "gaps": [
+        9.9411,
+        26.5814,
+        20.3469,
+        24.4203,
+        21.1496,
+        32.4394,
+        9.2801,
+        11.5237,
+        21.4887,
+        30.8168,
+        14.7015,
+        19.1347,
+        16.9808,
+        19.4533,
+        21.1523,
+        21.1815,
+        40.271,
+        27.4672,
+        32.6426,
+        14.8826,
+        12.1967,
+        9.8359,
+        8.6962,
+        29.1734,
+        24.0306,
+        25.7802,
+        19.7526,
+        29.4735,
+        15.8074,
+        11.4932,
+        20.1809,
+        24.7221,
+        14.9251,
+        18.5783,
+        19.5224,
+        19.7554,
+        15.6219,
+        18.1879,
+        44.0667,
+        28.5342,
+        30.7767,
+        28.4648,
+        17.6131,
+        13.094,
+        11.8163
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 22}}\n</tool_call>\n<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 163}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_018",
@@ -423,16 +1085,34 @@
       "server_prompt_tokens": 559,
       "chat_error": null,
       "prompt_match": true,
+      "action": "no_call",
       "tool_call_made": false,
       "parser_agrees": true,
       "ours": null,
       "theirs": null,
       "expected_tool_called": null,
       "expected_call_exact": null,
-      "decision_margin": null,
-      "margin_position": null,
-      "margin_bin": null,
-      "output": "The sum of the numbers from earlier is 76."
+      "decision_margin": 2.062553331255913,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "gaps": [
+        2.0626,
+        3.0992,
+        19.1605,
+        24.8149,
+        18.8997,
+        12.291,
+        15.8253,
+        10.6453,
+        25.3511,
+        19.3796,
+        29.3304,
+        20.5788,
+        9.734
+      ],
+      "output": "The sum of the numbers from earlier is 76.",
+      "our_roundtrip": null,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_019",
@@ -441,16 +1121,42 @@
       "server_prompt_tokens": 572,
       "chat_error": null,
       "prompt_match": true,
+      "action": "no_call",
       "tool_call_made": false,
       "parser_agrees": true,
       "ours": null,
       "theirs": null,
       "expected_tool_called": null,
       "expected_call_exact": null,
-      "decision_margin": null,
-      "margin_position": null,
-      "margin_bin": null,
-      "output": "The sum of 10, 34, and 13 is 57."
+      "decision_margin": 15.60161197185515,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "gaps": [
+        15.6016,
+        20.0266,
+        24.1579,
+        12.9978,
+        30.4503,
+        28.3112,
+        34.8059,
+        39.9147,
+        26.6905,
+        32.168,
+        30.5744,
+        28.6509,
+        37.8415,
+        29.3183,
+        28.4407,
+        26.4848,
+        17.1277,
+        28.0216,
+        28.2561,
+        22.2103,
+        12.5541
+      ],
+      "output": "The sum of 10, 34, and 13 is 57.",
+      "our_roundtrip": null,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_020",
@@ -459,22 +1165,56 @@
       "server_prompt_tokens": 575,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "109e877468b6def9"
+        "args_hash": "109e877468b6def9",
+        "args": {
+          "record_id": 130
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "109e877468b6def9"
+        "args_hash": "109e877468b6def9",
+        "args": {
+          "record_id": 130
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 9.201773082721047,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 130}}\n</tool_call>"
+      "gaps": [
+        9.2018,
+        24.934,
+        20.0559,
+        25.3995,
+        19.1343,
+        32.2891,
+        15.3034,
+        9.6027,
+        19.5126,
+        22.0828,
+        15.8717,
+        18.0427,
+        19.1526,
+        20.392,
+        21.1284,
+        20.9225,
+        42.2,
+        26.1622,
+        27.2874,
+        19.9942,
+        16.9223,
+        13.2834,
+        13.5456
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 130}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_021",
@@ -483,22 +1223,55 @@
       "server_prompt_tokens": 565,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "764566538642444a"
+        "args_hash": "764566538642444a",
+        "args": {
+          "record_id": 59
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "764566538642444a"
+        "args_hash": "764566538642444a",
+        "args": {
+          "record_id": 59
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 9.788249491033639,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 59}}\n</tool_call>"
+      "gaps": [
+        10.0792,
+        27.9514,
+        21.2921,
+        26.1245,
+        20.7691,
+        33.1162,
+        15.2784,
+        9.7882,
+        20.579,
+        28.2931,
+        14.5394,
+        18.3804,
+        18.6372,
+        20.8559,
+        18.0494,
+        20.17,
+        40.3926,
+        28.8699,
+        32.7617,
+        17.8292,
+        12.8927,
+        13.3348
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 59}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_022",
@@ -507,22 +1280,78 @@
       "server_prompt_tokens": 580,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "64b9916fee0d7ff4"
+        "args_hash": "64b9916fee0d7ff4",
+        "args": {
+          "record_id": 152
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "64b9916fee0d7ff4"
+        "args_hash": "64b9916fee0d7ff4",
+        "args": {
+          "record_id": 152
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 3.032123576849699,
       "margin_position": 6,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 152}}\n</tool_call>\n<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 94}}\n</tool_call>"
+      "gaps": [
+        8.765,
+        27.9091,
+        20.6199,
+        24.0269,
+        22.0699,
+        33.0202,
+        3.0321,
+        12.1098,
+        20.0425,
+        28.1114,
+        14.8093,
+        19.3619,
+        16.5759,
+        18.9328,
+        20.6516,
+        20.6035,
+        33.2594,
+        29.8357,
+        30.8209,
+        32.3245,
+        12.1328,
+        12.4286,
+        6.9501,
+        8.4766,
+        29.5271,
+        22.7592,
+        25.2886,
+        20.5985,
+        25.1777,
+        15.7749,
+        11.942,
+        21.2567,
+        30.1514,
+        14.1038,
+        19.2841,
+        20.0843,
+        19.9278,
+        13.3123,
+        20.3299,
+        43.885,
+        27.9288,
+        31.7559,
+        17.318,
+        12.8141,
+        11.879
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 152}}\n</tool_call>\n<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 94}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_023",
@@ -531,22 +1360,66 @@
       "server_prompt_tokens": 569,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "compute_sum",
-        "args_hash": "78b9cbce9f98a7f6"
+        "args_hash": "78b9cbce9f98a7f6",
+        "args": {
+          "values": [
+            58,
+            407
+          ]
+        }
       },
       "theirs": {
         "name": "compute_sum",
-        "args_hash": "78b9cbce9f98a7f6"
+        "args_hash": "78b9cbce9f98a7f6",
+        "args": {
+          "values": [
+            58,
+            407
+          ]
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 0.7512761652469635,
       "margin_position": 0,
       "margin_bin": "contested",
-      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [58, 407]}}\n</tool_call>"
+      "gaps": [
+        0.7513,
+        23.4044,
+        17.6525,
+        24.8076,
+        22.7218,
+        30.1095,
+        15.1289,
+        14.5673,
+        21.2724,
+        23.9822,
+        16.5663,
+        19.8195,
+        17.6274,
+        21.6283,
+        20.5107,
+        22.9005,
+        1.166,
+        28.6009,
+        5.8265,
+        30.6488,
+        15.2539,
+        27.685,
+        28.6606,
+        7.5812,
+        11.2495,
+        14.43,
+        14.1598
+      ],
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [58, 407]}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_024",
@@ -555,16 +1428,36 @@
       "server_prompt_tokens": 572,
       "chat_error": null,
       "prompt_match": true,
+      "action": "no_call",
       "tool_call_made": false,
       "parser_agrees": true,
       "ours": null,
       "theirs": null,
       "expected_tool_called": null,
       "expected_call_exact": null,
-      "decision_margin": null,
-      "margin_position": null,
-      "margin_bin": null,
-      "output": "record 165: field=beta value=105"
+      "decision_margin": 4.447147594764829,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "gaps": [
+        4.4471,
+        43.1783,
+        33.4582,
+        31.663,
+        31.725,
+        27.513,
+        17.7873,
+        19.0725,
+        12.3222,
+        20.7972,
+        30.2219,
+        30.1478,
+        25.2133,
+        30.2889,
+        9.7336
+      ],
+      "output": "record 165: field=beta value=105",
+      "our_roundtrip": null,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_025",
@@ -573,22 +1466,55 @@
       "server_prompt_tokens": 587,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "7637e6a7a30a68c1"
+        "args_hash": "7637e6a7a30a68c1",
+        "args": {
+          "record_id": 99
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "7637e6a7a30a68c1"
+        "args_hash": "7637e6a7a30a68c1",
+        "args": {
+          "record_id": 99
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 9.169646853632003,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 99}}\n</tool_call>"
+      "gaps": [
+        9.8461,
+        25.5252,
+        19.6332,
+        25.1287,
+        18.8669,
+        30.2009,
+        13.9193,
+        9.1696,
+        19.2359,
+        26.9265,
+        15.8399,
+        18.3661,
+        19.7364,
+        20.5597,
+        20.1739,
+        20.6264,
+        42.2104,
+        26.7119,
+        30.6655,
+        16.3799,
+        12.8439,
+        13.8287
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 99}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_026",
@@ -597,22 +1523,55 @@
       "server_prompt_tokens": 563,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "143ce155fbe70b08"
+        "args_hash": "143ce155fbe70b08",
+        "args": {
+          "record_id": 78
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "143ce155fbe70b08"
+        "args_hash": "143ce155fbe70b08",
+        "args": {
+          "record_id": 78
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 9.858118010102771,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 78}}\n</tool_call>"
+      "gaps": [
+        9.8581,
+        24.9457,
+        21.1955,
+        25.9212,
+        20.2238,
+        34.2107,
+        15.3696,
+        11.4832,
+        20.3343,
+        27.6938,
+        15.6693,
+        18.9916,
+        18.8846,
+        20.9848,
+        17.7296,
+        20.0288,
+        35.7469,
+        28.7623,
+        33.9575,
+        16.7206,
+        13.5498,
+        14.1903
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 78}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_027",
@@ -621,22 +1580,76 @@
       "server_prompt_tokens": 564,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "lookup_record",
-        "args_hash": "167b62ed90412905"
+        "args_hash": "167b62ed90412905",
+        "args": {
+          "record_id": 71
+        }
       },
       "theirs": {
         "name": "lookup_record",
-        "args_hash": "167b62ed90412905"
+        "args_hash": "167b62ed90412905",
+        "args": {
+          "record_id": 71
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 9.598268323985394,
       "margin_position": 20,
       "margin_bin": "confident",
-      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 71}}\n</tool_call>\n<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 9}}\n</tool_call>"
+      "gaps": [
+        9.6218,
+        27.8493,
+        21.6059,
+        24.7662,
+        21.4027,
+        31.7355,
+        13.6736,
+        12.7095,
+        20.3471,
+        29.2465,
+        14.2829,
+        19.5373,
+        16.0902,
+        19.9997,
+        21.2687,
+        21.2404,
+        31.552,
+        30.7865,
+        32.5351,
+        13.2422,
+        9.5983,
+        9.1899,
+        8.6401,
+        29.0633,
+        23.6424,
+        24.908,
+        19.8467,
+        26.4657,
+        15.4965,
+        11.6747,
+        20.371,
+        25.5256,
+        13.5063,
+        18.6811,
+        19.1101,
+        19.7682,
+        13.3531,
+        18.9783,
+        42.7674,
+        29.7045,
+        18.4603,
+        12.6321,
+        8.572
+      ],
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 71}}\n</tool_call>\n<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 9}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_028",
@@ -645,22 +1658,66 @@
       "server_prompt_tokens": 567,
       "chat_error": null,
       "prompt_match": true,
+      "action": "call",
       "tool_call_made": true,
       "parser_agrees": true,
       "ours": {
         "name": "compute_sum",
-        "args_hash": "b1335a53badd9c38"
+        "args_hash": "b1335a53badd9c38",
+        "args": {
+          "values": [
+            91,
+            222
+          ]
+        }
       },
       "theirs": {
         "name": "compute_sum",
-        "args_hash": "b1335a53badd9c38"
+        "args_hash": "b1335a53badd9c38",
+        "args": {
+          "values": [
+            91,
+            222
+          ]
+        }
       },
       "expected_tool_called": null,
       "expected_call_exact": null,
       "decision_margin": 0.6339492499828339,
       "margin_position": 16,
       "margin_bin": "contested",
-      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [91, 222]}}\n</tool_call>"
+      "gaps": [
+        5.1568,
+        23.9351,
+        20.0357,
+        24.4238,
+        22.5392,
+        32.5553,
+        15.0481,
+        14.0698,
+        20.6039,
+        23.2428,
+        16.6207,
+        19.3673,
+        17.5512,
+        21.6291,
+        19.5382,
+        25.254,
+        0.6339,
+        28.0827,
+        20.2356,
+        26.4365,
+        11.669,
+        26.9782,
+        23.3624,
+        9.3904,
+        12.3376,
+        14.3673,
+        13.5839
+      ],
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [91, 222]}}\n</tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "a2026_029",
@@ -669,16 +1726,36 @@
       "server_prompt_tokens": 584,
       "chat_error": null,
       "prompt_match": true,
+      "action": "no_call",
       "tool_call_made": false,
       "parser_agrees": true,
       "ours": null,
       "theirs": null,
       "expected_tool_called": null,
       "expected_call_exact": null,
-      "decision_margin": null,
-      "margin_position": null,
-      "margin_bin": null,
-      "output": "record 158: field=gamma value=846"
+      "decision_margin": 6.354808816220611,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "gaps": [
+        6.3548,
+        42.4078,
+        33.2957,
+        31.5733,
+        32.2726,
+        15.9344,
+        16.1879,
+        11.8239,
+        11.2378,
+        19.4696,
+        29.4631,
+        26.2457,
+        30.3952,
+        30.2244,
+        10.5648
+      ],
+      "output": "record 158: field=gamma value=846",
+      "our_roundtrip": null,
+      "adjudication": null
     }
   ],
   "model": "qwen3",

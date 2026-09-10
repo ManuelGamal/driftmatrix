@@ -13,6 +13,9 @@ Only the first complete <tool_call>...</tool_call> block is parsed; an
 unterminated block is not a call. Argument values are JSON-decoded where they
 parse and kept as stripped strings otherwise, and ToolCall.from_payload sorts
 keys, so an identical call always hashes identically.
+
+parse_tool_call_ordered keeps the arguments in the order the model emitted them
+and returns the raw block, which the template round trip needs (roundtrip.py).
 """
 from __future__ import annotations
 
@@ -41,8 +44,7 @@ def _qwen_xml(body):
     fn = _FUNCTION.search(body)
     if not fn:
         return None
-    params = {m.group(1): _value(m.group(2)) for m in _PARAMETER.finditer(fn.group(2))}
-    return ToolCall.from_payload(fn.group(1), params)
+    return fn.group(1), {m.group(1): _value(m.group(2)) for m in _PARAMETER.finditer(fn.group(2))}
 
 
 def _qwen_json(body):
@@ -60,7 +62,7 @@ def _qwen_json(body):
             return None
     if not isinstance(args, dict):
         return None
-    return ToolCall.from_payload(obj["name"], args)
+    return obj["name"], args
 
 
 def _spark_argkv(body):
@@ -68,18 +70,27 @@ def _spark_argkv(body):
     if not head:
         return None
     rest = body[head.end():]
-    return ToolCall.from_payload(head.group(1),
-                                 {k.strip(): _value(v) for k, v in _ARGKV.findall(rest)})
+    return head.group(1), {k.strip(): _value(v) for k, v in _ARGKV.findall(rest)}
 
 
 _PARSERS = {"qwen_xml": _qwen_xml, "qwen_json": _qwen_json, "spark_argkv": _spark_argkv}
 
 
-def parse_tool_call(text: str, fmt: str):
-    """Return the first complete tool call as a ToolCall, or None."""
+def parse_tool_call_ordered(text: str, fmt: str):
+    """(name, arguments in emitted order, raw <tool_call> block), or None."""
     if fmt not in _PARSERS:
         raise ValueError(f"unknown tool-call format: {fmt}")
     block = _BLOCK.search(text or "")
     if not block:
         return None
-    return _PARSERS[fmt](block.group(1))
+    parsed = _PARSERS[fmt](block.group(1))
+    if parsed is None:
+        return None
+    name, args = parsed
+    return name, args, block.group(0)
+
+
+def parse_tool_call(text: str, fmt: str):
+    """Return the first complete tool call as a ToolCall, or None."""
+    parsed = parse_tool_call_ordered(text, fmt)
+    return None if parsed is None else ToolCall.from_payload(parsed[0], parsed[1])

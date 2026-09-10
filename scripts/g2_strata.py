@@ -3,9 +3,10 @@
     python scripts/g2_strata.py
     python scripts/g2_strata.py --dir docs/findings/g2
 
-The ambiguous stratum earns its place only if, on every model, it keeps the
-tool-call rate at or above the gate AND lowers the median recompute-arm
-decision margin below the explicit stratum's (spec v4.2).
+The ambiguous stratum earns its place only if, on every model, both strata pass
+their own G2 checks (explicit: 90% tool calls; ambiguous: a 50% call floor;
+both: prompts match, every parsed call round-trips, disagreements adjudicated)
+AND the ambiguous stratum's median action margin is below the explicit one's.
 """
 import argparse
 import json
@@ -15,7 +16,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
-from driftmatrix.g2 import TOOL_CALL_GATE, stratum_check  # noqa: E402
+from driftmatrix.g2 import AMBIGUOUS_CALL_FLOOR, TOOL_CALL_GATE, stratum_check  # noqa: E402
 
 MODELS = ("ornith", "qwen3", "spark")
 
@@ -52,7 +53,8 @@ def main() -> int:
         print(f"  {'':<8}{'-> ' + chk['verdict']:<33}{'PASS' if ok else 'FAIL':>11}\n")
 
     print(f"G2 STRATA: {'PASS' if all_pass and rows else 'FAIL'}"
-          f"  (both strata >= {TOOL_CALL_GATE:.0%} tool calls, ambiguous median margin below explicit, every model)")
+          f"  (explicit >= {TOOL_CALL_GATE:.0%} and ambiguous >= {AMBIGUOUS_CALL_FLOOR:.0%} tool calls, "
+          f"parsers validated, ambiguous median margin below explicit, every model)")
     return 0 if all_pass and rows else 1
 
 

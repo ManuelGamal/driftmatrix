@@ -194,6 +194,8 @@ continuation factor C, because tool calls end the turn at 81–151 characters.
 
 ### Task 28: Action outcome and action margin (spec v4.3)
 
+**Status: done.** The ambiguous stratum re-run lowered the median action margin on all three models (Ornith 4.02 vs 6.92, Qwen3 7.47 vs 9.76, Spark 2.67 vs 7.77), with 87%, 67% and 83% calls. Spark's one parser disagreement led to Task 29.
+
 **Why:** in the strata check, the requests vague enough to create near-tie
 decisions were also vague enough that models sometimes asked a clarifying
 question or answered in text instead of calling a tool. Scoring only tool calls
@@ -215,6 +217,42 @@ would discard exactly those decisions.
 **Required tests (write first):** a no-call turn is scored at position 0 only; preamble positions before a call are excluded while position 0 still counts; both tags may be split across pieces; the ambiguous stratum passes at 60% calls and fails at 40%, while explicit fails at 60%; both parsers agreeing there is no call counts as agreement; `ToolCall` equality ignores `args`.
 
 **Run:** the ambiguous stratum for all three models (explicit margins are unchanged, because every explicit output starts its tool call at position 0), then `python scripts/g2_strata.py` and `python scripts/g2_types.py`.
+
+---
+
+### Task 29: Parser validation by template round trip (spec v4.4)
+
+**Status: done.** Saved reports were re-scored offline. All 161 parsed calls round-trip; the one disagreement (Spark `a2026_024`) is attributed to llama.cpp; `g2_strata.py` passes on every model.
+
+**Why:** in the ambiguous re-run, one Spark call parsed differently in llama.cpp,
+whose parser dropped the text before ": " in a string argument. Our parse matched
+the model's text, but the harness had no objective way to establish that.
+
+**Files:**
+- Modify: `src/driftmatrix/traces/toolcalls.py` — `parse_tool_call_ordered` returns the name, arguments in emitted order, and the raw block
+- Create: `src/driftmatrix/traces/roundtrip.py` — `serialise_call`, `round_trips`, `in_emitted_order`
+- Modify: `src/driftmatrix/g2.py` — `adjudicate_rows` and `summarise`, both usable on saved reports; verdict `OUR_PARSE_NOT_FAITHFUL`; adjudicated disagreements no longer fail the gate; rows keep the full output
+- Create: `scripts/g2_rescore.py` — re-score saved reports offline
+- Modify: `scripts/g2_strata.py` — footnote states each stratum's own threshold
+- Test: `tests/traces/test_roundtrip.py`, `tests/test_g2.py`
+
+**Rule:** a parsed call is faithful when serialising it through the model's chat
+template, arguments in emitted order, reproduces the model's tool-call block byte
+for byte. Every parsed call must be faithful. A disagreement with llama.cpp is
+`server_parser_lossy` when our reading round-trips and llama.cpp's does not,
+`our_parser_lossy` in the reverse case, and `unresolved` otherwise; only the last
+two fail the gate.
+
+**Required tests (write first):** the verbatim G2 Spark call round-trips under our
+reading and not under llama.cpp's; argument order matters and `in_emitted_order`
+restores it; a template error counts as no round trip; a lossy server parse is
+adjudicated and passes; a call found only by the server fails as unresolved; a
+template that serialises differently from the model fails as
+`OUR_PARSE_NOT_FAITHFUL`; offline re-scoring of saved rows reproduces the live
+summary exactly.
+
+**Run:** `python scripts/g2_rescore.py --gguf ornith=... --gguf qwen3=... --gguf spark=...`,
+then `python scripts/g2_strata.py`. No GPU is needed.
 
 ---
 

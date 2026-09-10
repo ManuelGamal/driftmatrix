@@ -5,7 +5,7 @@ A state-fidelity audit of prompt-cache reuse in llama.cpp across dense,
 sliding-window and hybrid recurrent architectures, under agent-shaped traffic.
 
 Date: 2026-09-10
-Status: v4.3 — gates G0 and G1 passed; G2 passed on explicit requests; ambiguous stratum re-run and pre-registration pending
+Status: v4.4 — gates G0 and G1 passed; G2 passed on both strata with parsers validated; pre-registration pending
 Author: Manuel Gamal
 
 ---
@@ -21,6 +21,7 @@ Author: Manuel Gamal
 | v4.1 | G1 passed; magnitude restated over 16 positions (controls: small, not negligible); offline chat-template rendering; per-model tool-call parsers | G1 results (`docs/findings/2026-09-10-g1.md`); `/apply-template` accepts no `tools` |
 | v4.2 | Request stratum S (explicit / ambiguous) replaces continuation C; recompute-arm decision margin as a pre-registered covariate; generation runs to the end of the turn | G2: 90/90 explicit requests gave the exact expected call, so decisions were near-certain; tool calls ended the turn at 81–151 characters, so a 32-token continuation truncates them |
 | v4.3 | Behavioural outcome is the agent's action — a tool call with its arguments, or no call; the action margin includes the act-or-not choice; the ambiguous stratum is held to a 50% call floor instead of the 90% gate | Strata check: tool-choice requests always called a tool (36/36) but were as confident as explicit ones; under-specified requests were the only source of near-ties and sometimes ended in a clarifying question or text answer instead of a call (35/54 calls) |
+| v4.4 | Parser validation by template round trip: every parsed call must reproduce the model's own tool-call text when serialised through its chat template; disagreements with llama.cpp's parser are adjudicated the same way | Ambiguous re-run: llama.cpp's parser dropped the text before ': ' in one Spark string argument; all 161 of our parsed calls round-trip byte for byte |
 
 ---
 
@@ -337,6 +338,16 @@ VALUE
 Argument values are canonicalised — JSON-decoded where they parse, keys sorted —
 before hashing, so an identical call always hashes identically.
 
+**Parser validation.** A parsed call is faithful when serialising it back through
+the model's own chat template, with its arguments in the order the model emitted
+them, reproduces the model's `<tool_call>` block byte for byte. Every parsed call
+in G2 must pass. Agreement with llama.cpp's parser is also checked, but a
+disagreement is adjudicated by the same round trip rather than counted as a
+failure: if our reading reproduces the model's text and llama.cpp's does not,
+the loss is llama.cpp's. In the ambiguous re-run, llama.cpp's parser read Spark's
+`record 165: field=beta value=105` as `field=beta value=105`; our reading
+round-trips and llama.cpp's does not.
+
 360 turns per model — 90 in each prefix-length × stratum cell — frozen and content-hashed.
 
 ### 4.5 Two measurement modes
@@ -538,7 +549,7 @@ leakage; GGUF reading against a synthetic file; the gate against golden files.
 |---|---|---|
 | **G0** ✅ 2026-09-10 | State API round-trips with both arms proven | — passed; divergence observed |
 | **G1** ✅ 2026-09-10 | Exact set tracks `n_ubatch` on Ornith Q4_K_M and Qwen3-4B | — passed: 66/66 restores matched the prediction |
-| **G2** ◐ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Pending:** ambiguous stratum re-run under v4.3 (median action margin below explicit, at least 50% tool calls, parsers agree), then pre-registration |
+| **G2** ◐ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Passed** on both strata: ambiguous median action margin below explicit on all three models (4.02 vs 6.92, 7.47 vs 9.76, 2.67 vs 7.77), ambiguous calls 87%/67%/83%, 161/161 parsed calls round-trip, one disagreement attributed to llama.cpp. **Pending:** pre-registration |
 | **G3** | Positive control diverges; snapped boundaries exact | Stop; the harness is unvalidated |
 
 ---

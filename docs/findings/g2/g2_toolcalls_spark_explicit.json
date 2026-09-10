@@ -7,7 +7,13 @@
     "chat_errors": 0,
     "prompt_match_rate": 1.0,
     "parser_agreement_rate": 1.0,
+    "our_roundtrip_rate": 1.0,
+    "parser_disagreements": 0,
+    "server_parser_lossy": 0,
+    "unresolved_disagreements": 0,
     "tool_call_rate": 1.0,
+    "no_call_rate": 0.0,
+    "call_threshold": 0.9,
     "expected_tool_rate": 1.0,
     "expected_call_exact_rate": 1.0,
     "median_margin": 7.766281454983982,
@@ -42,7 +48,9 @@
       "decision_margin": 8.507836977005354,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>153</arg_value></tool_call>"
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>153</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_001",
@@ -66,7 +74,9 @@
       "decision_margin": 8.40482417216117,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>0</arg_value></tool_call>"
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>0</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_002",
@@ -90,7 +100,9 @@
       "decision_margin": 9.230422611144604,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>175</arg_value></tool_call>"
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>175</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_003",
@@ -114,7 +126,9 @@
       "decision_margin": 7.084759717807174,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>185</arg_value></tool_call>"
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>185</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_004",
@@ -138,7 +152,9 @@
       "decision_margin": 2.8713034242391586,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 74</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>"
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 74</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_005",
@@ -162,7 +178,9 @@
       "decision_margin": 7.242960852221586,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>108</arg_value></tool_call>"
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>108</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_006",
@@ -186,7 +204,9 @@
       "decision_margin": 3.681696554645896,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 62</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>"
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 62</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_007",
@@ -210,7 +230,9 @@
       "decision_margin": 9.381002422545862,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>12</arg_value></tool_call>"
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>12</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_008",
@@ -234,7 +256,9 @@
       "decision_margin": 8.968633690325078,
       "margin_position": 0,
       "margin_bin": "confident",
-      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[31, 10, 31]</arg_value></tool_call>"
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[31, 10, 31]</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_009",
@@ -258,7 +282,9 @@
       "decision_margin": 2.8448297269642353,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 33</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>"
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 33</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_010",
@@ -282,7 +308,9 @@
       "decision_margin": 6.8341074011987075,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 90</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>"
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 90</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_011",
@@ -306,7 +334,9 @@
       "decision_margin": 1.5975579917430878,
       "margin_position": 4,
       "margin_bin": "contested",
-      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 59</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>"
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 59</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_012",
@@ -330,7 +360,9 @@
       "decision_margin": 9.476385111469426,
       "margin_position": 19,
       "margin_bin": "confident",
-      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[36, 43, 3]</arg_value></tool_call>"
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[36, 43, 3]</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_013",
@@ -354,7 +386,9 @@
       "decision_margin": 1.5877128541469574,
       "margin_position": 4,
       "margin_bin": "contested",
-      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 62</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>"
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 62</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_014",
@@ -378,7 +412,9 @@
       "decision_margin": 10.354336975640763,
       "margin_position": 19,
       "margin_bin": "confident",
-      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[10, 29, 1]</arg_value></tool_call>"
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[10, 29, 1]</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_015",
@@ -402,7 +438,9 @@
       "decision_margin": 8.079039883072255,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>30</arg_value></tool_call>"
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>30</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_016",
@@ -426,7 +464,9 @@
       "decision_margin": 7.633813019434456,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 46</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>"
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 46</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_017",
@@ -450,7 +490,9 @@
       "decision_margin": 3.8819968551397324,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 29</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>"
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 29</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_018",
@@ -474,7 +516,9 @@
       "decision_margin": 7.737438642943744,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>34</arg_value></tool_call>"
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>34</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_019",
@@ -498,7 +542,9 @@
       "decision_margin": 9.498065105377464,
       "margin_position": 18,
       "margin_bin": "confident",
-      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[1, 7, 25]</arg_value></tool_call>"
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[1, 7, 25]</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_020",
@@ -522,7 +568,9 @@
       "decision_margin": 9.90997302314645,
       "margin_position": 20,
       "margin_bin": "confident",
-      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[21, 44, 20]</arg_value></tool_call>"
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[21, 44, 20]</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_021",
@@ -546,7 +594,9 @@
       "decision_margin": 1.5791706144809723,
       "margin_position": 4,
       "margin_bin": "contested",
-      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 27</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>"
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 27</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_022",
@@ -570,7 +620,9 @@
       "decision_margin": 7.670051584747853,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>140</arg_value></tool_call>"
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>140</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_023",
@@ -594,7 +646,9 @@
       "decision_margin": 8.842362274139305,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>115</arg_value></tool_call>"
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>115</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_024",
@@ -618,7 +672,9 @@
       "decision_margin": 0.8848376274108887,
       "margin_position": 4,
       "margin_bin": "contested",
-      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 28</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>"
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 28</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_025",
@@ -642,7 +698,9 @@
       "decision_margin": 9.992804883833742,
       "margin_position": 5,
       "margin_bin": "confident",
-      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[28, 35, 27]</arg_value></tool_call>"
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[28, 35, 27]</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_026",
@@ -666,7 +724,9 @@
       "decision_margin": 9.935451266908785,
       "margin_position": 20,
       "margin_bin": "confident",
-      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[30, 12, 21]</arg_value></tool_call>"
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[30, 12, 21]</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_027",
@@ -690,7 +750,9 @@
       "decision_margin": 7.795124267024221,
       "margin_position": 7,
       "margin_bin": "confident",
-      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>23</arg_value></tool_call>"
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>23</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_028",
@@ -714,7 +776,9 @@
       "decision_margin": 10.378427623658354,
       "margin_position": 1,
       "margin_bin": "confident",
-      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[11, 23, 36]</arg_value></tool_call>"
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[11, 23, 36]</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     },
     {
       "conv_id": "c2026_029",
@@ -738,7 +802,9 @@
       "decision_margin": 3.579447340220213,
       "margin_position": 4,
       "margin_bin": "confident",
-      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 36</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>"
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 36</arg_value><arg_key>body</arg_key><arg_value>status nominal</arg_value></tool_call>",
+      "our_roundtrip": true,
+      "adjudication": null
     }
   ],
   "model": "spark",
