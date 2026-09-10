@@ -5,7 +5,7 @@ A state-fidelity audit of prompt-cache reuse in llama.cpp across dense,
 sliding-window and hybrid recurrent architectures, under agent-shaped traffic.
 
 Date: 2026-09-10
-Status: v4.1 — gates G0 and G1 passed
+Status: v4.1 — gates G0 and G1 passed; G2 checks passed, pre-registration pending
 Author: Manuel Gamal
 
 ---
@@ -126,6 +126,7 @@ descriptive, not population estimates.
 |---|---|---|
 | **G0, this project** | Exactness at micro-batch-aligned boundaries; architecture-dependent magnitude; compounding on the hybrid | **Strong day-one signal, n=1** |
 | **G1, this project** | Exact set tracks `n_ubatch` (66/66 restores, two architectures); hybrid ~26× dense by median TV; 5/23 vs 0/23 token flips | **Strong — mechanism confirmed; magnitude on one prompt per model** |
+| **G2, this project** | Offline rendering byte-exact vs `/apply-template` (12/12 per model); prompts with tools match server token counts, parsers agree with llama.cpp, 100% tool calls (30/30 per model) | **Strong — measurement path validated** |
 | **llama.cpp server README, `cache_prompt`** | *"the logits are not guaranteed to be bit-for-bit identical for different batch sizes … enabling this option can cause nondeterministic results."* The generic phenomenon is documented | **Strong — prior art** |
 | **llama.cpp #20225** (open) | Hybrid agentic sessions reprocess the full prompt every turn; checkpoint logic written for sliding-window attention fails on recurrent state | Strong — context |
 | **LMCache hybrid-model docs** | Generation "not bit-exact between a cached and a fresh run" on GDN backends; quantifies nothing. vLLM-specific | Motivation |
@@ -480,7 +481,8 @@ leakage; GGUF reading against a synthetic file; the gate against golden files.
 | Risk | Mitigation |
 |---|---|
 | Tiling is not the mechanism | G1 is designed to falsify it before the main study |
-| Chat templates don't put all three models into tool-calling mode | G2 requires ≥ 90% tool-call rate on recompute arms before tool-call agreement is used |
+| Chat templates don't put all three models into tool-calling mode | Resolved in G2: 100% tool-call rate on all three models |
+| Tool decisions too confident for restore to flip them | G2: 90 of 90 explicit requests produced exactly the expected call, so the behavioural headline risks a null caused by trace design. Decision pending before pre-registration (see `docs/findings/2026-09-10-g2.md`) |
 | Dense and sliding-window divergence changes tool calls at scale | Then the claim is architecture-general; reported as such, with magnitudes |
 | Few natural boundaries are misaligned-and-divergent | Natural boundaries are misaligned with probability ≈ (U−1)/U; power reported per alignment class |
 | VRAM at `-ub 1024` | Reduce `-c`; record it |
@@ -493,7 +495,7 @@ leakage; GGUF reading against a synthetic file; the gate against golden files.
 |---|---|---|
 | **G0** ✅ 2026-09-10 | State API round-trips with both arms proven | — passed; divergence observed |
 | **G1** ✅ 2026-09-10 | Exact set tracks `n_ubatch` on Ornith Q4_K_M and Qwen3-4B | — passed: 66/66 restores matched the prediction |
-| **G2** | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Fix traces; re-derive the behavioural outcome |
+| **G2** ◐ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Pending:** trace-difficulty decision, then pre-registration |
 | **G3** | Positive control diverges; snapped boundaries exact | Stop; the harness is unvalidated |
 
 ---

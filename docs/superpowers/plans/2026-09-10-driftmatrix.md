@@ -83,7 +83,7 @@ Implemented test-first; the fake server in `tests/test_g1.py` models micro-batch
 
 ### Task 7R: Chat-templated traces, natural and snapped boundaries, per-model tool calls
 
-**Status: code done; server check pending.** Renderer, boundary helpers and the three parsers are under test. Offline rendering of all three embedded templates with tools succeeds, and each template's own serialisation of a tool call parses back with its model's parser. Remaining: `scripts/g2_render_check.py` against each model's server, then the G2 tool-call-rate gate.
+**Status: done.** Server checks passed 2026-09-10 (`docs/findings/2026-09-10-g2.md`): rendering byte-exact vs `/apply-template` (12/12 per model); prompts with tools match server token counts, parsers agree with llama.cpp, and the tool-call rate is 100% on all three models (30 conversations each). Before those checks: Renderer, boundary helpers and the three parsers are under test. Offline rendering of all three embedded templates with tools succeeds, and each template's own serialisation of a tool call parses back with its model's parser.
 
 **Revised after checking the server and the templates.** `llama-server`'s
 `/apply-template` accepts `messages` only, not `tools`, so rendering is offline
