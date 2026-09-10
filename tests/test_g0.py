@@ -1,28 +1,35 @@
 """G0 probe logic against a scripted fake llama-server.
 
 The fake models the behaviours that matter most: whether a restored slot is
-actually reused or silently reprocessed, and whether a host-side prompt cache
-lets a "recompute" arm reuse state it never computed.
+actually reused or silently reprocessed, whether a host-side prompt cache lets
+a "recompute" arm reuse state it never computed, and whether divergence
+depends on the split being aligned to the server's physical micro-batch.
 """
-from driftmatrix.g0 import recompute_was_clean, run_g0, split_points, verdict
+from driftmatrix.g0 import (
+    recompute_was_clean, run_g0, split_points, tiling_reading, top_margin, verdict,
+)
 from driftmatrix.runner.llamaserver import (
     Completion, ServerError, first_divergence, max_top1_logprob_gap,
     parse_completion, restore_was_used,
 )
 
 PROMPT = " ".join(f"w{i}" for i in range(600))
+PROMPT_1390 = " ".join(f"w{i}" for i in range(1390))
 
 
 class FakeServer:
     def __init__(self, reprocess_on_restore=False, diverge_after_restore=False,
-                 nondeterministic=False, refuse_slots=False, host_cache=False):
+                 nondeterministic=False, refuse_slots=False, host_cache=False,
+                 diverge_unless_multiple_of=None):
         self.reprocess = reprocess_on_restore
         self.diverge = diverge_after_restore
         self.nondet = nondeterministic
         self.refuse = refuse_slots
         self.host_cache = host_cache
+        self.tiling = diverge_unless_multiple_of
         self.host = set()
         self.cache, self.saved, self.restored, self.calls = [], {}, False, 0
+        self.restored_k = None
 
     def props(self):
         return {"total_slots": 1}
@@ -42,34 +49,41 @@ class FakeServer:
 
     def slot_restore(self, filename, slot=0):
         self.cache, self.restored = list(self.saved[filename]), True
+        self.restored_k = len(self.cache)
         return {"n_restored": len(self.cache)}
 
     def complete(self, toks, n_predict, n_probs=5, cache_prompt=True, slot=0, seed=1234):
         self.calls += 1
-        reuse = (cache_prompt and self.cache and toks[:len(self.cache)] == self.cache
-                 and not self.reprocess)
+        reuse = bool(cache_prompt and self.cache and toks[:len(self.cache)] == self.cache
+                     and not self.reprocess)
         prompt_n = len(toks) - len(self.cache) if reuse else len(toks)
         if self.host_cache and tuple(toks) in self.host:
-            prompt_n = 1                       # served from host RAM, ignores erase
+            prompt_n = 1
         self.host.add(tuple(toks))
         out = [sum(toks) % 997 + i for i in range(n_predict)]
-        if self.diverge and self.restored and reuse and n_predict > 3:
+        restored_reuse = self.restored and reuse and n_predict > 3
+        if self.diverge and restored_reuse:
+            out[3] += 1
+        if (self.tiling is not None and restored_reuse
+                and self.restored_k % self.tiling != 0):
             out[3] += 1
         if self.nondet and n_predict > 5:
             out[5] += self.calls
         self.cache = list(toks)
-        return Completion(out, [[(t, -0.1)] for t in out], prompt_n,
-                          len(toks) - prompt_n, {})
+        top = [[(t, -0.1), (t + 1, -0.35)] for t in out]
+        return Completion(out, top, prompt_n, len(toks) - prompt_n, {})
 
 
 def test_faithful_server_passes():
-    assert run_g0(FakeServer(), PROMPT)["verdict"] == "FAITHFUL_AT_TESTED_SPLITS"
+    r = run_g0(FakeServer(), PROMPT)
+    assert r["verdict"] == "FAITHFUL_AT_TESTED_SPLITS"
+    assert r["tiling_reading"] == "NO_DIVERGENCE"
 
 
 def test_silent_reprocessing_is_caught_not_mistaken_for_a_pass():
     r = run_g0(FakeServer(reprocess_on_restore=True), PROMPT)
     assert r["verdict"] == "RESTORE_NOT_USED"
-    assert all(c["identical"] for c in r["cases"].values())   # identical, yet invalid
+    assert all(c["identical"] for c in r["cases"].values())
 
 
 def test_host_cache_leaking_into_recompute_is_caught():
@@ -101,10 +115,48 @@ def test_restore_arm_proves_only_the_suffix_was_evaluated():
     assert case["n_saved"] == case["split_at"]
 
 
+def test_split_points_reproduce_the_first_g0_run_and_add_ubatch_multiples():
+    s = split_points(1390)
+    assert s["aligned_64"] == 640 and s["offset_32"] == 672     # the splits G0 used
+    assert s["ubatch_512"] == 512 and s["ubatch_1024"] == 1024
+    assert "ubatch_1536" not in s
+
+
 def test_split_points_are_aligned_and_offset_by_half_a_chunk():
     s = split_points(600)
     assert s["aligned_64"] % 64 == 0
     assert s["offset_32"] - s["aligned_64"] == 32
+    assert s["ubatch_512"] == 512
+
+
+def test_tiling_prediction_confirmed_when_only_misaligned_splits_diverge():
+    r = run_g0(FakeServer(diverge_unless_multiple_of=512), PROMPT_1390)
+    assert r["verdict"] == "DIVERGENCE_ON_DAY_ONE"
+    assert r["tiling_reading"] == "CONSISTENT_WITH_UBATCH_TILING"
+    assert r["cases"]["ubatch_512"]["identical"] is True
+    assert r["cases"]["ubatch_1024"]["identical"] is True
+    assert r["cases"]["aligned_64"]["identical"] is False
+
+
+def test_tiling_prediction_falsified_when_aligned_splits_also_diverge():
+    r = run_g0(FakeServer(diverge_after_restore=True), PROMPT_1390)
+    assert r["tiling_reading"] == "NOT_EXPLAINED_BY_UBATCH_TILING"
+
+
+def test_alignment_flags_and_margin_are_recorded():
+    r = run_g0(FakeServer(diverge_after_restore=True), PROMPT_1390)
+    c = r["cases"]["ubatch_1024"]
+    assert c["aligned_to_ubatch"] is True and c["aligned_to_chunk"] is True
+    assert r["cases"]["offset_32"]["aligned_to_chunk"] is False
+    assert abs(c["restore_margin_at_divergence"] - 0.25) < 1e-12
+    assert len(c["restore_top"]) == 8
+
+
+def test_top_margin_edge_cases():
+    assert top_margin([[(1, -0.1), (2, -0.4)]], 0) == 0.30000000000000004 or \
+        abs(top_margin([[(1, -0.1), (2, -0.4)]], 0) - 0.3) < 1e-12
+    assert top_margin([[(1, -0.1)]], 0) is None
+    assert top_margin([], None) is None
 
 
 def test_save_mismatch_verdict():

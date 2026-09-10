@@ -4,17 +4,22 @@ Stdlib only. Runs these measurements and returns a report with one verdict:
 
   floor      recompute the full prompt twice; must be identical, or no other
              comparison means anything
-  cases      at two split points - one aligned to 64 tokens, one offset by 32 -
-             fill the slot with the prefix, save, erase, restore, then complete
-             the full prompt; compare against a clean recompute
+  cases      at several split points, fill the slot with the prefix, save,
+             erase, restore, then complete the full prompt; compare against a
+             clean recompute
   proof      each arm's own prompt_n is checked, in both directions: a restore
              arm must have evaluated only the suffix, and a recompute arm must
              have evaluated the whole prompt
 
+Split points cover two alignment classes on purpose. llama.cpp evaluates a
+prompt in physical micro-batches (n_ubatch, default 512). A split at a multiple
+of n_ubatch tiles the restore arm exactly like the recompute arm; any other
+split tiles it differently. If divergence comes from tiling, ubatch-aligned
+splits must be bit-exact - a sharp, falsifiable prediction.
+
 Both proofs exist because llama-server can fail silently either way. On hybrid
 models it may reprocess a restored prompt from scratch (llama.cpp #20225), and
 its host-RAM prompt cache can hand a "recompute" arm state it never computed.
-Either failure makes the two arms secretly identical and looks like a pass.
 
 Verdicts, checked in this order because each invalidates the ones after it:
   STATE_API_UNSUPPORTED      slot save/restore endpoints refused
@@ -32,12 +37,20 @@ from .runner.llamaserver import (
 )
 
 CHUNK = 64
-SLACK = 2  # the server may re-evaluate the last prompt token or two
+UBATCH = 512
+SLACK = 2       # the server may re-evaluate the last prompt token or two
+TOP_KEEP = 8    # positions of top-k logprobs kept per arm for inspection
 
 
-def split_points(n_tokens: int, chunk: int = CHUNK) -> dict:
+def split_points(n_tokens: int, chunk: int = CHUNK, ubatch: int = UBATCH) -> dict:
+    """Chunk-aligned, chunk-offset, and every ubatch multiple that leaves a suffix."""
     base = max(chunk, (n_tokens // 2 // chunk) * chunk)
-    return {"aligned_64": base, "offset_32": base + chunk // 2}
+    points = {"aligned_64": base, "offset_32": base + chunk // 2}
+    k = ubatch
+    while k < n_tokens - chunk:
+        points[f"ubatch_{k}"] = k
+        k += ubatch
+    return points
 
 
 def recompute_was_clean(prompt_n: int, n_full: int):
@@ -45,6 +58,17 @@ def recompute_was_clean(prompt_n: int, n_full: int):
     if prompt_n is None or prompt_n < 0:
         return None
     return prompt_n >= n_full - SLACK
+
+
+def top_margin(top, pos):
+    """Logprob gap between the top-1 and top-2 candidates at a position.
+
+    A tiny margin at the divergence position means the flip was a near-tie
+    tipped by a small numerical difference, not a large perturbation.
+    """
+    if pos is None or pos >= len(top) or len(top[pos]) < 2:
+        return None
+    return top[pos][0][1] - top[pos][1][1]
 
 
 def verdict(report: dict) -> str:
@@ -66,9 +90,26 @@ def verdict(report: dict) -> str:
     return "FAITHFUL_AT_TESTED_SPLITS"
 
 
-def run_g0(client, prompt_text: str, n_predict: int = 32, n_probs: int = 5,
+def tiling_reading(report: dict) -> str:
+    """Does the divergence pattern match the ubatch-tiling prediction?"""
+    valid = [c for c in report.get("cases", {}).values() if "identical" in c]
+    aligned = [c for c in valid if c.get("aligned_to_ubatch")]
+    other = [c for c in valid if not c.get("aligned_to_ubatch")]
+    if not any(not c["identical"] for c in valid):
+        return "NO_DIVERGENCE"
+    if not aligned:
+        return "UNTESTED_NO_UBATCH_ALIGNED_SPLIT"
+    if all(c["identical"] for c in aligned) and all(not c["identical"] for c in other):
+        return "CONSISTENT_WITH_UBATCH_TILING"
+    if any(not c["identical"] for c in aligned):
+        return "NOT_EXPLAINED_BY_UBATCH_TILING"
+    return "MIXED"
+
+
+def run_g0(client, prompt_text: str, n_predict: int = 32, n_probs: int = 10,
+           chunk: int = CHUNK, ubatch: int = UBATCH,
            slot_file: str = "dm_g0_prefix.bin") -> dict:
-    report = {"errors": [], "cases": {}}
+    report = {"errors": [], "cases": {}, "chunk": chunk, "ubatch": ubatch}
     try:
         report["props"] = client.props()
     except Exception as e:  # noqa: BLE001 - props are diagnostic only
@@ -91,8 +132,10 @@ def run_g0(client, prompt_text: str, n_predict: int = 32, n_probs: int = 5,
                             recompute_was_clean(rc2.prompt_n, n)],
     }
 
-    for name, k in split_points(n).items():
-        case = {"split_at": k, "n_suffix": n - k}
+    for name, k in split_points(n, chunk, ubatch).items():
+        case = {"split_at": k, "n_suffix": n - k,
+                "aligned_to_chunk": k % chunk == 0,
+                "aligned_to_ubatch": k % ubatch == 0}
         try:
             client.slot_erase()
             client.complete(toks[:k], 0, 0, cache_prompt=True)
@@ -107,6 +150,7 @@ def run_g0(client, prompt_text: str, n_predict: int = 32, n_probs: int = 5,
 
         client.slot_erase()
         rc = client.complete(toks, n_predict, n_probs, cache_prompt=False)
+        fd = first_divergence(rs.tokens, rc.tokens)
         case.update({
             "restore_prompt_n": rs.prompt_n,
             "restore_tokens_cached": rs.tokens_cached,
@@ -114,12 +158,17 @@ def run_g0(client, prompt_text: str, n_predict: int = 32, n_probs: int = 5,
             "restore_used": restore_was_used(rs.prompt_n, k, n, SLACK),
             "recompute_clean": recompute_was_clean(rc.prompt_n, n),
             "identical": rs.tokens == rc.tokens,
-            "first_divergence": first_divergence(rs.tokens, rc.tokens),
+            "first_divergence": fd,
             "max_top1_logprob_gap": max_top1_logprob_gap(rs.top, rc.top),
+            "restore_margin_at_divergence": top_margin(rs.top, fd),
+            "recompute_margin_at_divergence": top_margin(rc.top, fd),
             "restore_tokens": rs.tokens,
             "recompute_tokens": rc.tokens,
+            "restore_top": rs.top[:TOP_KEEP],
+            "recompute_top": rc.top[:TOP_KEEP],
         })
         report["cases"][name] = case
 
     report["verdict"] = verdict(report)
+    report["tiling_reading"] = tiling_reading(report)
     return report
