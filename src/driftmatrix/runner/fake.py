@@ -40,14 +40,25 @@ class FakeEngine:
         self._ctx[seq_id] = pickle.loads(Path(path).read_bytes())
         self._restored[seq_id] = True
 
+    def _dist_for(self, seq_id, step, n_probs):
+        ctx = self._ctx.get(seq_id, [])
+        rng = np.random.default_rng(sum(ctx) % 9973)
+        base = int(rng.integers(10, 5000))
+        if (self.divergence_at is not None and step == self.divergence_at
+                and self._restored.get(seq_id)):
+            base += 1
+        ids = [base] + [base + j for j in range(1, n_probs)]
+        probs = np.array([0.6] + [0.3 / (n_probs - 1)] * (n_probs - 1))
+        return base, TokenDist(token_ids=ids, logprobs=list(np.log(probs)))
+
     def generate(self, seq_id, max_tokens, n_probs):
         ctx = self._ctx.get(seq_id, [])
         rng = np.random.default_rng(sum(ctx) % 9973)
         toks, dists = [], []
         for i in range(max_tokens):
             base = int(rng.integers(10, 5000))
-            if (self.divergence_at is not None
-                    and i == self.divergence_at and self._restored.get(seq_id)):
+            if (self.divergence_at is not None and i == self.divergence_at
+                    and self._restored.get(seq_id)):
                 base += 1
             toks.append(base)
             ids = [base] + [base + j for j in range(1, n_probs)]
@@ -55,6 +66,15 @@ class FakeEngine:
             dists.append(TokenDist(token_ids=ids, logprobs=list(np.log(probs))))
         return GenerationResult(tokens=toks, dists=dists,
                                 text=" ".join(map(str, toks)))
+
+    def score_tokens(self, seq_id, tokens, n_probs):
+        """Teacher-forced scoring: distributions for a fixed token sequence."""
+        dists = []
+        for step, tok in enumerate(tokens):
+            _, dist = self._dist_for(seq_id, step, n_probs)
+            dists.append(dist)
+            self.eval_tokens(seq_id, [tok])
+        return dists
 
     def read_state_tensors(self, path):
         ctx = pickle.loads(Path(path).read_bytes())
