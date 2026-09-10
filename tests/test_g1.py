@@ -7,7 +7,8 @@ when those tilings differ - so the prediction logic is tested against an engine
 where tiling is the only cause, and against engines where it is not.
 """
 from driftmatrix.g1 import (
-    SPLITS, completions_exact, cross_ubatch_summary, g1_verdict, run_g1,
+    SPLITS, completions_exact, cross_ubatch_summary, g1_verdict, magnitude_summary,
+    run_g1,
 )
 from driftmatrix.runner.llamaserver import Completion, ServerError
 
@@ -146,3 +147,25 @@ def test_state_api_error_verdict():
 def test_default_splits_include_the_discriminating_boundaries():
     assert {512, 768, 1024}.issubset(SPLITS)
     assert any(k % 256 for k in SPLITS)
+
+
+def test_magnitude_summary_counts_flips_and_sizes_misaligned_cases_only():
+    reports = [run_g1(TilingServer(ub), PROMPT, ubatch=ub) for ub in (256, 512)]
+    m = magnitude_summary(reports)
+    ub512 = m["per_ubatch"][512]
+    assert ub512["n_misaligned"] == 8                 # 11 splits, 3 aligned
+    assert ub512["token_flips"] == 8                  # the fake flips every misaligned case
+    assert ub512["median_max_tv"] > 0
+    assert m["all"]["n_misaligned"] == 8 + 5          # ub256: 6 aligned of 11
+    assert m["all"]["token_flips"] == 13
+
+
+def test_magnitude_summary_without_flips():
+    m = magnitude_summary([run_g1(TilingServer(512, flip=False), PROMPT, ubatch=512)])
+    assert m["per_ubatch"][512]["token_flips"] == 0
+    assert m["per_ubatch"][512]["min_max_tv"] > 0     # inexact, yet no token changed
+
+
+def test_magnitude_summary_median_of_even_count():
+    from driftmatrix.g1 import _median
+    assert _median([1.0, 3.0]) == 2.0 and _median([5.0]) == 5.0 and _median([]) is None

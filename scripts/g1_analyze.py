@@ -1,9 +1,11 @@
 """Combine G1 runs across n_ubatch values into the exact-set grid.
 
     python scripts/g1_analyze.py --label ornith_q4km
+    python scripts/g1_analyze.py --label ornith_q4km --dir docs/findings/g1
 
-Reads data/g1_<label>_ub*.json and prints, for every reuse boundary k, whether
-restore was exact at each n_ubatch - alongside what tiling predicts.
+Reads g1_<label>_ub*.json and prints, for every reuse boundary k, whether
+restore was exact at each n_ubatch alongside what tiling predicts, then the
+size of divergence at misaligned boundaries and how often a greedy token flipped.
 """
 import argparse
 import json
@@ -13,17 +15,19 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
-from driftmatrix.g1 import cross_ubatch_summary  # noqa: E402
+from driftmatrix.g1 import cross_ubatch_summary, magnitude_summary  # noqa: E402
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--label", required=True)
+    ap.add_argument("--dir", default=str(REPO / "data"),
+                    help="directory holding g1_<label>_ub*.json")
     args = ap.parse_args()
 
-    paths = sorted((REPO / "data").glob(f"g1_{args.label}_ub*.json"))
+    paths = sorted(Path(args.dir).glob(f"g1_{args.label}_ub*.json"))
     if not paths:
-        print(f"no reports matching data/g1_{args.label}_ub*.json")
+        print(f"no reports matching {args.dir}/g1_{args.label}_ub*.json")
         return 1
     reports = [json.loads(p.read_text(encoding="utf-8")) for p in paths]
     s = cross_ubatch_summary(reports)
@@ -47,6 +51,16 @@ def main() -> int:
     print(f"\nper-run verdicts: {s['verdicts']}")
     print(f"discriminating boundaries: {s['discriminating_splits']}")
     print(f"\nEXACT SET TRACKS n_ubatch: {s['exact_set_tracks_ubatch']}")
+
+    m = magnitude_summary(reports)
+    print("\nmisaligned boundaries: size of divergence (worst-position TV) and greedy token flips")
+    print(f"  {'n_ubatch':>8}  {'cases':>5}  {'median TV':>9}  {'min TV':>7}  {'max TV':>7}  {'flips':>5}  flip splits")
+    for ub, v in m["per_ubatch"].items():
+        print(f"  {ub:>8}  {v['n_misaligned']:>5}  {v['median_max_tv']:>9.4f}  {v['min_max_tv']:>7.4f}  "
+              f"{v['max_max_tv']:>7.4f}  {v['token_flips']:>5}  {v['flip_splits']}")
+    al = m["all"]
+    print(f"  {'all':>8}  {al['n_misaligned']:>5}  {al['median_max_tv']:>9.4f}  {'':>7}  {'':>7}  {al['token_flips']:>5}")
+    print("  (splits share one prompt per model: descriptive, not a population estimate)")
     return 0
 
 

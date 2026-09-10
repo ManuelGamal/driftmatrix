@@ -133,3 +133,46 @@ def cross_ubatch_summary(reports) -> dict:
     return {"ubatches": ubs, "grid": grid, "discriminating_splits": discriminating,
             "exact_set_tracks_ubatch": tracks,
             "verdicts": {r["ubatch"]: r["verdict"] for r in reports}}
+
+
+def _median(values):
+    vals = sorted(values)
+    if not vals:
+        return None
+    mid = len(vals) // 2
+    return vals[mid] if len(vals) % 2 else (vals[mid - 1] + vals[mid]) / 2
+
+
+def magnitude_summary(reports) -> dict:
+    """How large misaligned divergence is, and how often a greedy token flipped.
+
+    Exactness is binary; this reports size. Per n_ubatch, over misaligned
+    reuse boundaries only: the median / min / max of each case's worst-position
+    total variation, and the splits whose greedy output changed within
+    n_predict tokens. Splits share one prompt, so they are not independent
+    samples - this describes one prompt, not a population.
+    """
+    per_ub = {}
+    for r in sorted(reports, key=lambda rep: rep["ubatch"]):
+        mis = [c for c in r["cases"] if "exact" in c and not c["aligned"]]
+        tvs = sorted(c["max_tv"] for c in mis)
+        flips = [c["k"] for c in mis if c["first_divergence"] is not None]
+        per_ub[r["ubatch"]] = {
+            "n_misaligned": len(mis),
+            "median_max_tv": _median(tvs),
+            "min_max_tv": tvs[0] if tvs else None,
+            "max_max_tv": tvs[-1] if tvs else None,
+            "token_flips": len(flips),
+            "flip_splits": flips,
+            "n_positions": r["n_predict"],
+        }
+    all_tvs = [c["max_tv"] for r in reports for c in r["cases"]
+               if "exact" in c and not c["aligned"]]
+    return {
+        "per_ubatch": per_ub,
+        "all": {
+            "n_misaligned": len(all_tvs),
+            "median_max_tv": _median(all_tvs),
+            "token_flips": sum(v["token_flips"] for v in per_ub.values()),
+        },
+    }

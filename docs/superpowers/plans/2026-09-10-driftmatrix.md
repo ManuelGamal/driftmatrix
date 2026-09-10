@@ -58,6 +58,8 @@ it and an original task disagree, this wins.
 
 ### Task 12R: G1 — does the exact set track `n_ubatch`?
 
+**Status: done.** G1 passed 2026-09-10 — 66/66 restores matched the prediction on Ornith Q4_K_M and Qwen3-4B. Findings: `docs/findings/2026-09-10-g1.md`.
+
 **Files:**
 - Create: `src/driftmatrix/g1.py`
 - Modify: `src/driftmatrix/metrics/distributional.py` (add `context_matched_drift`)
@@ -79,39 +81,82 @@ Implemented test-first; the fake server in `tests/test_g1.py` models micro-batch
 
 ---
 
-### Task 7R: Chat-templated traces with natural and snapped boundaries
+### Task 7R: Chat-templated traces, natural and snapped boundaries, per-model tool calls
 
-**Files:** Create `src/driftmatrix/traces/render.py`; Test `tests/traces/test_render.py`.
+**Revised after checking the server and the templates.** `llama-server`'s
+`/apply-template` accepts `messages` only, not `tools`, so rendering is offline
+from each GGUF's embedded `tokenizer.chat_template`. The three models emit tool
+calls in three incompatible formats (spec §4.4).
+
+**Files:**
+- Create: `src/driftmatrix/traces/render.py`, `src/driftmatrix/traces/toolcalls.py`
+- Create: `scripts/g2_render_check.py`
+- Test: `tests/traces/test_render.py`, `tests/traces/test_toolcalls.py`
 
 **Interfaces:**
-- Produces: `Conversation(messages: list[dict], tools: list[dict])`; `render(client_or_renderer, conversation) -> str`; `natural_boundary(renderer, tokenizer, conversation) -> int` (token length of the rendered conversation before the final user turn); `snap(k: int, ubatch: int) -> int` returning `k - k % ubatch`; `parse_tool_call(text: str, model_family: str) -> ToolCall | None`.
+- `load_template(gguf_path) -> str` — reads `tokenizer.chat_template` via `driftmatrix.gguf.read_metadata`.
+- `render(template: str, messages: list[dict], tools: list[dict] | None, *, add_generation_prompt: bool = True, enable_thinking: bool = False, **context) -> str` — jinja2 `ImmutableSandboxedEnvironment(trim_blocks=True, lstrip_blocks=True, extensions=["jinja2.ext.loopcontrols"])`; filter `tojson(x, indent=None) = json.dumps(x, ensure_ascii=False, indent=indent)`; global `raise_exception(msg)` raising `jinja2.exceptions.TemplateError`.
+- `snap(k: int, ubatch: int) -> int` — `k - k % ubatch`.
+- `natural_boundary(count_tokens, template, messages, tools) -> int` — token count of the conversation rendered without its final user turn and without a generation prompt. Callers must verify it is a strict token prefix of the full render; turns where it is not are recorded `boundary_not_prefix` and excluded.
+- `parse_tool_call(text: str, fmt: str) -> ToolCall | None`, `fmt` in `{"qwen_xml", "qwen_json", "spark_argkv"}`; `FORMAT_BY_MODEL = {"ornith": "qwen_xml", "qwen3": "qwen_json", "spark": "spark_argkv"}`. Values are JSON-decoded where they parse, otherwise stripped strings; the result hashes through `ToolCall.from_payload`, which sorts keys.
 
 **Required tests (write first):**
 
 ```python
-def test_snap_rounds_down_to_ubatch_multiple():
+from driftmatrix.metrics.behavioral import ToolCall
+from driftmatrix.traces.render import render, snap
+from driftmatrix.traces.toolcalls import parse_tool_call
+
+EXPECTED = ToolCall.from_payload('lookup_record', {'record_id': 7})
+
+def test_tojson_does_not_html_escape():
+    assert render('{{ x | tojson }}', [], None, add_generation_prompt=False, x='<a&b>') == '"<a&b>"'
+
+def test_trim_blocks_like_huggingface():
+    assert render('{% if true %}\nA{% endif %}', [], None, add_generation_prompt=False) == 'A'
+
+def test_raise_exception_surfaces_template_errors():
+    import pytest
+    from jinja2.exceptions import TemplateError
+    with pytest.raises(TemplateError, match='boom'):
+        render("{{ raise_exception('boom') }}", [], None, add_generation_prompt=False)
+
+def test_snap_rounds_down_and_costs_less_than_one_ubatch():
     assert snap(1390, 512) == 1024 and snap(1024, 512) == 1024 and snap(511, 512) == 0
+    assert all(0 <= k - snap(k, 512) <= 511 for k in range(0, 5000, 37))
 
-def test_snapped_boundary_costs_at_most_ubatch_minus_one_tokens():
-    for k in range(0, 5000, 37):
-        assert 0 <= k - snap(k, 512) <= 511
+def test_parse_ornith_qwen_xml():
+    txt = '<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n7\n</parameter>\n</function>\n</tool_call>'
+    assert parse_tool_call(txt, 'qwen_xml') == EXPECTED
 
-def test_natural_boundary_is_prefix_of_full_render(fake_renderer, tok):
-    conv = sample_conversation()
-    full = tok.encode(render(fake_renderer, conv))
-    k = natural_boundary(fake_renderer, tok, conv)
-    prev = tok.encode(render(fake_renderer, conv.without_last_user_turn()))
-    assert full[:k] == prev and 0 < k < len(full)
+def test_parse_ornith_allows_reasoning_before_the_call():
+    txt = 'I will look it up.\n\n<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n7\n</parameter>\n</function>\n</tool_call>'
+    assert parse_tool_call(txt, 'qwen_xml') == EXPECTED
 
-def test_parse_tool_call_qwen_format():
+def test_parse_qwen3_json():
     txt = '<tool_call>\n{"name": "lookup_record", "arguments": {"record_id": 7}}\n</tool_call>'
-    assert parse_tool_call(txt, "qwen") == ToolCall.from_payload("lookup_record", {"record_id": 7})
+    assert parse_tool_call(txt, 'qwen_json') == EXPECTED
 
-def test_parse_tool_call_returns_none_for_plain_text():
-    assert parse_tool_call("The record says alpha.", "qwen") is None
+def test_parse_spark_argkv():
+    txt = '<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>7</arg_value></tool_call>'
+    assert parse_tool_call(txt, 'spark_argkv') == EXPECTED
+
+def test_string_values_survive_canonicalisation():
+    txt = '<tool_call>format_report<arg_key>title</arg_key><arg_value>Batch 5</arg_value></tool_call>'
+    assert parse_tool_call(txt, 'spark_argkv') == ToolCall.from_payload('format_report', {'title': 'Batch 5'})
+
+def test_plain_text_and_truncated_calls_are_none():
+    assert parse_tool_call('The record says alpha.', 'qwen_json') is None
+    assert parse_tool_call('<tool_call>\n{"name": "lookup_rec', 'qwen_json') is None
 ```
 
-**Verification step before use:** confirm `llama-server --jinja` exposes a render endpoint that accepts `tools`; if not, render offline with the model's Jinja template. Record which path was used. **Gate G2** requires ≥ 90% of recompute-arm turns to parse as tool calls on every model.
+**Verification with the server (`scripts/g2_render_check.py`):** for each model,
+render N tool-less conversations offline and compare against
+`POST /apply-template` byte for byte. Any mismatch blocks G2 until explained.
+
+**Gate G2:** renderer matches `/apply-template` on every model; ≥ 90% of
+recompute-arm turns parse as tool calls on every model; recompute floor exact;
+pre-registration committed and tagged.
 
 ---
 
