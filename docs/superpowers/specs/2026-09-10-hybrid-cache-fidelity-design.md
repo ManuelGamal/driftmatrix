@@ -50,7 +50,68 @@ The second clause is the one that matters. A shifted logprob is a curiosity. A
 changed tool call is a behavioral divergence caused by an optimization that is
 supposed to be invisible.
 
-### 1.2 Evidence, with honest confidence levels
+### 1.2 Two different caches — precisely which one is under test
+
+Both are routinely called "the KV cache." Conflating them makes this design
+unreadable, so the distinction is fixed here and used consistently throughout.
+
+**(a) The within-request decode cache — NOT under test.**
+While generating token by token, the engine retains each previous token's K/V so
+it does not re-run attention over the entire sequence for every new token. This
+is mandatory, always on, and present in every engine; disabling it would only be
+slower. **It remains fully enabled on both arms of this experiment**, including
+the "forced cold" arm — that arm prefills the prompt from scratch and then
+decodes normally, exactly like any other request.
+
+**(b) The cross-request prefix cache — THE TREATMENT.**
+When a new request's prompt begins with the same tokens as an earlier request's,
+the engine can skip prefilling that shared span and instead reuse the state
+stored from the earlier request. This is what agent traffic exercises on every
+single turn: identical system prompt, identical tool schemas, and a conversation
+history that only grows.
+
+So the two arms are: **reuse state stored by a previous request** versus
+**prefill this prompt from scratch**. Both then decode identically, both using
+(a).
+
+#### Why the hybrid architecture makes (b) risky
+
+| | Dense transformer | Gated DeltaNet |
+|---|---|---|
+| What is stored | One K/V pair **per token** — a list | One fixed-size **state matrix** — a running summary |
+| Token *i*'s entry | Depends only on tokens ≤ *i*; independently computable | Does not exist. `S_i = f(S_{i−1}, k_i, v_i)` — each token *overwrites* the state |
+| Sliceable? | Yes — take the first *n* entries | **No.** "State at token 300" is not recoverable from "state at token 1000"; that information has been mixed in and written over |
+| Reuse granularity | Token-level | Whole-state snapshots at fixed checkpoint positions only |
+| Is reuse arithmetically exact? | Yes by construction — same inputs, same independent computation | **No guarantee** |
+
+Because the state cannot be sliced, reuse requires snapshotting the entire matrix
+at checkpoint positions and restoring it wholesale, then replaying forward. That
+is the direct cause of three design constraints: the coarse 528-token block size
+(#40696), all-or-nothing matching per layer group (documented in vLLM's Hybrid KV
+Cache Manager as per-group hit intersection), and the relevance of *where* the
+checkpoint boundary falls (factor **G**, §4.1).
+
+#### The mechanism hypothesis for divergence
+
+A fresh prefill processes the prompt in one large chunked pass — particular tile
+shapes, particular reduction order. A restore-then-continue path enters the
+recurrent update at a different chunk boundary with a different sequence shape,
+and therefore takes different kernel paths with different reduction orders.
+Floating-point addition is not associative, so the two produce slightly different
+numbers.
+
+On a dense model that also happens, but the discrepancy stays **local** to one
+token's K/V, and attention's softmax-weighted average tends to damp it. In a
+recurrent layer the discrepancy lands in a state matrix that is then carried
+forward and re-transformed at every subsequent token, so it can **compound**
+rather than stay local.
+
+This is why LMCache's disclaimer names batch-invariant mode specifically: the
+deterministic kernels that would pin the reduction order **do not exist for GDN
+layers**. The path cannot be made exact, and the size of the inexactness has
+never been measured. Hence this project.
+
+### 1.3 Evidence, with honest confidence levels
 
 Every item below was verified against the GitHub API or the primary document, not
 a summary.
@@ -68,7 +129,7 @@ a summary.
 | **vLLM #45238** (open) | Reports catastrophic 0% hit rate when the checkpoint lands in the request-unique suffix. **Nuance that must be stated:** the reporter later conceded that specific case was already fixed on main by #37898/#43447 (40/64 hits, not 0/64). Independent corroborations continued through Aug 2026 on 0.26–0.28 builds — including loading a vision tower disabling caching for pure-text requests, and 261,794 byte-identical queries with 0 hits. | **Moderate — cite for boundary *geometry*, never as a live 0% claim** |
 | **vLLM PRs #45845, #46384** | Both **merged** (Jun/Jul 2026). #46384 adds `prefix_match_unit` for token-granularity matching independent of block size. Partial fixes have landed — this is a moving target. | **Strong — forces commit pinning** |
 
-### 1.3 Prior art — what this project must not pretend to be
+### 1.4 Prior art — what this project must not pretend to be
 
 **Agent-workload characterization on dense models is a crowded field.** TraceLab
 (arXiv 2606.30560) analyzed 4,300 Claude Code/Codex sessions and ~350K LLM steps,
@@ -106,10 +167,10 @@ territory.
 
 ### 2.2 Out of scope
 
-- **Speed, hit rate, TTFT, throughput as headline results.** Crowded (§1.3).
+- **Speed, hit rate, TTFT, throughput as headline results.** Crowded (§1.4).
   Hit rate is instrumentation here, never a finding.
-- **A cache-aware agent runtime / router.** Scooped (§1.3).
-- **Prompt-ordering guidance.** Commoditized (§1.3).
+- **A cache-aware agent runtime / router.** Scooped (§1.4).
+- **Prompt-ordering guidance.** Commoditized (§1.4).
 - **Engine-internal fixes** to LMCache/vLLM cache machinery — C++/CUDA scope well
   beyond this project. Findings get filed upstream; fixes are not promised.
 - **Batch size / batch invariance** — solved by Thinking Machines' work and
@@ -469,7 +530,7 @@ already merged; treating the engine as stable would make results unreproducible.
 | **`prompt_logprobs` unreliable on hybrid models** | Medium | Behavioral metrics (§5.1) are primary and do not depend on it; teacher-forced is supporting. Crashes recorded as outcomes |
 | **Qwen3.5 needs vLLM main — build friction** | Medium | Week-0 gate; llama.cpp fallback |
 | Scope creep into speed/hit-rate results | Medium | §2.2 is a written decision creep must argue against |
-| Reviewer thinks the work ignores prior art | Medium | §1.3 in the README: TraceLab, Mooncake, 2605.27744, batch-invariance all cited up front |
+| Reviewer thinks the work ignores prior art | Medium | §1.4 in the README: TraceLab, Mooncake, 2605.27744, batch-invariance all cited up front |
 
 ### 10.2 Gates
 
@@ -541,7 +602,7 @@ outcome, not a goal, and making it a goal would create pressure to overclaim.
 - vLLM #43587 — hybrid + multimodal prefix cache 0% hit; absent on the pure-attention sibling (open)
 - vLLM #40696 — 528-token block-size cliff (open; positive control)
 - vLLM #26201 — prefix caching for hybrid models, tracking issue (open)
-- vLLM #45238 — checkpoint-boundary geometry; see §1.2 for the required caveat (open)
+- vLLM #45238 — checkpoint-boundary geometry; see §1.3 for the required caveat (open)
 - vLLM PRs #45845, #46384 — merged partial fixes; `prefix_match_unit`
 - vLLM RFC #54506 — M-dependent kernel arithmetic, verify-vs-decode non-invariance (open)
 - vLLM design docs — Hybrid KV Cache Manager
