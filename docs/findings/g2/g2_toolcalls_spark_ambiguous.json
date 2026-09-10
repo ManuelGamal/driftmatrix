@@ -1,0 +1,719 @@
+{
+  "summary": {
+    "n": 30,
+    "strata": [
+      "ambiguous"
+    ],
+    "chat_errors": 0,
+    "prompt_match_rate": 1.0,
+    "parser_agreement_rate": 0.9666666666666667,
+    "tool_call_rate": 0.8333333333333334,
+    "expected_tool_rate": null,
+    "expected_call_exact_rate": null,
+    "median_margin": 3.6664659157395363,
+    "margin_bins": {
+      "near_tie": 3,
+      "contested": 2,
+      "confident": 20,
+      "unavailable": 5
+    },
+    "verdict": "PARSER_DISAGREES"
+  },
+  "rows": [
+    {
+      "conv_id": "a2026_000",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 458,
+      "server_prompt_tokens": 458,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "f22e6021b1efe55c"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "f22e6021b1efe55c"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 8.103481143829413,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>81</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_001",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 441,
+      "server_prompt_tokens": 441,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "c5b08685974f920b"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "c5b08685974f920b"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 9.323912616528105,
+      "margin_position": 7,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>53</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_002",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 462,
+      "server_prompt_tokens": 462,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "841fbad128e102ee"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "841fbad128e102ee"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 1.2954382598400116,
+      "margin_position": 1,
+      "margin_bin": "contested",
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[198, 29]</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_003",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 426,
+      "server_prompt_tokens": 426,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "cd7607ae7a597cba"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "cd7607ae7a597cba"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 2.007427006959915,
+      "margin_position": 18,
+      "margin_bin": "confident",
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[44, 21, 14, 17, 23, 23, 48, 33, 41]</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_004",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 432,
+      "server_prompt_tokens": 432,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": false,
+      "parser_agrees": true,
+      "ours": null,
+      "theirs": null,
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": null,
+      "margin_position": null,
+      "margin_bin": null,
+      "output": "Here is the formatted report:\n\n# Batch 91\n\nstatus nominal"
+    },
+    {
+      "conv_id": "a2026_005",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 426,
+      "server_prompt_tokens": 426,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "f0e30bdd8c04717b"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "f0e30bdd8c04717b"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 3.6664659157395363,
+      "margin_position": 9,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>1</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_006",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 449,
+      "server_prompt_tokens": 449,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "1ccca60dd94de344"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "1ccca60dd94de344"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 8.573698323889403,
+      "margin_position": 7,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>186</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_007",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 466,
+      "server_prompt_tokens": 466,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "fbd3c21c755a1e2e"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "fbd3c21c755a1e2e"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 2.635979674756527,
+      "margin_position": 1,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>39</arg_value></tool_call><tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>102</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_008",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 457,
+      "server_prompt_tokens": 457,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": false,
+      "parser_agrees": true,
+      "ours": null,
+      "theirs": null,
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": null,
+      "margin_position": null,
+      "margin_bin": null,
+      "output": "It looks like you're referring to the numbers from the earlier batch reports, but those reports only contained the text \"status nominal\" and did not include any numeric values. Could you clarify which numbers you'd like me to add up? If you have a list of numbers, please share them and I'll compute the sum for you."
+    },
+    {
+      "conv_id": "a2026_009",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 444,
+      "server_prompt_tokens": 444,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": false,
+      "parser_agrees": true,
+      "ours": null,
+      "theirs": null,
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": null,
+      "margin_position": null,
+      "margin_bin": null,
+      "output": "# Sum Calculation\n\n44 + 31 + 46 = **121**"
+    },
+    {
+      "conv_id": "a2026_010",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 461,
+      "server_prompt_tokens": 461,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "3522fec8c7699723"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "3522fec8c7699723"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 1.5998964309692383,
+      "margin_position": 9,
+      "margin_bin": "contested",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>52</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_011",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 434,
+      "server_prompt_tokens": 434,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "a3d245a569fb42fd"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "a3d245a569fb42fd"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 9.174205416959012,
+      "margin_position": 7,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>19</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_012",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 443,
+      "server_prompt_tokens": 443,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "ffbafe302feb41f1"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "ffbafe302feb41f1"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 4.425847698934376,
+      "margin_position": 1,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>156</arg_value></tool_call><tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>198</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_013",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 424,
+      "server_prompt_tokens": 424,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "04a22b109f0dcf6c"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "04a22b109f0dcf6c"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 2.039779633283615,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[21, 30, 7, 45, 46, 33, 29, 12, 28]</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_014",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 443,
+      "server_prompt_tokens": 443,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "134e443b8448f201"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "134e443b8448f201"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 0.0983586311340332,
+      "margin_position": 17,
+      "margin_bin": "near_tie",
+      "output": "<tool_call>format_report<arg_key>title</arg_key><arg_value>Record 191</arg_value><arg_key>body</arg_key><arg_value>record 191: field=delta value=67</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_015",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 437,
+      "server_prompt_tokens": 437,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "6f3c98e8d1e7d5de"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "6f3c98e8d1e7d5de"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 7.631708526983857,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>0</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_016",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 456,
+      "server_prompt_tokens": 456,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "78f12f962d9cedb5"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "78f12f962d9cedb5"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 8.304285435791826,
+      "margin_position": 7,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>180</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_017",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 435,
+      "server_prompt_tokens": 435,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "c9ceb56e493e76ad"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "c9ceb56e493e76ad"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 5.516581885982305,
+      "margin_position": 1,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>22</arg_value></tool_call><tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>163</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_018",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 431,
+      "server_prompt_tokens": 431,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "ce71e6a531043070"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "ce71e6a531043070"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 2.705011911690235,
+      "margin_position": 1,
+      "margin_bin": "confident",
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[38, 9, 39]</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_019",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 445,
+      "server_prompt_tokens": 445,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": false,
+      "parser_agrees": true,
+      "ours": null,
+      "theirs": null,
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": null,
+      "margin_position": null,
+      "margin_bin": null,
+      "output": "# Sum Calculation\n\n**Values:** 10, 34, 13\n\n**Sum:** 57"
+    },
+    {
+      "conv_id": "a2026_020",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 446,
+      "server_prompt_tokens": 446,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "cc99da2475647d21"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "cc99da2475647d21"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 4.207025654613972,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>13</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_021",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 436,
+      "server_prompt_tokens": 436,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "764566538642444a"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "764566538642444a"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 9.60971832046198,
+      "margin_position": 7,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>59</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_022",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 453,
+      "server_prompt_tokens": 453,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "64b9916fee0d7ff4"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "64b9916fee0d7ff4"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 3.649603785946965,
+      "margin_position": 1,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>152</arg_value></tool_call><tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>94</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_023",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 441,
+      "server_prompt_tokens": 441,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "e3153cd3e4ab8dad"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "e3153cd3e4ab8dad"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 2.3006204813718796,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[3, 13, 42]</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_024",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 444,
+      "server_prompt_tokens": 444,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": false,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "34b9442d9015ade7"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "3464b62e8b72b8c9"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 0.07245397567749023,
+      "margin_position": 7,
+      "margin_bin": "near_tie",
+      "output": "<tool_call>format_report<arg_key>body</arg_key><arg_value>record 165: field=beta value=105</arg_value><arg_key>title</arg_key><arg_value>Record 165</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_025",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 459,
+      "server_prompt_tokens": 459,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "7637e6a7a30a68c1"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "7637e6a7a30a68c1"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 0.2583926320075989,
+      "margin_position": 9,
+      "margin_bin": "near_tie",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>99</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_026",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 434,
+      "server_prompt_tokens": 434,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "143ce155fbe70b08"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "143ce155fbe70b08"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 9.38932215814566,
+      "margin_position": 7,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>78</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_027",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 436,
+      "server_prompt_tokens": 436,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "167b62ed90412905"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "167b62ed90412905"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 5.5886943261139095,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>71</arg_value></tool_call><tool_call>lookup_record<arg_key>record_id</arg_key><arg_value>9</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_028",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 439,
+      "server_prompt_tokens": 439,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "8ec1c0baeeabc940"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "8ec1c0baeeabc940"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 2.3474611937999725,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>compute_sum<arg_key>values</arg_key><arg_value>[42, 22, 27]</arg_value></tool_call>"
+    },
+    {
+      "conv_id": "a2026_029",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 457,
+      "server_prompt_tokens": 457,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": false,
+      "parser_agrees": true,
+      "ours": null,
+      "theirs": null,
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": null,
+      "margin_position": null,
+      "margin_bin": null,
+      "output": "# record 158\n\nfield=gamma value=846"
+    }
+  ],
+  "model": "spark",
+  "gguf": "Spark-X2.5-4B-Q4_K_M.gguf",
+  "format": "spark_argkv",
+  "stratum": "ambiguous",
+  "build": "b10839-0cae43063"
+}

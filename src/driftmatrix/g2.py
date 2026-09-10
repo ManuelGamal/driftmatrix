@@ -1,32 +1,34 @@
-"""Gate G2, tool calls: are the study's prompts the server's, and do they call tools?
+"""Gate G2, tool calls: are the study's prompts the server's, and do they act as intended?
 
 For each conversation, with tools on and thinking off:
 
   1. render offline, tokenize with the server, complete through /completion -
      the study's own path, with no restore involved - and parse the output with
-     the model's parser. Top-k logprobs give the decision margin (spec 5.1);
+     the model's parser. Top-k logprobs give the action margin (spec 5.1);
   2. send the same conversation to /v1/chat/completions, where the server
      renders it itself and parses tool calls with llama.cpp's parser.
 
-Checks, in verdict order:
+The agent's action is a tool call with its arguments, or no call (a clarifying
+question or text answer). Checks, in verdict order:
 
   chat errors    the server rejected the OpenAI-format conversation. llama.cpp's
                  docs do not specify how assistant tool_calls and tool messages
                  must be shaped in requests, so a rejection is recorded, not raised.
   prompt_match   the server's prompt token count equals our offline render's.
                  /apply-template cannot render tools, so this is the only
-                 end-to-end check that prompts carrying tools match the
-                 server's - including its conversion of string arguments to
-                 objects for templates that require them.
+                 end-to-end check that prompts carrying tools match the server's.
   parser_agrees  our parse of the /completion output equals llama.cpp's parsed
-                 tool_calls from the chat path. Same prompt, greedy decoding,
-                 so the model output is the same text in both paths.
-  tool-call rate share of outputs that parse as a tool call; gate >= 0.90.
+                 tool_calls from the chat path, including agreeing that there is
+                 no call. Same prompt, greedy decoding, same output text.
+  call rate      share of outputs that are tool calls. Explicit requests must
+                 reach 90%: they validate the tool-call pipeline. Ambiguous
+                 requests are held to a 50% floor instead - the requests that
+                 create near-tie decisions also sometimes end in a clarifying
+                 question, and that outcome is part of what is measured (v4.3).
 
-Correct-tool and correct-arguments rates are reported for explicit requests
-but do not gate, and are undefined for ambiguous ones. stratum_check compares
-two strata's reports: the ambiguous stratum must lower the median decision
-margin, or it is not creating the near-ties it exists for (spec v4.2).
+Correct-call rates are reported for explicit requests only; ambiguous requests
+have no single correct action. stratum_check compares two strata's reports: the
+ambiguous stratum must lower the median action margin.
 """
 from __future__ import annotations
 
@@ -34,13 +36,14 @@ import json
 import statistics
 
 from .metrics.behavioral import ToolCall
-from .metrics.margin import BIN_LABELS, decision_margin, margin_bin
+from .metrics.margin import BIN_LABELS, decision_margin, margin_bin, position_gaps
 from .runner.llamaserver import ServerError
 from .traces.conversations import to_oai
 from .traces.render import render
 from .traces.toolcalls import parse_tool_call
 
 TOOL_CALL_GATE = 0.90
+AMBIGUOUS_CALL_FLOOR = 0.50
 
 
 def server_tool_call(resp):
@@ -86,6 +89,10 @@ def _median(values):
     return statistics.median(vals) if vals else None
 
 
+def call_threshold(strata) -> float:
+    return AMBIGUOUS_CALL_FLOOR if "ambiguous" in (strata or []) else TOOL_CALL_GATE
+
+
 def g2_verdict(summary: dict) -> str:
     if summary.get("chat_errors", 0):
         return "CHAT_PATH_ERROR"
@@ -93,13 +100,13 @@ def g2_verdict(summary: dict) -> str:
         return "RENDER_WITH_TOOLS_MISMATCH"
     if summary["parser_agreement_rate"] != 1.0:
         return "PARSER_DISAGREES"
-    if summary["tool_call_rate"] < TOOL_CALL_GATE:
+    if summary["tool_call_rate"] < call_threshold(summary.get("strata")):
         return "TOOL_CALL_RATE_BELOW_GATE"
     return "G2_TOOLCALLS_PASS"
 
 
 def stratum_check(explicit: dict, ambiguous: dict) -> dict:
-    """Does the ambiguous stratum lower the median decision margin?"""
+    """Does the ambiguous stratum lower the median action margin?"""
     e, a = explicit.get("median_margin"), ambiguous.get("median_margin")
     out = {"explicit_median_margin": e, "ambiguous_median_margin": a,
            "explicit_tool_call_rate": explicit.get("tool_call_rate"),
@@ -111,6 +118,11 @@ def stratum_check(explicit: dict, ambiguous: dict) -> dict:
     else:
         out["verdict"] = "STRATUM_DOES_NOT_LOWER_MARGIN"
     return out
+
+
+def _call_dict(call):
+    return None if call is None else {"name": call.name, "args_hash": call.args_hash,
+                                      "args": call.args}
 
 
 def run_g2(client, conversations, template: str, fmt: str, specials=None,
@@ -147,28 +159,33 @@ def run_g2(client, conversations, template: str, fmt: str, specials=None,
             "server_prompt_tokens": n_server,
             "chat_error": chat_error,
             "prompt_match": prompt_match,
+            "action": "call" if ours is not None else "no_call",
             "tool_call_made": ours is not None,
             "parser_agrees": (ours == theirs) if prompt_match else None,
-            "ours": None if ours is None else {"name": ours.name, "args_hash": ours.args_hash},
-            "theirs": None if theirs is None else {"name": theirs.name, "args_hash": theirs.args_hash},
+            "ours": _call_dict(ours),
+            "theirs": _call_dict(theirs),
             "expected_tool_called": (None if expected is None
                                      else ours is not None and ours.name == conv.expected_tool),
             "expected_call_exact": None if expected is None else ours == expected,
             "decision_margin": margin,
             "margin_position": margin_pos,
             "margin_bin": margin_bin(margin),
+            "gaps": [None if g is None else round(g, 4) for g in position_gaps(comp.top)],
             "output": output[:400],
         })
 
+    strata = sorted({r["stratum"] for r in rows})
     bins = {label: sum(1 for r in rows if r["margin_bin"] == label) for label in BIN_LABELS}
     bins["unavailable"] = sum(1 for r in rows if r["margin_bin"] is None)
     summary = {
         "n": len(rows),
-        "strata": sorted({r["stratum"] for r in rows}),
+        "strata": strata,
         "chat_errors": sum(1 for r in rows if r["chat_error"]),
         "prompt_match_rate": _rate(r["prompt_match"] for r in rows),
         "parser_agreement_rate": _rate(r["parser_agrees"] for r in rows),
         "tool_call_rate": _rate(r["tool_call_made"] for r in rows),
+        "no_call_rate": _rate(not r["tool_call_made"] for r in rows),
+        "call_threshold": call_threshold(strata),
         "expected_tool_rate": _rate(r["expected_tool_called"] for r in rows),
         "expected_call_exact_rate": _rate(r["expected_call_exact"] for r in rows),
         "median_margin": _median(r["decision_margin"] for r in rows),

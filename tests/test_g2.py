@@ -111,10 +111,12 @@ def test_decision_margin_recorded_and_summarised():
     assert r["rows"][0]["margin_bin"] == "near_tie" and r["rows"][0]["margin_position"] == 0
 
 
-def test_no_tool_call_means_no_margin():
-    r = run_g2(FakeServer(emits=[False]), CONVS, TEMPLATE, "qwen_json")
-    assert r["summary"]["median_margin"] is None
-    assert r["summary"]["margin_bins"]["unavailable"] == len(CONVS)
+def test_no_call_turns_get_an_action_margin_from_the_first_position():
+    r = run_g2(FakeServer(emits=[False], margins=[0.3]), CONVS, TEMPLATE, "qwen_json")
+    s = r["summary"]
+    assert s["median_margin"] == pytest.approx(0.3)
+    assert s["margin_bins"]["near_tie"] == len(CONVS) and s["margin_bins"]["unavailable"] == 0
+    assert all(row["action"] == "no_call" for row in r["rows"])
 
 
 def test_ambiguous_conversations_have_no_correctness_scores():
@@ -172,3 +174,34 @@ def test_verdict_order():
     assert g2_verdict({**base, "prompt_match_rate": 0.5, "parser_agreement_rate": None}) == \
         "RENDER_WITH_TOOLS_MISMATCH"
     assert g2_verdict({**base, "chat_errors": 1, "prompt_match_rate": None}) == "CHAT_PATH_ERROR"
+
+
+def test_rows_record_both_parsers_arguments_for_diagnosis():
+    row = run_g2(FakeServer(), CONVS, TEMPLATE, "qwen_json")["rows"][0]
+    assert row["ours"]["args"] == {"record_id": 7}
+    assert row["theirs"]["args"] == {"record_id": 7}
+
+
+def test_ambiguous_stratum_is_held_to_the_call_floor_not_the_explicit_gate():
+    ambiguous = generate_conversations(10, 2, seed=1, stratum="ambiguous")
+    emits = [True] * 6 + [False] * 4
+    amb = run_g2(FakeServer(emits=emits), ambiguous, TEMPLATE, "qwen_json")["summary"]
+    exp = run_g2(FakeServer(emits=emits), CONVS, TEMPLATE, "qwen_json")["summary"]
+    assert amb["tool_call_rate"] == exp["tool_call_rate"] == 0.6
+    assert amb["verdict"] == "G2_TOOLCALLS_PASS" and amb["call_threshold"] == 0.5
+    assert exp["verdict"] == "TOOL_CALL_RATE_BELOW_GATE" and exp["call_threshold"] == 0.9
+
+
+def test_ambiguous_stratum_below_the_call_floor_fails():
+    ambiguous = generate_conversations(10, 2, seed=1, stratum="ambiguous")
+    s = run_g2(FakeServer(emits=[True] * 4 + [False] * 6), ambiguous, TEMPLATE, "qwen_json")["summary"]
+    assert s["verdict"] == "TOOL_CALL_RATE_BELOW_GATE"
+
+
+def test_rows_record_the_action_and_every_positions_gap():
+    r = run_g2(FakeServer(emits=[True, False], margins=[1.0]), CONVS, TEMPLATE, "qwen_json")
+    call_row, no_call_row = r["rows"][0], r["rows"][1]
+    assert call_row["action"] == "call" and no_call_row["action"] == "no_call"
+    assert len(call_row["gaps"]) == len(CALL_PIECES) and call_row["gaps"][0] == pytest.approx(1.0)
+    assert no_call_row["parser_agrees"] is True          # both parsers agree there is no call
+    assert r["summary"]["no_call_rate"] == 0.5

@@ -36,3 +36,11 @@ def test_tool_call_disagreement_on_name_and_on_args():
 def test_both_none_counts_as_agreement_but_one_none_does_not():
     assert tool_call_agree(None, None) is True
     assert tool_call_agree(ToolCall.from_payload("s", {}), None) is False
+
+
+def test_tool_call_keeps_canonical_args_without_affecting_equality():
+    a = ToolCall.from_payload("s", {"b": 1, "a": [2]})
+    b = ToolCall.from_payload("s", {"a": [2], "b": 1})
+    assert a == b and a.args == {"a": [2], "b": 1}
+    assert ToolCall("s", a.args_hash) == a      # args never take part in comparison
+    assert hash(a) == hash(ToolCall("s", a.args_hash))

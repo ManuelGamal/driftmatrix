@@ -5,7 +5,7 @@ A state-fidelity audit of prompt-cache reuse in llama.cpp across dense,
 sliding-window and hybrid recurrent architectures, under agent-shaped traffic.
 
 Date: 2026-09-10
-Status: v4.2 — gates G0 and G1 passed; G2 passed on explicit requests; ambiguous stratum and pre-registration pending
+Status: v4.3 — gates G0 and G1 passed; G2 passed on explicit requests; ambiguous stratum re-run and pre-registration pending
 Author: Manuel Gamal
 
 ---
@@ -20,6 +20,7 @@ Author: Manuel Gamal
 | **v4** | **Mechanism located at the physical micro-batch; chat-templated traces; quantization-matched ladder; mitigation arm** | **G0 results — see §1.3 and `docs/findings/2026-09-10-g0.md`** |
 | v4.1 | G1 passed; magnitude restated over 16 positions (controls: small, not negligible); offline chat-template rendering; per-model tool-call parsers | G1 results (`docs/findings/2026-09-10-g1.md`); `/apply-template` accepts no `tools` |
 | v4.2 | Request stratum S (explicit / ambiguous) replaces continuation C; recompute-arm decision margin as a pre-registered covariate; generation runs to the end of the turn | G2: 90/90 explicit requests gave the exact expected call, so decisions were near-certain; tool calls ended the turn at 81–151 characters, so a 32-token continuation truncates them |
+| v4.3 | Behavioural outcome is the agent's action — a tool call with its arguments, or no call; the action margin includes the act-or-not choice; the ambiguous stratum is held to a 50% call floor instead of the 90% gate | Strata check: tool-choice requests always called a tool (36/36) but were as confident as explicit ones; under-specified requests were the only source of near-ties and sometimes ended in a clarifying question or text answer instead of a call (35/54 calls) |
 
 ---
 
@@ -40,9 +41,10 @@ Restoring is assumed to be invisible. This project measures whether it is.
 > with the engine's physical micro-batch; the size of that change depends
 > strongly on architecture; and aligning the boundary removes it.
 
-The behavioural question stays central: **does the change alter which tool the
-agent calls?** A shifted logprob is a curiosity. A changed tool call is a
-behavioural change caused by an optimization meant to be invisible.
+The behavioural question stays central: **does the change alter the agent's
+action** — which tool it calls, with which arguments, or whether it calls one at
+all? A shifted logprob is a curiosity. A changed action is a behavioural change
+caused by an optimization meant to be invisible.
 
 ### 1.2 The mechanism
 
@@ -293,13 +295,16 @@ with its tool-call format**, so the model is in tool-calling mode:
 **Strata.** An ambiguous conversation is its explicit twin with only the final
 user request replaced, so both strata share the same history and the stratum
 contrast is paired. Explicit requests name one tool and its arguments ("Look up
-record 153"). Ambiguous requests stay answerable with a tool call but leave a
-real choice: more than one plausible tool ("Give me something on record 42"),
+record 153"). Ambiguous requests leave a real choice: more than one plausible tool ("Give me something on record 42"),
 or an argument to infer from history ("Add up the numbers from earlier"). They
-have no single correct call, so correctness is not scored for them; the
-recompute arm's own call is the reference. The stratum must earn its place: G2
-requires ambiguous requests to keep at least 90% tool calls **and** to show a
-lower median decision margin than explicit ones.
+have no single correct action — asking for clarification can be as reasonable
+as calling a tool — so correctness is not scored for them; the recompute arm's
+own action is the reference. The stratum must earn its place: G2
+requires its median action margin to be below the explicit stratum's, and at
+least half its turns to be tool calls so tool-call parsing is still exercised.
+The strata check found that only under-specified requests produce near-ties, and
+that those same requests sometimes end in a clarifying question instead of a
+call — so a no-call outcome is part of what is measured, not a failure.
 
 **Rendering.** `llama-server`'s `/apply-template` accepts `messages` only, not
 `tools`, so prompts are rendered offline from the chat template embedded in each
@@ -338,7 +343,7 @@ before hashing, so an identical call always hashes identically.
 
 **Free-running (headline):** both arms generate at temperature 0 until the end
 of the turn, capped at 192 tokens; record exact-match, first-divergence position,
-**parsed tool call**, final answer.
+**the action** (parsed tool call, or no call), final answer.
 
 **Teacher-forced (instrument):** each arm scores the other's output, giving
 per-position distribution differences under identical context.
@@ -349,13 +354,17 @@ per-position distribution differences under identical context.
 
 ### 5.1 Behavioural (primary)
 
-- **Tool-call agreement** — same tool name and same canonicalised arguments.
+- **Action agreement** — both arms took the same action: the same tool with the
+  same canonicalised arguments, or both made no tool call. The wording of a
+  no-call reply is compared separately through exact match and first divergence.
 - **Exact-match rate** of the completion.
 - **First-divergence position**, right-censored when the two outputs are identical.
 - **Final-answer agreement** on the verifiable subset.
-- **Decision margin (covariate).** On the recompute arm only: the smallest gap
-  between the top-1 and top-2 logprobs at any generated position through the end
-  of the first complete tool call. Pre-registered bins: **near-tie** below 0.5
+- **Action margin (covariate).** On the recompute arm only: the smallest gap
+  between the top-1 and top-2 logprobs over the positions that decide the action
+  — the first generated position (start a tool call, or start prose) and every
+  position of the first complete tool call. Prose after the first position cannot
+  change the action, so it is excluded, and every turn has a margin. Pre-registered bins: **near-tie** below 0.5
   nats, **contested** 0.5 to 2 nats, **confident** 2 nats or more. Taken from the
   recompute arm so that stratifying by it never selects on the treatment's
   outcome. (G0's hybrid flipped a token whose recompute-arm margin was 1.13 nats.)
@@ -423,7 +432,7 @@ nulls.
    interleaved layer structure.
 3. **Compounding:** on the hybrid, divergence grows with prefix length and
    across positions within the output.
-4. **Stratum and margin:** tool-call changes concentrate in the ambiguous stratum
+4. **Stratum and margin:** action changes concentrate in the ambiguous stratum
    and in the near-tie and contested margin bins. The margin analysis is a
    pre-registered secondary analysis reported with CIs, outside the Holm families.
 
@@ -516,7 +525,7 @@ leakage; GGUF reading against a synthetic file; the gate against golden files.
 |---|---|
 | Tiling is not the mechanism | G1 is designed to falsify it before the main study |
 | Chat templates don't put all three models into tool-calling mode | Resolved in G2: 100% tool-call rate on all three models |
-| Tool decisions too confident for restore to flip them | G2: 90 of 90 explicit requests produced exactly the expected call. Addressed in v4.2 by an ambiguous stratum and a decision-margin covariate; G2 checks the stratum actually lowers margins |
+| Tool decisions too confident for restore to flip them | G2: 90 of 90 explicit requests produced exactly the expected call. Addressed by an ambiguous stratum and a margin covariate (v4.2); v4.3 scores no-call as an action, because the requests that create near-ties also sometimes end in clarifying questions |
 | Dense and sliding-window divergence changes tool calls at scale | Then the claim is architecture-general; reported as such, with magnitudes |
 | Few natural boundaries are misaligned-and-divergent | Natural boundaries are misaligned with probability ≈ (U−1)/U; power reported per alignment class |
 | VRAM at `-ub 1024` | Reduce `-c`; record it |
@@ -529,7 +538,7 @@ leakage; GGUF reading against a synthetic file; the gate against golden files.
 |---|---|---|
 | **G0** ✅ 2026-09-10 | State API round-trips with both arms proven | — passed; divergence observed |
 | **G1** ✅ 2026-09-10 | Exact set tracks `n_ubatch` on Ornith Q4_K_M and Qwen3-4B | — passed: 66/66 restores matched the prediction |
-| **G2** ◐ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Pending:** ambiguous stratum keeps at least 90% tool calls with a lower median decision margin than explicit, then pre-registration |
+| **G2** ◐ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Pending:** ambiguous stratum re-run under v4.3 (median action margin below explicit, at least 50% tool calls, parsers agree), then pre-registration |
 | **G3** | Positive control diverges; snapped boundaries exact | Stop; the harness is unvalidated |
 
 ---
@@ -558,7 +567,7 @@ boundaries to micro-batch multiples.
 
 > On llama.cpp build X, restoring saved state is bit-exact exactly when the
 > reuse boundary is a multiple of `n_ubatch`. At natural agent-turn boundaries,
-> restore changed the tool call in *W*% of ambiguous-request turns (explicit: *W′*%) on a hybrid recurrent model
+> restore changed the agent's action in *W*% of ambiguous-request turns (explicit: *W′*%) on a hybrid recurrent model
 > (95% CI [*a*, *b*]) versus *~0*% on quantization-matched dense and
 > sliding-window models; snapping boundaries to micro-batch multiples, at a cost
 > of at most `n_ubatch − 1` re-evaluated tokens, reduced it to *~0*%.

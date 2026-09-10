@@ -1,0 +1,725 @@
+{
+  "summary": {
+    "n": 30,
+    "strata": [
+      "ambiguous"
+    ],
+    "chat_errors": 0,
+    "prompt_match_rate": 1.0,
+    "parser_agreement_rate": 1.0,
+    "tool_call_rate": 0.8666666666666667,
+    "expected_tool_rate": null,
+    "expected_call_exact_rate": null,
+    "median_margin": 5.739713840186596,
+    "margin_bins": {
+      "near_tie": 4,
+      "contested": 4,
+      "confident": 18,
+      "unavailable": 4
+    },
+    "verdict": "TOOL_CALL_RATE_BELOW_GATE"
+  },
+  "rows": [
+    {
+      "conv_id": "a2026_000",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 758,
+      "server_prompt_tokens": 758,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "f22e6021b1efe55c"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "f22e6021b1efe55c"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 5.489292255602777,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n81\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_001",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 740,
+      "server_prompt_tokens": 740,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "c5b08685974f920b"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "c5b08685974f920b"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 6.754949586698785,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n53\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_002",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 759,
+      "server_prompt_tokens": 759,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "d2ad78bb57de7fea"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "d2ad78bb57de7fea"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 7.831885801395401,
+      "margin_position": 16,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n198\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n29\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_003",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 723,
+      "server_prompt_tokens": 723,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "9fe7d8cafdf51c93"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "9fe7d8cafdf51c93"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 2.1201611161231995,
+      "margin_position": 16,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[79, 63, 122]\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_004",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 731,
+      "server_prompt_tokens": 731,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": false,
+      "parser_agrees": true,
+      "ours": null,
+      "theirs": null,
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": null,
+      "margin_position": null,
+      "margin_bin": null,
+      "output": "I'm not sure what you'd like me to write up. Could you clarify what you're referring to? \n\nFor example, would you like me to:\n- Summarize the previous tasks (the two sums and the Batch 91 report)?\n- Write up a report on a specific topic?\n- Document something else?\n\nLet me know and I'll be happy to help."
+    },
+    {
+      "conv_id": "a2026_005",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 723,
+      "server_prompt_tokens": 723,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": false,
+      "parser_agrees": true,
+      "ours": null,
+      "theirs": null,
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": null,
+      "margin_position": null,
+      "margin_bin": null,
+      "output": "I don't have a specific record to pull up. My previous actions only involved computing sums (2+46+24=72, 30+28+6=64, 38+36+32=106) — none of those created a stored record with an ID.\n\nCould you clarify which record you're referring to? If you have a record ID in mind, I can look it up for you."
+    },
+    {
+      "conv_id": "a2026_006",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 750,
+      "server_prompt_tokens": 750,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "1ccca60dd94de344"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "1ccca60dd94de344"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 5.990135424770415,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n186\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_007",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 763,
+      "server_prompt_tokens": 763,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "fbd3c21c755a1e2e"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "fbd3c21c755a1e2e"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 6.720185165060684,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n39\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n102\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_008",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 760,
+      "server_prompt_tokens": 760,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "3153824cc234cc3b"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "3153824cc234cc3b"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 0.14104652404785156,
+      "margin_position": 0,
+      "margin_bin": "near_tie",
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[67, 14, 80]\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_009",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 742,
+      "server_prompt_tokens": 742,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "fc0819f2190eea58"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "fc0819f2190eea58"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 0.09706121683120728,
+      "margin_position": 37,
+      "margin_bin": "near_tie",
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nSum of 44, 31, 46\n</parameter>\n<parameter=body>\nThe sum of 44, 31, and 46 is 121.\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_010",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 764,
+      "server_prompt_tokens": 764,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": false,
+      "parser_agrees": true,
+      "ours": null,
+      "theirs": null,
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": null,
+      "margin_position": null,
+      "margin_bin": null,
+      "output": "I don't have a specific record ID to reference, and there's no prior record that was pulled up in our conversation. Could you provide the record ID (an integer) so I can look it up?"
+    },
+    {
+      "conv_id": "a2026_011",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 730,
+      "server_prompt_tokens": 730,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "a3d245a569fb42fd"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "a3d245a569fb42fd"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 8.854906349326484,
+      "margin_position": 13,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n19\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_012",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 742,
+      "server_prompt_tokens": 742,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "ffbafe302feb41f1"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "ffbafe302feb41f1"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 7.992730834666872,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n156\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n198\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_013",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 721,
+      "server_prompt_tokens": 721,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "aa51775fe9cbc195"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "aa51775fe9cbc195"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 1.897249162197113,
+      "margin_position": 16,
+      "margin_bin": "contested",
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[58, 124, 69]\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_014",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 738,
+      "server_prompt_tokens": 738,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "5755c822cc1acbad"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "5755c822cc1acbad"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 0.12987130880355835,
+      "margin_position": 65,
+      "margin_bin": "near_tie",
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nRecord Lookup Summary\n</parameter>\n<parameter=body>\n## Record 166\n- Field: gamma\n- Value: 142\n\n## Record 191\n- Field: delta\n- Value: 67\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_015",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 735,
+      "server_prompt_tokens": 735,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "6f3c98e8d1e7d5de"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "6f3c98e8d1e7d5de"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 6.944368379190564,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n0\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_016",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 759,
+      "server_prompt_tokens": 759,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "78f12f962d9cedb5"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "78f12f962d9cedb5"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 7.163414262933657,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n180\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_017",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 731,
+      "server_prompt_tokens": 731,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "c9ceb56e493e76ad"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "c9ceb56e493e76ad"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 7.3901492898585275,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n22\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n163\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_018",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 730,
+      "server_prompt_tokens": 730,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "086e54aa482f9db6"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "086e54aa482f9db6"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 0.8448486924171448,
+      "margin_position": 16,
+      "margin_bin": "contested",
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[38, 9, 39, 6, 27, 43]\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_019",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 746,
+      "server_prompt_tokens": 746,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": false,
+      "parser_agrees": true,
+      "ours": null,
+      "theirs": null,
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": null,
+      "margin_position": null,
+      "margin_bin": null,
+      "output": "Done. 57"
+    },
+    {
+      "conv_id": "a2026_020",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 741,
+      "server_prompt_tokens": 741,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "109e877468b6def9"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "109e877468b6def9"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 3.0708007775247097,
+      "margin_position": 18,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n130\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_021",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 732,
+      "server_prompt_tokens": 732,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "764566538642444a"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "764566538642444a"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 8.953568588825874,
+      "margin_position": 13,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n59\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_022",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 754,
+      "server_prompt_tokens": 754,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "64b9916fee0d7ff4"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "64b9916fee0d7ff4"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 8.534386578248814,
+      "margin_position": 16,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n152\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n94\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_023",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 739,
+      "server_prompt_tokens": 739,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "e3153cd3e4ab8dad"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "e3153cd3e4ab8dad"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 0.3063812851905823,
+      "margin_position": 0,
+      "margin_bin": "near_tie",
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[3, 13, 42]\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_024",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 742,
+      "server_prompt_tokens": 742,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "3464b62e8b72b8c9"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "3464b62e8b72b8c9"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 1.9537505358457565,
+      "margin_position": 30,
+      "margin_bin": "contested",
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nRecord 165\n</parameter>\n<parameter=body>\nfield=beta value=105\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_025",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 756,
+      "server_prompt_tokens": 756,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "7637e6a7a30a68c1"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "7637e6a7a30a68c1"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 2.7699298039078712,
+      "margin_position": 16,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n99\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_026",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 730,
+      "server_prompt_tokens": 730,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "143ce155fbe70b08"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "143ce155fbe70b08"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 8.592110061785206,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n78\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_027",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 735,
+      "server_prompt_tokens": 735,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "167b62ed90412905"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "167b62ed90412905"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 7.817644107621163,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n71\n</parameter>\n</function>\n</tool_call>\n<tool_call>\n<function=lookup_record>\n<parameter=record_id>\n9\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_028",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 737,
+      "server_prompt_tokens": 737,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "8ec1c0baeeabc940"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "8ec1c0baeeabc940"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 2.281845211982727,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n<function=compute_sum>\n<parameter=values>\n[42, 22, 27]\n</parameter>\n</function>\n</tool_call>"
+    },
+    {
+      "conv_id": "a2026_029",
+      "stratum": "ambiguous",
+      "offline_prompt_tokens": 757,
+      "server_prompt_tokens": 757,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "4431c05c5b3a51db"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "4431c05c5b3a51db"
+      },
+      "expected_tool_called": null,
+      "expected_call_exact": null,
+      "decision_margin": 1.6533469408750534,
+      "margin_position": 30,
+      "margin_bin": "contested",
+      "output": "<tool_call>\n<function=format_report>\n<parameter=title>\nRecord 158\n</parameter>\n<parameter=body>\nfield=gamma value=846\n</parameter>\n</function>\n</tool_call>"
+    }
+  ],
+  "model": "ornith",
+  "gguf": "Ornith-1.5-9B-Q4_K_M.gguf",
+  "format": "qwen_xml",
+  "stratum": "ambiguous",
+  "build": "b10839-0cae43063"
+}

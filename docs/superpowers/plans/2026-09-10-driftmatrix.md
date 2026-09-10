@@ -164,6 +164,8 @@ pre-registration committed and tagged.
 
 ### Task 27: Ambiguous request stratum and decision-margin covariate (spec v4.2)
 
+**Status: done; outcome and margin revised by Task 28.** The strata check (`docs/findings/2026-09-10-g2.md`) showed tool-choice requests always call a tool but never produce near-ties, while under-specified requests are the only source of near-ties and sometimes end without a call.
+
 **Why:** all 90 explicit G2 requests produced exactly the expected call, and G1
 showed restore flips only near-tie decisions. The stratum S replaces the
 continuation factor C, because tool calls end the turn at 81–151 characters.
@@ -187,6 +189,32 @@ continuation factor C, because tool calls end the turn at 81–151 characters.
 **Run:** for each model, `python scripts/g2_toolcalls.py --model M --gguf G --stratum explicit` and `--stratum ambiguous`, then `python scripts/g2_strata.py`.
 
 **Gate G2 addition:** on every model, the ambiguous stratum keeps at least 90% tool calls, and its median recompute-arm decision margin is below the explicit stratum's.
+
+---
+
+### Task 28: Action outcome and action margin (spec v4.3)
+
+**Why:** in the strata check, the requests vague enough to create near-tie
+decisions were also vague enough that models sometimes asked a clarifying
+question or answered in text instead of calling a tool. Scoring only tool calls
+would discard exactly those decisions.
+
+**Files:**
+- Modify: `src/driftmatrix/metrics/margin.py` — action margin over the first position plus the tool-call span; `tool_call_span`, `position_gaps`
+- Modify: `src/driftmatrix/metrics/behavioral.py` — `ToolCall.args` kept for diagnosis, excluded from equality
+- Modify: `src/driftmatrix/g2.py` — `action` per row, stratum-aware call threshold, per-position gaps and both parsers' arguments stored
+- Create: `scripts/g2_types.py` — per request type breakdown
+- Test: `tests/metrics/test_margin.py`, `tests/metrics/test_behavioral.py`, `tests/test_g2.py`
+
+**Interfaces:**
+- `decision_margin(top, pieces)` returns the action margin: the smallest top-1 minus top-2 gap over position 0 and the positions of the first complete tool call. Every turn with any generated position has one.
+- `tool_call_span(pieces) -> (first, last) | None`; `position_gaps(top) -> list`.
+- `call_threshold(strata)`: 0.90 for explicit, 0.50 when the report is ambiguous; `g2_verdict` uses it.
+- Rows gain `action` (`call` or `no_call`), `gaps` (every position's top-two gap, so margins can be recomputed without a GPU), and `args` inside `ours` and `theirs`.
+
+**Required tests (write first):** a no-call turn is scored at position 0 only; preamble positions before a call are excluded while position 0 still counts; both tags may be split across pieces; the ambiguous stratum passes at 60% calls and fails at 40%, while explicit fails at 60%; both parsers agreeing there is no call counts as agreement; `ToolCall` equality ignores `args`.
+
+**Run:** the ambiguous stratum for all three models (explicit margins are unchanged, because every explicit output starts its tool call at position 0), then `python scripts/g2_strata.py` and `python scripts/g2_types.py`.
 
 ---
 

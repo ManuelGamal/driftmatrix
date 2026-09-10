@@ -1,0 +1,749 @@
+{
+  "summary": {
+    "n": 30,
+    "strata": [
+      "explicit"
+    ],
+    "chat_errors": 0,
+    "prompt_match_rate": 1.0,
+    "parser_agreement_rate": 1.0,
+    "tool_call_rate": 1.0,
+    "expected_tool_rate": 1.0,
+    "expected_call_exact_rate": 1.0,
+    "median_margin": 9.759933354289387,
+    "margin_bins": {
+      "near_tie": 0,
+      "contested": 0,
+      "confident": 30,
+      "unavailable": 0
+    },
+    "verdict": "G2_TOOLCALLS_PASS"
+  },
+  "rows": [
+    {
+      "conv_id": "c2026_000",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 587,
+      "server_prompt_tokens": 587,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "4890a8c8c8aa3adb"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "4890a8c8c8aa3adb"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.943118746596156,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 153}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_001",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 571,
+      "server_prompt_tokens": 571,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "6f3c98e8d1e7d5de"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "6f3c98e8d1e7d5de"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 6.427463621133938,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 0}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_002",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 589,
+      "server_prompt_tokens": 589,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "7907b04052f4481a"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "7907b04052f4481a"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.428764697629958,
+      "margin_position": 7,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 175}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_003",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 561,
+      "server_prompt_tokens": 561,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "37886d09c8a53dcc"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "37886d09c8a53dcc"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 10.527745740051614,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 185}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_004",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 570,
+      "server_prompt_tokens": 570,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "ec864fbb412da46a"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "ec864fbb412da46a"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.247125786729157,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Batch 74\", \"body\": \"status nominal\"}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_005",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 557,
+      "server_prompt_tokens": 557,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "6cc5679f68ef3dbd"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "6cc5679f68ef3dbd"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 10.551906654203776,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 108}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_006",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 582,
+      "server_prompt_tokens": 582,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "e9c73293754dbc00"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "e9c73293754dbc00"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 10.213365659001283,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Batch 62\", \"body\": \"status nominal\"}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_007",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 592,
+      "server_prompt_tokens": 592,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "f693d509c7a77c9a"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "f693d509c7a77c9a"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.731139658106258,
+      "margin_position": 7,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 12}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_008",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 593,
+      "server_prompt_tokens": 593,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "3b8b1254f74b149a"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "3b8b1254f74b149a"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 6.262069595977664,
+      "margin_position": 26,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [31, 10, 31]}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_009",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 582,
+      "server_prompt_tokens": 582,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "34feaed97860cd2c"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "34feaed97860cd2c"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.793620956421364,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Batch 33\", \"body\": \"status nominal\"}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_010",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 592,
+      "server_prompt_tokens": 592,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "a6d3a4075d81cfe5"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "a6d3a4075d81cfe5"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.907296709221555,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Batch 90\", \"body\": \"status nominal\"}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_011",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 570,
+      "server_prompt_tokens": 570,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "2360e99c933ecab6"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "2360e99c933ecab6"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.51106278062798,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Batch 59\", \"body\": \"status nominal\"}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_012",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 572,
+      "server_prompt_tokens": 572,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "8422e24a4939f978"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "8422e24a4939f978"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.738085031654919,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [36, 43, 3]}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_013",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 562,
+      "server_prompt_tokens": 562,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "e9c73293754dbc00"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "e9c73293754dbc00"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.342601691081654,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Batch 62\", \"body\": \"status nominal\"}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_014",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 582,
+      "server_prompt_tokens": 582,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "0323ff1580be11a5"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "0323ff1580be11a5"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.781781676923856,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [10, 29, 1]}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_015",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 566,
+      "server_prompt_tokens": 566,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "fabd1cd53b9b29ce"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "fabd1cd53b9b29ce"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 10.09552749717841,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 30}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_016",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 588,
+      "server_prompt_tokens": 588,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "0daf609615d0e4a2"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "0daf609615d0e4a2"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.8370725933637,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Batch 46\", \"body\": \"status nominal\"}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_017",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 566,
+      "server_prompt_tokens": 566,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "2ce941580ee31148"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "2ce941580ee31148"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.511850734357722,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Batch 29\", \"body\": \"status nominal\"}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_018",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 564,
+      "server_prompt_tokens": 564,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "c555936a02f02858"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "c555936a02f02858"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 10.619998750014929,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 34}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_019",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 581,
+      "server_prompt_tokens": 581,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "17552f333cb43802"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "17552f333cb43802"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.371715964167379,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [1, 7, 25]}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_020",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 581,
+      "server_prompt_tokens": 581,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "5d7bcf73c070c202"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "5d7bcf73c070c202"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.827495134086348,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [21, 44, 20]}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_021",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 572,
+      "server_prompt_tokens": 572,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "96cfadaa72b54543"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "96cfadaa72b54543"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.670595498813782,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Batch 27\", \"body\": \"status nominal\"}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_022",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 579,
+      "server_prompt_tokens": 579,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "a560b6c9f968b99a"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "a560b6c9f968b99a"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.245719982893206,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 140}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_023",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 575,
+      "server_prompt_tokens": 575,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "c758cc9402c32683"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "c758cc9402c32683"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 10.045299648281798,
+      "margin_position": 7,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 115}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_024",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 582,
+      "server_prompt_tokens": 582,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "3bc4c75ef783c80c"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "3bc4c75ef783c80c"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.790374833683018,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Batch 28\", \"body\": \"status nominal\"}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_025",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 593,
+      "server_prompt_tokens": 593,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "173a93139fde6532"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "173a93139fde6532"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 6.351720862556249,
+      "margin_position": 26,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [28, 35, 27]}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_026",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 571,
+      "server_prompt_tokens": 571,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "36683c6ce45c3fa5"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "36683c6ce45c3fa5"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 10.190312838501995,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [30, 12, 21]}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_027",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 564,
+      "server_prompt_tokens": 564,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "lookup_record",
+        "args_hash": "862958c0b55a7f94"
+      },
+      "theirs": {
+        "name": "lookup_record",
+        "args_hash": "862958c0b55a7f94"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 6.898031317163259,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"lookup_record\", \"arguments\": {\"record_id\": 23}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_028",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 577,
+      "server_prompt_tokens": 577,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "compute_sum",
+        "args_hash": "8b2bdf0c4b6d6d4d"
+      },
+      "theirs": {
+        "name": "compute_sum",
+        "args_hash": "8b2bdf0c4b6d6d4d"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 10.09021363267675,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"compute_sum\", \"arguments\": {\"values\": [11, 23, 36]}}\n</tool_call>"
+    },
+    {
+      "conv_id": "c2026_029",
+      "stratum": "explicit",
+      "offline_prompt_tokens": 594,
+      "server_prompt_tokens": 594,
+      "chat_error": null,
+      "prompt_match": true,
+      "tool_call_made": true,
+      "parser_agrees": true,
+      "ours": {
+        "name": "format_report",
+        "args_hash": "fa127d7db6498326"
+      },
+      "theirs": {
+        "name": "format_report",
+        "args_hash": "fa127d7db6498326"
+      },
+      "expected_tool_called": true,
+      "expected_call_exact": true,
+      "decision_margin": 9.45982326939702,
+      "margin_position": 0,
+      "margin_bin": "confident",
+      "output": "<tool_call>\n{\"name\": \"format_report\", \"arguments\": {\"title\": \"Batch 36\", \"body\": \"status nominal\"}}\n</tool_call>"
+    }
+  ],
+  "model": "qwen3",
+  "gguf": "Qwen3-4B-Q4_K_M.gguf",
+  "format": "qwen_json",
+  "stratum": "explicit",
+  "build": "b10839-0cae43063"
+}

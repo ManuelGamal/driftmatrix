@@ -2,20 +2,24 @@
 from __future__ import annotations
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
 class ToolCall:
     name: str
     args_hash: str
+    # Canonical arguments, kept for diagnosing disagreements. Excluded from
+    # comparison and hashing: two calls are equal exactly when name and hash are.
+    args: dict = field(default=None, compare=False, hash=False, repr=False)
 
     @classmethod
     def from_payload(cls, name: str, args: dict) -> "ToolCall":
         # sort_keys makes the hash insensitive to serialisation order, so a
         # reordered-but-identical call is not scored as a disagreement.
         blob = json.dumps(args, sort_keys=True, separators=(",", ":"))
-        return cls(name=name, args_hash=hashlib.sha256(blob.encode()).hexdigest()[:16])
+        return cls(name=name, args_hash=hashlib.sha256(blob.encode()).hexdigest()[:16],
+                   args=json.loads(blob))
 
 
 def exact_match(a, b) -> bool:
