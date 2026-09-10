@@ -20,9 +20,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
-from driftmatrix.gguf import read_metadata  # noqa: E402
 from driftmatrix.runner.llamaserver import ServerClient  # noqa: E402
-from driftmatrix.traces.render import render  # noqa: E402
+from driftmatrix.traces.render import load_specials, load_template, render  # noqa: E402
 from driftmatrix.traces.tools import call_tool  # noqa: E402
 
 VARIANTS = list(itertools.product((True, False), (True, None, False)))  # (add_generation_prompt, enable_thinking)
@@ -58,13 +57,8 @@ def main() -> int:
     ap.add_argument("--n", type=int, default=12)
     args = ap.parse_args()
 
-    kv = read_metadata(args.gguf, capture=("tokenizer.ggml.tokens",))["kv"]
-    vocab = kv["tokenizer.ggml.tokens"]
-    specials = {
-        "bos_token": vocab[kv["tokenizer.ggml.bos_token_id"]] if "tokenizer.ggml.bos_token_id" in kv else "",
-        "eos_token": vocab[kv["tokenizer.ggml.eos_token_id"]] if "tokenizer.ggml.eos_token_id" in kv else "",
-    }
-    template = kv["tokenizer.chat_template"]
+    specials = load_specials(args.gguf)
+    template = load_template(args.gguf)
 
     client = ServerClient(args.url)
     print(f"waiting for {args.url} ...", flush=True)

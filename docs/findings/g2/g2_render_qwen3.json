@@ -1,0 +1,59 @@
+{
+  "model": "qwen3",
+  "gguf": "Qwen3-4B-Q4_K_M.gguf",
+  "build": "b10839-0cae43063",
+  "n": 12,
+  "verdict": "RENDER_MATCHES",
+  "matching_variants": [
+    "add_generation_prompt=True, enable_thinking=True",
+    "add_generation_prompt=True, enable_thinking=None"
+  ],
+  "variants": {
+    "add_generation_prompt=True, enable_thinking=True": {
+      "matches": 12,
+      "of": 12,
+      "first_mismatch": null
+    },
+    "add_generation_prompt=True, enable_thinking=None": {
+      "matches": 12,
+      "of": 12,
+      "first_mismatch": null
+    },
+    "add_generation_prompt=True, enable_thinking=False": {
+      "matches": 0,
+      "of": 12,
+      "first_mismatch": {
+        "index": 297,
+        "offline": ". What should I check next?<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+        "server": ". What should I check next?<|im_end|>\n<|im_start|>assistant\n"
+      }
+    },
+    "add_generation_prompt=False, enable_thinking=True": {
+      "matches": 0,
+      "of": 12,
+      "first_mismatch": {
+        "index": 275,
+        "offline": "|im_start|>user\nThanks. What should I check next?<|im_end|>\n",
+        "server": "|im_start|>user\nThanks. What should I check next?<|im_end|>\n<|im_start|>assistant\n"
+      }
+    },
+    "add_generation_prompt=False, enable_thinking=None": {
+      "matches": 0,
+      "of": 12,
+      "first_mismatch": {
+        "index": 275,
+        "offline": "|im_start|>user\nThanks. What should I check next?<|im_end|>\n",
+        "server": "|im_start|>user\nThanks. What should I check next?<|im_end|>\n<|im_start|>assistant\n"
+      }
+    },
+    "add_generation_prompt=False, enable_thinking=False": {
+      "matches": 0,
+      "of": 12,
+      "first_mismatch": {
+        "index": 275,
+        "offline": "|im_start|>user\nThanks. What should I check next?<|im_end|>\n",
+        "server": "|im_start|>user\nThanks. What should I check next?<|im_end|>\n<|im_start|>assistant\n"
+      }
+    }
+  }
+}

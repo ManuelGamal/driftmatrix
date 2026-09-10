@@ -53,6 +53,18 @@ def load_template(gguf_path) -> str:
     return template
 
 
+def load_specials(gguf_path) -> dict:
+    """bos_token and eos_token strings, as llama.cpp passes them to templates."""
+    kv = read_metadata(gguf_path, capture=("tokenizer.ggml.tokens",))["kv"]
+    vocab = kv["tokenizer.ggml.tokens"]
+
+    def piece(key):
+        return vocab[kv[key]] if key in kv else ""
+
+    return {"bos_token": piece("tokenizer.ggml.bos_token_id"),
+            "eos_token": piece("tokenizer.ggml.eos_token_id")}
+
+
 def render(template: str, messages, tools=None, *, add_generation_prompt: bool = True,
            enable_thinking=False, **context) -> str:
     """Render a conversation.

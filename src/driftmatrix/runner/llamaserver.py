@@ -129,6 +129,17 @@ class ServerClient:
         """The server's own chat-template rendering. Accepts no tools."""
         return self._req("POST", "/apply-template", {"messages": messages})["prompt"]
 
+    def chat(self, messages, tools=None, *, max_tokens: int = 192,
+             chat_template_kwargs=None, seed: int = 1234):
+        """OpenAI-style chat completion, rendered and tool-parsed by the server."""
+        body = {"messages": messages, "temperature": 0.0, "top_k": 1, "seed": seed,
+                "max_tokens": max_tokens, "stream": False, "cache_prompt": False}
+        if tools:
+            body["tools"] = tools
+        if chat_template_kwargs is not None:
+            body["chat_template_kwargs"] = chat_template_kwargs
+        return self._req("POST", "/v1/chat/completions", body)
+
     def tokenize(self, text: str, add_special: bool = True):
         resp = self._req("POST", "/tokenize", {"content": text, "add_special": add_special})
         return [t["id"] if isinstance(t, dict) else t for t in resp["tokens"]]
