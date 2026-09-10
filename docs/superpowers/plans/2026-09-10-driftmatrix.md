@@ -288,6 +288,14 @@ Writing the plan exposed three problems, fixed before the freeze:
 
 **Amended by spec v4.2:** conditions are B × P × S (the continuation factor is gone); generation runs to the end of the turn, capped at 192 tokens; each row records the stratum and the recompute arm's decision margin. This task introduces the new condition encoding; `config.Condition`, which still carries the continuation band for the off-path Python engine, is left untouched.
 
+**Status: runner done (with Task 26); analysis module pending.** As built, following the pre-registration (sections 4, 6, 11):
+- `src/driftmatrix/servergrid.py` — `run_study`, `run_turn`, `load_records`, `restore_record`, `compare_files`, `loaded_model_matches`. Arms per turn in pre-registered order (replicate 1 then 2: recompute, restore natural, restore snapped); a snapped boundary equal to the natural one reuses the natural run; a boundary of 0 is recorded as `boundary_zero` and never restored.
+- **Records are JSON lines, not Parquet**: appended one whole turn at a time and fsynced, so a multi-hour laptop run resumes at the interrupted turn. A metadata line (model, build, trace hash, `n_ubatch`, `n_predict`, `n_probs`) must match on resume. Server errors and timeouts leave a turn incomplete and are retried on the next run.
+- **Blinded runner:** it computes no exactness, drift or action outcome, and its progress lines report arm validity only.
+- Refuses to run if the server's build is not `b10839-0cae43063` or its loaded model is not the named GGUF.
+- `src/driftmatrix/g3.py` — `g3_check`: arm proofs, snapped exactness in both replicates, positive control on the hybrid only.
+- `scripts/run_study.py` (`--pilot` for G3), `tests/test_servergrid.py` (fake server where tiling is the only cause).
+
 
 **Files:** Create `src/driftmatrix/servergrid.py`; Test `tests/test_servergrid.py`.
 

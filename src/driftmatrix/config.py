@@ -100,3 +100,5 @@ STUDY_UBATCH = 512
 STUDY_CONTEXT = 8192
 MAX_NEW_TOKENS = 192
 TOP_K = 10
+ENGINE_BUILD = "b10839-0cae43063"
+ARCH_LEVELS = {"ornith": 3, "spark": 2, "qwen3": 1}   # hybrid recurrent, sliding window, dense
