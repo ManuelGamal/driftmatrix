@@ -88,3 +88,15 @@ NOISE_FLOOR_NATS = 0.01
 SELF_INCONSISTENCY_MULTIPLIER = 2.0
 TARGET_EFFECT_RATE = 0.02
 TARGET_POWER = 0.80
+
+# Main study against llama-server - fixed by docs/preregistration/2026-09-10-analysis-plan.md.
+# PREFIX_TOKENS and CONTINUATION_TOKENS above belong to the off-path Python engine.
+STUDY_SEED = 20260910
+PILOT_SEED = 20260911          # G3 pilot turns; never part of the confirmatory analysis
+STUDY_BASES = 90               # x 2 prefix bands x 2 strata = 360 turns per model
+PILOT_BASES = 10
+ROUND_TRIPS = {"short": 8, "long": 60}
+STUDY_UBATCH = 512
+STUDY_CONTEXT = 8192
+MAX_NEW_TOKENS = 192
+TOP_K = 10

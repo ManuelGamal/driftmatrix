@@ -256,6 +256,34 @@ then `python scripts/g2_strata.py`. No GPU is needed.
 
 ---
 
+### Task 17R: Pre-registration (supersedes Task 17)
+
+**Status: done.** `docs/preregistration/2026-09-10-analysis-plan.md`, tag `prereg-2026-09-10`.
+
+**Why it differs from Task 17:** the measured inputs are G1's `n_ubatch` (not a kernel
+chunk size) and a bit-exact floor; the design is B × P × S with action outcomes (v4.3).
+Writing the plan exposed three problems, fixed before the freeze:
+- Qwen3's history is never a token prefix of its next prompt, so `boundary_tokens` would
+  have excluded every Qwen3 turn. The natural boundary is now the longest common prefix.
+- Holm-corrected sign tests need at least 9 changed turns out of 90 to reject, which
+  contradicts the 2% power target. Against a zero floor, the exact binomial test with
+  null rate 0 is the correct test and matches `stats/power.py`.
+- A percentile bootstrap returns [0, 0] for a rate with no events. Rates carry
+  Clopper–Pearson intervals.
+
+**Files:**
+- Create: `docs/preregistration/2026-09-10-analysis-plan.md`
+- Create: `src/driftmatrix/stats/exact.py` — `clopper_pearson`, `sign_test`, `signs`, `test_against_floor`
+- Modify: `src/driftmatrix/traces/render.py` — `common_prefix_length`, `reuse_boundary`
+- Modify: `src/driftmatrix/traces/conversations.py` — `generate_study_turns`, `trace_hash`, `Conversation.prefix_band` / `base_id`
+- Modify: `src/driftmatrix/config.py` — study constants; `stats/multiplicity.py` — family C = 6
+- Create: `scripts/study_manifest.py` — token budget and reuse boundaries, no generation
+- Test: `tests/stats/test_exact.py`, `tests/traces/test_reuse_boundary.py`, `tests/traces/test_study_turns.py`
+
+**Run before any arm:** `python scripts/study_manifest.py --model M --gguf G` for each model.
+
+---
+
 ### Task 22R: Main-study grid against `llama-server`
 
 **Amended by spec v4.2:** conditions are B × P × S (the continuation factor is gone); generation runs to the end of the turn, capped at 192 tokens; each row records the stratum and the recompute arm's decision margin. This task introduces the new condition encoding; `config.Condition`, which still carries the continuation band for the off-path Python engine, is left untouched.

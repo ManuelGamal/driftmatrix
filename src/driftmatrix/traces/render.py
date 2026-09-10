@@ -129,3 +129,33 @@ def boundary_tokens(tokenize, template, messages, tools=None, **context):
                                 add_generation_prompt=False, **context)))
     k = len(head)
     return k, full, 0 < k < len(full) and full[:k] == head
+
+
+def common_prefix_length(a, b) -> int:
+    n = 0
+    for x, y in zip(a, b):
+        if x != y:
+            break
+        n += 1
+    return n
+
+
+def reuse_boundary(tokenize, template, messages, tools=None, **context):
+    """Return (k, full_tokens): the natural reuse boundary, as a server finds it.
+
+    k is the longest common token prefix between the history rendered on its own
+    (what the server holds from the previous request) and the full prompt. A
+    server reuses exactly that prefix and evaluates the rest.
+
+    This is not always the history's full length. Qwen3's template renders the
+    last assistant message with an empty think block while it follows the last
+    user turn, and without one once a new user turn arrives. Its history is
+    therefore never a prefix of the full prompt, and the reusable prefix ends
+    just before that block. Excluding such turns (boundary_tokens) would drop
+    every Qwen3 turn from the study.
+    """
+    full = list(tokenize(render(template, messages, tools, add_generation_prompt=True,
+                                **context)))
+    head = list(tokenize(render(template, messages[:_last_user_index(messages)], tools,
+                                add_generation_prompt=False, **context)))
+    return common_prefix_length(head, full), full

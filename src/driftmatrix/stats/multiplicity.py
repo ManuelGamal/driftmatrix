@@ -18,7 +18,7 @@ class Family(str, Enum):
 FAMILY_SIZES = {
     Family.BEHAVIORAL: 24,
     Family.DISTRIBUTIONAL: 16,
-    Family.MECHANISM: 5,
+    Family.MECHANISM: 6,    # pre-registration adds hybrid vs sliding-window (spec 6.3.2)
 }
 
 

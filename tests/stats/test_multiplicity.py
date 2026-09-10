@@ -5,7 +5,7 @@ from driftmatrix.stats.multiplicity import Family, FAMILY_SIZES, holm, holm_by_f
 def test_family_sizes_match_spec():
     assert FAMILY_SIZES[Family.BEHAVIORAL] == 24
     assert FAMILY_SIZES[Family.DISTRIBUTIONAL] == 16
-    assert FAMILY_SIZES[Family.MECHANISM] == 5
+    assert FAMILY_SIZES[Family.MECHANISM] == 6
 
 
 def test_holm_matches_hand_computed_example():

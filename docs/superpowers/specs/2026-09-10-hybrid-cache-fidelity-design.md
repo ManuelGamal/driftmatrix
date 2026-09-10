@@ -5,7 +5,7 @@ A state-fidelity audit of prompt-cache reuse in llama.cpp across dense,
 sliding-window and hybrid recurrent architectures, under agent-shaped traffic.
 
 Date: 2026-09-10
-Status: v4.4 — gates G0 and G1 passed; G2 passed on both strata with parsers validated; pre-registration pending
+Status: v4.5 — gates G0, G1 and G2 passed; analysis plan pre-registered (`docs/preregistration/2026-09-10-analysis-plan.md`, tag `prereg-2026-09-10`)
 Author: Manuel Gamal
 
 ---
@@ -22,6 +22,7 @@ Author: Manuel Gamal
 | v4.2 | Request stratum S (explicit / ambiguous) replaces continuation C; recompute-arm decision margin as a pre-registered covariate; generation runs to the end of the turn | G2: 90/90 explicit requests gave the exact expected call, so decisions were near-certain; tool calls ended the turn at 81–151 characters, so a 32-token continuation truncates them |
 | v4.3 | Behavioural outcome is the agent's action — a tool call with its arguments, or no call; the action margin includes the act-or-not choice; the ambiguous stratum is held to a 50% call floor instead of the 90% gate | Strata check: tool-choice requests always called a tool (36/36) but were as confident as explicit ones; under-specified requests were the only source of near-ties and sometimes ended in a clarifying question or text answer instead of a call (35/54 calls) |
 | v4.4 | Parser validation by template round trip: every parsed call must reproduce the model's own tool-call text when serialised through its chat template; disagreements with llama.cpp's parser are adjudicated the same way | Ambiguous re-run: llama.cpp's parser dropped the text before ': ' in one Spark string argument; all 161 of our parsed calls round-trip byte for byte |
+| v4.5 | Pre-registration. Prefix bands are 8 and 60 prior round trips on shared base conversations; natural boundary is the longest common token prefix; tests against a zero floor are exact; family C gains hybrid vs sliding-window (6 members); teacher-forced scoring leaves the confirmatory analysis | Qwen3's template renders the last assistant message differently once a new user turn follows, so requiring the history to be a full prefix would have dropped every Qwen3 turn; a percentile bootstrap cannot bound a rate with no events; spec 6.3.2 attributes the effect to recurrent state only through L3 vs L2, which no family tested |
 
 ---
 
@@ -246,7 +247,7 @@ to isolate the k=1024 anomaly by varying `n_ubatch` independently of its window.
 |---|---|---|
 | **T** | Arm (treatment) | restore · recompute |
 | **B** | Reuse boundary | **natural** (end of the previous turn, wherever it falls) · **snapped** (natural boundary rounded down to a multiple of `n_ubatch`) |
-| **P** | Prefix length | short (~1K tokens) · long (~6K tokens) |
+| **P** | Prefix length | short (last 8 round trips, ~0.9–1.4K tokens) · long (60 round trips, ~5.3–6.8K tokens) |
 | **S** | Request stratum | **explicit** (one tool and its arguments are unambiguous) · **ambiguous** (more than one plausible tool, or an under-specified argument) |
 | **A** | Architecture (blocking) | levels 3, 2, 1 |
 
@@ -290,8 +291,8 @@ with its tool-call format**, so the model is in tool-calling mode:
 | System prompt, tool schemas | Identical across turns and sessions |
 | History | Monotonic accumulation of rendered user, assistant and tool messages |
 | Tool round trips | Deterministic mock tools, pure functions of their arguments |
-| Natural boundary | Token length of the rendered conversation before the current turn |
-| Prefix length | Padded history to satisfy **P** |
+| Natural boundary | Longest common token prefix of the history rendered on its own and the full prompt — what a server reuses |
+| Prefix length | Prefix-length twins: a base's long history is 60 round trips, its short history the last 8 of them, both ending with the same request |
 
 **Strata.** An ambiguous conversation is its explicit twin with only the final
 user request replaced, so both strata share the same history and the stratum
@@ -348,7 +349,14 @@ the loss is llama.cpp's. In the ambiguous re-run, llama.cpp's parser read Spark'
 `record 165: field=beta value=105` as `field=beta value=105`; our reading
 round-trips and llama.cpp's does not.
 
-360 turns per model — 90 in each prefix-length × stratum cell — frozen and content-hashed.
+360 turns per model — 90 base conversations, each in both prefix bands and both strata, so 90 in each
+prefix-length × stratum cell — frozen and content-hashed. The same turns run on every model, which pairs
+the architecture contrasts by turn.
+
+**Why the boundary is a common prefix.** Qwen3's template renders the last assistant message of a history
+with an empty think block while it follows the final user turn, and without one once a new user turn
+arrives. Its history is never a prefix of the next prompt; a server reuses the common prefix, which ends
+10–20 tokens earlier. Requiring a full prefix would have excluded every Qwen3 turn.
 
 ### 4.5 Two measurement modes
 
@@ -357,7 +365,10 @@ of the turn, capped at 192 tokens; record exact-match, first-divergence position
 **the action** (parsed tool call, or no call), final answer.
 
 **Teacher-forced (instrument):** each arm scores the other's output, giving
-per-position distribution differences under identical context.
+per-position distribution differences under identical context. Its path
+through `llama-server` is unvalidated, so it is exploratory and outside the
+pre-registered analysis; context-matched free-running positions carry the
+distributional family.
 
 ---
 
@@ -432,7 +443,7 @@ nulls.
 |---|---|---|
 | A — behavioural divergence | 8 conditions × 3 architectures | 24 |
 | B — distributional effects | 8 conditions × 2 statistics (mean, max JSD), level 3 | 16 |
-| C — mechanism contrasts | snapping effect; snapping × architecture; hybrid vs dense magnitude at natural boundaries; P compounding; stratum effect (ambiguous vs explicit) | 5 |
+| C — mechanism contrasts | snapping effect; snapping × architecture; hybrid vs dense magnitude at natural boundaries; hybrid vs sliding-window magnitude at natural boundaries; P compounding; stratum effect (ambiguous vs explicit) | 6 |
 
 ### 6.3 The contrasts that carry the contribution
 
@@ -455,6 +466,12 @@ Analysis plan, family membership and thresholds committed and tagged **after G1
 and after the floor is measured, before any main-study treatment effect is
 examined.** It fixes the ambiguous request templates, the margin definition
 and the margin bins.
+
+Frozen in `docs/preregistration/2026-09-10-analysis-plan.md` (tag `prereg-2026-09-10`). Tests against the
+recompute floor are exact: with a floor that is zero on every turn, one reproducible divergence rejects
+(p = 0), which is the test the power calculation assumes; with a nonzero floor, a one-sided exact sign
+test. Contrasts use two-sided exact sign tests with paired bootstrap intervals; rates carry
+Clopper–Pearson intervals, because a percentile bootstrap returns [0, 0] for a rate with no events.
 
 ### 6.5 Power, and designing for a null
 
@@ -549,8 +566,8 @@ leakage; GGUF reading against a synthetic file; the gate against golden files.
 |---|---|---|
 | **G0** ✅ 2026-09-10 | State API round-trips with both arms proven | — passed; divergence observed |
 | **G1** ✅ 2026-09-10 | Exact set tracks `n_ubatch` on Ornith Q4_K_M and Qwen3-4B | — passed: 66/66 restores matched the prediction |
-| **G2** ◐ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Passed** on both strata: ambiguous median action margin below explicit on all three models (4.02 vs 6.92, 7.47 vs 9.76, 2.67 vs 7.77), ambiguous calls 87%/67%/83%, 161/161 parsed calls round-trip, one disagreement attributed to llama.cpp. **Pending:** pre-registration |
-| **G3** | Positive control diverges; snapped boundaries exact | Stop; the harness is unvalidated |
+| **G2** ✅ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Passed** on both strata: ambiguous median action margin below explicit on all three models (4.02 vs 6.92, 7.47 vs 9.76, 2.67 vs 7.77), ambiguous calls 87%/67%/83%, 161/161 parsed calls round-trip, one disagreement attributed to llama.cpp. Pre-registration tagged `prereg-2026-09-10` |
+| **G3** | On pilot turns (separate seed, never confirmatory): every arm proof holds, snapped boundaries exact, positive control diverges | Stop; the harness is unvalidated |
 
 ---
 
