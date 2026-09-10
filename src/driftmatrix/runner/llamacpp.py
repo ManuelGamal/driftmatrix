@@ -1,6 +1,7 @@
 """llama.cpp adapter. Satisfies the same Engine protocol as FakeEngine."""
 from __future__ import annotations
 import json
+import pickle
 from pathlib import Path
 import numpy as np
 from ..config import LayerType
@@ -45,11 +46,15 @@ class LlamaCppEngine:
         self._llm.eval(list(tokens))
 
     def save_state(self, seq_id, path):
-        state = self._llm.save_state()
-        Path(path).write_bytes(bytes(state.llama_state[: state.llama_state_size]))
+        # Llama.load_state() takes a whole LlamaState (scores, input_ids,
+        # n_tokens and the raw blob), not bytes. Persisting only the blob
+        # would make restore impossible, so the full object is pickled.
+        with open(path, "wb") as f:
+            pickle.dump(self._llm.save_state(), f)
 
     def load_state(self, seq_id, path):
-        self._llm.load_state(Path(path).read_bytes())
+        with open(path, "rb") as f:
+            self._llm.load_state(pickle.load(f))
 
     def generate(self, seq_id, max_tokens, n_probs):
         toks, dists = [], []
@@ -78,7 +83,10 @@ class LlamaCppEngine:
         are not exposed by the build, this returns a single pseudo-layer keyed
         -1 holding the raw bytes, which still supports byte-level equality.
         """
-        return {-1: np.frombuffer(Path(path).read_bytes(), dtype=np.uint8)}
+        with open(path, "rb") as f:
+            state = pickle.load(f)
+        raw = bytes(state.llama_state)[: int(state.llama_state_size)]
+        return {-1: np.frombuffer(raw, dtype=np.uint8)}
 
     def layer_types(self):
         return dict(self._layer_types)
