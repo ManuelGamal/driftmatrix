@@ -1,0 +1,21 @@
+[project]
+name = "driftmatrix"
+version = "0.1.0"
+description = "State-fidelity audit harness for hybrid linear-attention models"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.26", "scipy>=1.11", "pandas>=2.1", "pyarrow>=14", "matplotlib>=3.8"]
+
+[project.optional-dependencies]
+engine = ["llama-cpp-python>=0.3"]
+traces = ["langgraph>=0.2", "transformers>=4.44"]
+dev = ["pytest>=8", "pytest-cov>=5"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
