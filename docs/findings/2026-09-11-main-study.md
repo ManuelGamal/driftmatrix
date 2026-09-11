@@ -129,6 +129,11 @@ boundary equals the window. The G3 pilot ran the short band only, so it could no
 have seen this. A follow-up that varies `k` and `n_ubatch` independently of the
 512-token window on Spark would isolate it (exploratory; not pre-registered).
 
+**Follow-up (2026-09-11, exploratory):** [`2026-09-11-spark-window.md`](2026-09-11-spark-window.md) varied `n_ubatch` over 256, 512 and 1024. With default
+flash attention, a Spark restore is exact only when the boundary is aligned **and** within the 512-token window:
+0 contradictions in 39 proven cases. Turning flash attention off extends exactness to 2,560 tokens but not beyond,
+and without `--swa-full` the server silently discarded every restore.
+
 ## Where the changes happen
 
 **At near-ties, as predicted.** Action changes at natural boundaries by the

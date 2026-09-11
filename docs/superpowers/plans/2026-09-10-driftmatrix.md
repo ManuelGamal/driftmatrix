@@ -286,6 +286,8 @@ Writing the plan exposed three problems, fixed before the freeze:
 
 ### Task 30: Spark window follow-up (exploratory)
 
+**Status: done 2026-09-11** (`docs/findings/2026-09-11-spark-window.md`). `window_limit` fits all 39 proven cases (aligned and k ≤ 512); `single_microbatch` fails twice. Flash attention off extends exactness to 2,560 but not 3,072; without `--swa-full` all 13 restores were silently discarded.
+
 **Why:** the main study found Spark's snapped restores exact at k = 512 and inexact at k = 4096 (G0: inexact at 1024), all at `n_ubatch` = 512, while dense and hybrid stayed exact. Several rules fit.
 
 **Files:** `src/driftmatrix/followup.py` (rules, predicted exact sets, scoring, diagnostic comparison); `scripts/spark_window_probe.py` (one server configuration, one long-band study turn, reuses `g1.run_g1`); `scripts/spark_window_analyze.py`; `tests/test_followup.py` (a fake server per mechanism: scoring must single out the mechanism the engine has); plan and predictions in `docs/findings/2026-09-11-spark-window-plan.md`, committed before any run.

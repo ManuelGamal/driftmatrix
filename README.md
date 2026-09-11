@@ -143,7 +143,13 @@ recurrent state carries the difference forward instead of letting it stay local.
   alone.
 - **Snapping does not protect the sliding-window model beyond its window.** It was
   exact at 512 tokens (the window size) and inexact at 1,024 (G0) and 4,096 (all
-  180 long-band turns). The cause is located but not explained.
+  180 long-band turns). A [follow-up](docs/findings/2026-09-11-spark-window.md)
+  that varied `n_ubatch` isolated the rule: with default flash attention, a
+  restore is exact only when the boundary is aligned *and* inside the 512-token
+  window (0 contradictions in 39 cases). Turning flash attention off extends
+  exactness to 2,560 tokens but not beyond. Without `--swa-full`, the server
+  silently discarded every restore, which the arm proofs caught. The underlying
+  cause in llama.cpp is located, not explained.
 - **Qwen3's chat template re-renders the previous assistant turn** once a new user
   message arrives, so its history is never a token prefix of the next prompt.
   Requiring a full prefix would have silently dropped the dense baseline. The reuse

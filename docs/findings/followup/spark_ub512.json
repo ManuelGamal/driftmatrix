@@ -1,0 +1,193 @@
+{
+  "ubatch": 512,
+  "n_predict": 16,
+  "errors": [],
+  "cases": [
+    {
+      "k": 256,
+      "aligned": false,
+      "n_saved": 256,
+      "restore_prompt_n": 4012,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 3.304962467235189e-06,
+      "max_tv": 1.2333605688726677e-05
+    },
+    {
+      "k": 384,
+      "aligned": false,
+      "n_saved": 384,
+      "restore_prompt_n": 3884,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 3.0986485760283776e-06,
+      "max_tv": 1.733665067643643e-05
+    },
+    {
+      "k": 512,
+      "aligned": true,
+      "n_saved": 512,
+      "restore_prompt_n": 3756,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": true,
+      "first_divergence": null,
+      "max_jsd": 0.0,
+      "max_tv": 0.0
+    },
+    {
+      "k": 640,
+      "aligned": false,
+      "n_saved": 640,
+      "restore_prompt_n": 3628,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 5.910290188607204e-07,
+      "max_tv": 1.540263315237145e-05
+    },
+    {
+      "k": 768,
+      "aligned": false,
+      "n_saved": 768,
+      "restore_prompt_n": 3500,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 3.937964168572308e-06,
+      "max_tv": 2.818528862133775e-05
+    },
+    {
+      "k": 1024,
+      "aligned": true,
+      "n_saved": 1024,
+      "restore_prompt_n": 3244,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 3.1075207563813645e-06,
+      "max_tv": 1.1910996005032013e-05
+    },
+    {
+      "k": 1280,
+      "aligned": false,
+      "n_saved": 1280,
+      "restore_prompt_n": 2988,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 5.09831799255931e-07,
+      "max_tv": 2.489950508540624e-05
+    },
+    {
+      "k": 1536,
+      "aligned": true,
+      "n_saved": 1536,
+      "restore_prompt_n": 2732,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 4.40815460472447e-06,
+      "max_tv": 4.09946258952198e-05
+    },
+    {
+      "k": 2048,
+      "aligned": true,
+      "n_saved": 2048,
+      "restore_prompt_n": 2220,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 2.4430668517928483e-07,
+      "max_tv": 1.5933599108880698e-05
+    },
+    {
+      "k": 2560,
+      "aligned": true,
+      "n_saved": 2560,
+      "restore_prompt_n": 1708,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 5.900153212209455e-06,
+      "max_tv": 6.348396706915519e-05
+    },
+    {
+      "k": 3072,
+      "aligned": true,
+      "n_saved": 3072,
+      "restore_prompt_n": 1196,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 3.0495794166671137e-06,
+      "max_tv": 1.9230399259446465e-05
+    },
+    {
+      "k": 3584,
+      "aligned": true,
+      "n_saved": 3584,
+      "restore_prompt_n": 684,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 9.352088225596719e-07,
+      "max_tv": 3.468990998599499e-05
+    },
+    {
+      "k": 4096,
+      "aligned": true,
+      "n_saved": 4096,
+      "restore_prompt_n": 172,
+      "restore_used": true,
+      "saved_exact": true,
+      "exact": false,
+      "first_divergence": null,
+      "max_jsd": 4.252780745204637e-06,
+      "max_tv": 3.159478363584103e-05
+    }
+  ],
+  "n_tokens": 4268,
+  "splits_skipped": [],
+  "floor": {
+    "exact": true,
+    "recompute_clean": [
+      true,
+      true
+    ]
+  },
+  "aligned_not_exact": [
+    1024,
+    1536,
+    2048,
+    2560,
+    3072,
+    3584,
+    4096
+  ],
+  "misaligned_exact": [],
+  "verdict": "ALIGNED_NOT_ALWAYS_EXACT",
+  "label": "ub512",
+  "model": "spark",
+  "gguf": "Spark-X2.5-4B-Q4_K_M.gguf",
+  "build": "b10839-0cae43063",
+  "turn": "el20260910_000",
+  "config": {
+    "ubatch": 512,
+    "flash_attn": "auto",
+    "swa_full": true
+  }
+}
