@@ -11,8 +11,7 @@ Regenerate: `python scripts/analyze_study.py --gguf ornith=… --gguf qwen3=… 
 
 Restoring saved state instead of recomputing changed the agent's action — which
 tool it called, with which arguments, or whether it called one at all — on
-**2–12% of ambiguous requests on all three architectures**, and on **none of
-1,080 explicit-request turns**. The hybrid recurrent model changed most in the
+**2–12% of ambiguous requests on all three architectures**, and on **none of 1,080 explicit-request restores** (540 turns, each restored at both boundaries). The hybrid recurrent model changed most in the
 long prefix band (11 of 90 turns, 12.2%), but the dense and sliding-window
 models were **not** immune, contrary to the spec's prediction. Snapping the reuse
 boundary down to a multiple of `n_ubatch` made every restore **bit-exact on the
@@ -200,8 +199,7 @@ The resulting headline, scoped to this build and quantization:
 
 > On llama.cpp b10839, restoring saved state at a natural agent-turn boundary was
 > never bit-exact on hybrid recurrent, sliding-window or dense models. It changed
-> the agent's action on 2–12% of ambiguous requests on all three (0 of 1,080
-> explicit-request turns), almost always where the model was near a tie. Snapping
+> the agent's action on 2–12% of ambiguous requests on all three (0 of 1,080 explicit-request restores), almost always where the model was near a tie. Snapping
 > the reuse boundary to a multiple of `n_ubatch` — at a median cost of 158–443
 > re-evaluated tokens — made restore bit-exact and removed every change on the
 > hybrid and dense models, but not on the sliding-window model at 4,096 tokens.

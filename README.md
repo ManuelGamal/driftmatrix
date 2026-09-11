@@ -1,165 +1,214 @@
 # driftmatrix
 
-**Does restoring saved state instead of recomputing change what the model says?**
+**Does serving an LLM agent from a restored prompt cache change what the agent does?**
 
-A state-fidelity audit for hybrid linear-attention models under agent-shaped traffic.
+A pre-registered measurement of prompt-cache fidelity in llama.cpp, across hybrid
+recurrent, sliding-window and dense models, on agent-shaped traffic with real
+tool calls.
 
----
+![Restore changed the agent's action on ambiguous requests, on every architecture](docs/figures/action_changes.png)
 
-## What this measures
+## Result
 
-Serving stacks avoid recomputation by saving model state and restoring it later.
-On a dense transformer that state is a KV cache: one K/V pair per token, each
-computed independently, sliceable, and exact to reuse. Hybrid models break that.
-In Qwen3.5-class architectures, 24 of 32 layers are `linear_attention` layers
-carrying a fixed-size **recurrent state** that is rewritten at every token — it
-cannot be sliced, only snapshotted whole and restored whole.
+On llama.cpp build `b10839` (Q4_K_M weights, one RTX 4060 Laptop GPU, greedy
+decoding), with 360 agent turns per model:
 
-driftmatrix asks whether restoring it is faithful, in the workload where state
-reuse matters most: **for an identical agent turn, does serving from restored
-recurrent state produce different output than recomputing — and does the
-difference change which tool the agent calls?**
+- **Restoring saved state at a natural agent-turn boundary was never bit-exact**,
+  on any of the three architectures (1,080 of 1,080 turns).
+- **It changed the agent's action on 2–12% of ambiguous requests, on all three
+  architectures.** The changes were a different argument list, a tool call that
+  became a text reply, or a clarifying question that became a tool call. It
+  changed **none** of the 540 explicit-request turns, each restored at two
+  boundaries. The hybrid recurrent model changed most: 11 of 90 long-history
+  turns.
+- **Changes happen where the model was already close to a tie**: in 29% of turns
+  where its top two choices were within 0.5 nats, against 0.1% of confident turns.
+- **The fix works on two of the three architectures.** Rounding the reuse boundary
+  down to a multiple of the engine's micro-batch size (`n_ubatch`) made every
+  restore bit-exact on the hybrid and dense models, at a median cost of 158–443
+  re-evaluated tokens. On the sliding-window model it worked at 512 tokens and
+  failed at 4,096.
+- **The prediction that dense and sliding-window models would be unaffected was
+  wrong**, and is reported as such.
 
-The second clause is the one that matters. A shifted logprob is a curiosity. A
-changed tool call is a behavioural change caused by an optimization that is
-supposed to be invisible.
+Full write-up: [`docs/findings/2026-09-11-main-study.md`](docs/findings/2026-09-11-main-study.md)
 
-## Prior art, and what this is not
+## Why this matters
 
-This project is deliberately narrow, because the surrounding space is crowded.
+Agent frameworks resend the same system prompt, tool schemas and growing history
+on every turn, so serving stacks restore cached model state for nearly every
+request. Production agent traces show 94–96% of prompt tokens served from cache
+(TraceLab, arXiv 2606.30560). That optimization is assumed to be invisible.
+llama.cpp's own documentation warns that cached logits "are not guaranteed to be
+bit-for-bit identical", but the questions that matter for agents were open:
+when is reuse exact, how much does it depend on the architecture, and does it
+change what an agent does?
 
-| Work | What it already covers |
+## The mechanism
+
+Restoring a saved state returns identical bytes, so the restore itself cannot
+introduce a difference. The difference comes from how the prompt is split into
+micro-batches. llama.cpp evaluates prompts in physical micro-batches of `n_ubatch`
+tokens:
+
+- **Recompute** tiles the whole prompt from position 0: `[0, U) [U, 2U) …`
+- **Restore** tiled the prefix `[0, k)` when it was cached, then tiles the suffix
+  afresh from `k`.
+
+The two tilings coincide only when `k` is a multiple of `n_ubatch`. Otherwise
+matrix multiplications, attention and the recurrent scan accumulate
+floating-point error in a different order, and addition is not associative.
+
+![Restore is bit-exact exactly when the reuse boundary is a multiple of n_ubatch](docs/figures/g1_exactness_grid.png)
+
+Gate G1 tested this directly by changing `n_ubatch`. The set of exact boundaries
+moved with it: all 66 restores matched the prediction, on a hybrid and a dense
+model. The hybrid's inexact cells are about 26× larger by median, because its
+recurrent state carries the difference forward instead of letting it stay local.
+
+## Study design
+
+- **Architecture ladder, quantization-matched (Q4_K_M):**
+  - Ornith-1.5-9B: hybrid, linear attention plus full attention, recurrent state
+  - Spark-X2.5-4B: sliding window of 512 tokens plus full attention
+  - Qwen3-4B: dense
+- **Agent traffic:**
+  - 90 base conversations with real tool round trips against deterministic
+    mock tools, rendered through each model's own chat template with tools.
+  - Each conversation appears with a short history (8 round trips, about 1K
+    tokens) and a long one (60 round trips, about 4–6.5K tokens), and ends with
+    either an explicit request ("Look up record 153") or an ambiguous one ("Add
+    up the numbers from earlier").
+  - That makes 360 turns per model, and every model gets the same turns.
+- **Six arms per turn:** recompute, restore at the natural turn boundary, and
+  restore at the snapped boundary, each run twice.
+- **Outcome:** the agent's action, meaning a tool call with canonical arguments or
+  no call. A secondary outcome is distribution drift (JSD) at context-matched
+  positions. The recompute arm's action margin (top-two logprob gap at the
+  decision) is a covariate.
+- **Pre-registered:** outcomes, three Holm-corrected test families, decision rules
+  and a null-result commitment were frozen in a tagged commit
+  ([`docs/preregistration/`](docs/preregistration/2026-09-10-analysis-plan.md))
+  before any main-study turn ran. The analysis code was committed and tested
+  before the run, too.
+
+## How the measurement is kept honest
+
+- **Every arm is proven, not assumed.** llama-server can silently reprocess a
+  "restored" prompt, and a host-side cache can hand a "recompute" state it never
+  computed. So each restore must show, in the server's own `timings.prompt_n`,
+  that it evaluated only its suffix; each recompute must show it evaluated
+  everything; and each saved slot must hold exactly `k` tokens. All 6,480 arms
+  passed.
+- **The noise floor is measured, not assumed.** Recompute ran twice on every turn
+  and was bit-exact every time, so any difference is attributable to restore.
+- **Tool-call parsers are validated against the model itself.** A parsed call must
+  reproduce the model's exact `<tool_call>` text when written back through its
+  chat template. This caught llama.cpp's own parser dropping text from a Spark
+  argument.
+- **Offline prompt rendering is checked against the server**, byte for byte
+  without tools and token for token with tools. The check revealed, for example,
+  that jinja2's `tojson` sorts keys and HTML-escapes, which would silently rewrite
+  every tool schema.
+- **Blinded, resumable runner.** It prints only arm validity while it runs, writes
+  whole turns atomically, and refuses a server with the wrong build or model. The
+  analysis script refuses to run until all three models are complete.
+- **Gates before the study:** G0 (the state API works), G1 (the mechanism), G2 (the
+  prompts and parsers are right) and G3 (a pilot on separate turns: snapped
+  restores exact, the positive control visible).
+- **GPU-free test suite**, including a fake server in which micro-batch tiling is
+  the only cause of divergence.
+
+## More results
+
+![Changes happen where the model was already close to a tie](docs/figures/margin_bins.png)
+
+![Every natural-boundary restore drifted; the hybrid's median drift is the highest](docs/figures/drift_per_turn.png)
+
+| Pre-registered hypothesis | Verdict |
 |---|---|
-| **TraceLab** (arXiv 2606.30560) | Agent-workload characterization over 4,300 Claude Code/Codex sessions; reports 94–96% prefix-cache hit rates |
-| **vLLM × Mooncake** | Disaggregated cache on Codex-derived traces: 1.7% → 92.2% hit rate, 46× TTFT reduction. Lists hybrid-model cache offloading as *future work* |
-| **Policy-Driven Runtime Layer for Agentic LLM Serving** (arXiv 2605.27744) | Cache-aware routing at the serving-engine tier, +13–37pp hit rate |
-| **LangChain, "Deep Agents Prompt Caching"** | Cache-aware prompt ordering, 49–80% token cost reduction. Settled, quantified advice |
-| **Thinking Machines, "Defeating Nondeterminism in LLM Inference"** | Batch-size nondeterminism, diagnosed and fixed; shipped in vLLM as `VLLM_BATCH_INVARIANT` |
+| H1 Snapped restores are bit-exact | Holds on hybrid and dense; **fails on sliding window** at k = 4,096 |
+| H2 Restore shifts the hybrid's output distribution | Supported |
+| H3 Restore changes the hybrid's actions | Partial: on ambiguous requests, not explicit ones |
+| H4 The hybrid diverges more than the controls | Partial: more than sliding window; more than dense on 291 of 360 turns, but not on average |
+| H5 Snapping helps, more on the hybrid than the dense model | Partial: helps; no larger on the hybrid |
+| H6 Divergence compounds with prefix length | Not supported |
+| H7 Action changes concentrate in ambiguous requests | Supported |
 
-Every one of them measures **speed** — hit rate, TTFT, throughput, cost. None
-measures output fidelity, and none covers recurrent-state architectures.
+## What turned out differently than planned
 
-So driftmatrix does **not** attempt: agent-workload characterization on dense
-models, cache-aware prompt ordering, a cache-aware agent runtime or router, or
-anything about batch invariance. Those are done, and done better elsewhere.
+- **The controls were not immune.** The dense and sliding-window models changed
+  actions at rates similar to the hybrid's on short histories. Restore-induced
+  action changes are a property of near-tie decisions, not of recurrent state
+  alone.
+- **Snapping does not protect the sliding-window model beyond its window.** It was
+  exact at 512 tokens (the window size) and inexact at 1,024 (G0) and 4,096 (all
+  180 long-band turns). The cause is located but not explained.
+- **Qwen3's chat template re-renders the previous assistant turn** once a new user
+  message arrives, so its history is never a token prefix of the next prompt.
+  Requiring a full prefix would have silently dropped the dense baseline. The reuse
+  boundary is instead defined as the longest common token prefix, which is what a
+  server actually reuses.
+- **The planned statistics contradicted the planned power.** Holm-corrected sign
+  tests needed 9 changed turns out of 90 to detect anything. Because the
+  recompute floor is bit-exact, the pre-registration uses an exact test against a
+  zero floor, with Clopper–Pearson intervals.
 
-The gap it occupies is narrow and specific: LMCache's own hybrid-model
-documentation states that generation is *"not bit-exact between a cached and a
-fresh run"* on GDN backends and instructs users to abandon token-level
-comparison — while quantifying nothing. That is a disclaimer, not a measurement.
+## Scope and limits
 
-## The mechanism, and why the prediction is falsifiable
-
-Restoring a saved state returns bit-identical bytes, so divergence cannot come
-from the restore itself. It comes from the two arms **segmenting the prompt
-differently**.
-
-With the prompt as `[prefix | suffix]` and the save boundary between them:
-
-- The **recompute arm** processes `prefix + suffix` in one pass, so a chunk in
-  the linear-attention scan may straddle the boundary.
-- The **restore arm** processed `prefix` alone (chunks ending exactly at the
-  boundary), saved, restored, and processes `suffix` as a fresh pass.
-
-Different chunk boundaries mean different reduction orders, and floating-point
-addition is not associative. That matters only for recurrent layers: a dense
-`K_i = W_k x_i` depends on token *i* alone and is chunk-invariant, while
-`S_i = f(S_{i−1}, k_i, v_i)` folds every prior token into one matrix, so the
-reduction order changes the stored value — which is then carried forward and
-re-transformed at every later token, and can compound rather than stay local.
-
-**The prediction:** if the save boundary is aligned to the kernel's chunk size,
-both arms tile identically and output should be bit-exact. If misaligned, they
-tile differently and divergence should appear — **on hybrid models only, never
-on dense ones.**
-
-This can be wrong. Divergence appearing at *aligned* boundaries too would
-falsify the chunk-tiling explanation and demand a different one. The chunk size
-itself is implementation-defined and is measured empirically, not assumed.
-
-## Design
-
-Three models form an **architecture ladder**, so divergence can be attributed to
-state type rather than to hybrid layer structure or to the engine:
-
-| Level | Model | Attention mix | State type | Prediction |
-|---|---|---|---|---|
-| 3 — treatment | Ornith-1.5-9B (IQ4_XS, `qwen3_5`) | linear + full | recurrent, non-sliceable | diverges when misaligned |
-| 2 — control | Spark-X2.5-4B (`spark2_5`) | sliding + full | per-token KV, bounded | no divergence |
-| 1 — baseline | dense GGUF of comparable size | full only | per-token KV | no divergence |
-
-Level 2 is what makes the finding mechanistic. With only a dense baseline, a
-reviewer can object that it might be interleaved layer structure in general.
-Level 2 has the same structure and a conventional state type. It is also exactly
-the distinction llama.cpp #20225 draws — checkpoint logic *"written for
-sliding-window attention"* failing on recurrent state.
-
-Both arms are forced **exactly**, via llama.cpp's sequence state save/restore,
-so the arm is a property of the procedure rather than something inferred from
-cache metrics afterwards.
-
-## Scope limits
-
-- All claims are scoped to **engine, commit, and quantization**. Results are
-  reported "at IQ4_XS" on a pinned llama.cpp commit stamped into every row.
-- **No bit-exactness claims about vLLM.** LMCache's disclaimer motivates the
-  question; this study measures llama.cpp and says so.
-- Distributional metrics are computed over **truncated top-*k* logprobs**, with
-  both arms renormalized over the union of their supports plus one `<other>`
-  bucket. The value of *k* is recorded and reported.
-- Hit rate, TTFT and throughput are instrumentation here, never findings.
-- A **null result is pre-committed as publishable**, with a stated detection
-  limit rather than an implied one.
-
-## Status
-
-Built and tested (121 tests, GPU-free):
-
-- `traces` — LangGraph-shaped agent trace generator, deterministic mock tools,
-  tokenizer-verified boundary placement, frozen content-hashed corpus
-- `runner` — engine protocol, deterministic fake engine, both arms with outcome
-  classification, Parquet capture, llama.cpp adapter
-- `statediff` — per-layer restored-vs-recomputed state comparison
-- `metrics` — behavioural (tool-call agreement, first divergence) and
-  distributional (JSD with union-support truncation)
-- `stats` — paired bootstrap against a measured noise floor, Holm correction
-  across three declared families, coverage simulation, power, mechanism contrasts
-- `controls` — synthetic calibrated positive control and detection floor
-- `gate` — CI regression gate; `report` — tables and figures
-- `sweep` — boundary-offset sweep for empirical chunk-size detection
-
-Pending hardware access: gate G0 (state-API round-trip on the real model), gate
-G1 (empirical chunk size), the pre-registration document — which depends on the
-measured noise floor and chunk size — and the grid runs that produce results.
+- One engine build, one quantization, one GPU, `n_ubatch = 512`. Exactness is a
+  property of kernels and can differ elsewhere.
+- Synthetic agent traffic: three mock tools and five ambiguous request types. The
+  margin relationship is the part expected to transfer.
+- Rates rest on 2–11 events per condition, so the intervals are wide.
+- Greedy decoding only. No claims about vLLM or SGLang.
 
 ## Reproducing
 
 ```bash
-pip install -e ".[dev,engine,traces]"
-pytest -q                                   # 121 tests, no GPU required
+pip install -e ".[dev]"
+pytest -q                                      # GPU-free
 
-# G0 - does state save/restore round-trip on this model at all?
-python scripts/g0_viability.py /path/to/Ornith-1.5-9B-IQ4_XS.gguf
+# start the server with the pre-registered flags (add --swa-full for Spark)
+llama-server -m <model.gguf> --jinja -c 8192 -ngl 99 -np 1 -b 2048 -ub 512 \
+  --cache-ram 0 --ctx-checkpoints 0 --slot-save-path <slot-dir> --port 8090
 
-# G1 - find the linear-attention kernel chunk size empirically
-python scripts/g1_chunk_sweep.py /path/to/model.gguf ./data/g1
+python scripts/study_manifest.py --model ornith --gguf <model.gguf>                    # token budget, no generation
+python scripts/run_study.py --pilot --model ornith --gguf <model.gguf> --slot-dir <slot-dir>   # gate G3
+python scripts/run_study.py --model ornith --gguf <model.gguf> --slot-dir <slot-dir>           # main study, resumable
 
-# full condition grid (chunk size from G1)
-python scripts/run_grid.py /path/to/model.gguf 64 ./data/run1 3
-
-# secondary: per-turn cost of full-prompt reprocessing (llama.cpp #20225)
-python scripts/reproduce_20225.py /path/to/model.gguf
+python scripts/analyze_study.py --gguf ornith=<...> --gguf qwen3=<...> --gguf spark=<...>
+python scripts/make_figures.py                 # figures from committed results
 ```
 
-Design spec: [`docs/superpowers/specs/2026-09-10-hybrid-cache-fidelity-design.md`](docs/superpowers/specs/2026-09-10-hybrid-cache-fidelity-design.md)
-Implementation plan: [`docs/superpowers/plans/2026-09-10-driftmatrix.md`](docs/superpowers/plans/2026-09-10-driftmatrix.md)
+Models: `ornith`, `qwen3`, `spark`. The gate scripts (`g0_server.py`,
+`g1_server.py`, `g2_render_check.py`, `g2_toolcalls.py`) document their own
+usage.
 
-## References
+## Repository map
 
-- llama.cpp #20225 — hybrid agentic sessions reprocessing the full prompt each turn (open)
-- vLLM #43587 — hybrid + multimodal prefix cache 0% hit; absent on the pure-attention sibling (open)
-- vLLM #40696 — 528-token block-size cliff (open)
-- vLLM #26201 — prefix caching for hybrid models, tracking issue (open)
-- vLLM RFC #54506 — M-dependent kernel arithmetic, verify-vs-decode non-invariance (open)
-- SGLang #21846 — HiCache hybrid compatibility limited; agentic hybrid scheduling in progress
-- LMCache hybrid-model documentation — the non-bit-exactness disclaimer
+| Path | Contents |
+|---|---|
+| [`docs/findings/`](docs/findings/) | One write-up per gate and for the main study, with raw reports |
+| [`docs/preregistration/`](docs/preregistration/2026-09-10-analysis-plan.md) | The frozen analysis plan (tag `prereg-2026-09-10`) |
+| [`docs/superpowers/specs/`](docs/superpowers/specs/2026-09-10-hybrid-cache-fidelity-design.md) | Design spec and its revision history (v1–v4.5) |
+| `src/driftmatrix/runner/llamaserver.py` | Stdlib llama-server client and arm proofs |
+| `src/driftmatrix/servergrid.py`, `analysis.py` | Main-study runner and pre-registered analysis |
+| `src/driftmatrix/traces/` | Conversation generator, offline chat-template rendering, reuse boundaries, tool-call parsers and round trip |
+| `src/driftmatrix/stats/` | Exact tests, Clopper–Pearson, paired bootstrap, Holm families, power |
+| `src/driftmatrix/g0.py` … `g3.py` | The gates |
+
+## Prior art
+
+- **llama.cpp server README, `cache_prompt`** documents that cached logits may
+  differ from fresh ones. This project does not claim that caching *can* change
+  output; it measures when, by how much, and with what behavioural consequence.
+- **Thinking Machines Lab, "Defeating Nondeterminism in LLM Inference"** (2025):
+  batch invariance in general, shipped in vLLM as `VLLM_BATCH_INVARIANT`.
+- **TraceLab** (arXiv 2606.30560), **vLLM × Mooncake**, **Policy-Driven Runtime
+  Layer** (arXiv 2605.27744): agent-workload cache characterization, all measuring
+  speed.
+- **LMCache hybrid-model documentation** notes that generation is not bit-exact
+  between cached and fresh runs on GDN backends, without quantifying it.
+- **llama.cpp #20225**, **vLLM #43587, #40696, #26201**, **SGLang #21846**: hybrid
+  prefix-caching limitations on three engines.

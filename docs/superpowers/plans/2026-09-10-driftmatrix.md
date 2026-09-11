@@ -45,7 +45,7 @@ it and an original task disagree, this wins.
 | 17 Pre-registration | Moves to **after G1** (spec §6.4) |
 | 18 Synthetic positive control | Kept for harness tests only; the measurement positive control is natural misaligned restore on the hybrid (spec §8) |
 | 22 Grid on the Python engine | **Superseded by Task 22R** (grid against `llama-server`) |
-| 23 README | Update after G1 |
+| 23 README | **Done 2026-09-11**: rewritten around the main-study results, with figures from committed results (`src/driftmatrix/figures.py`, `scripts/make_figures.py`, `docs/figures/`) |
 
 ### Global constraints added
 
