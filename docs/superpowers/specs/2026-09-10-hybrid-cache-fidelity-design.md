@@ -5,7 +5,7 @@ A state-fidelity audit of prompt-cache reuse in llama.cpp across dense,
 sliding-window and hybrid recurrent architectures, under agent-shaped traffic.
 
 Date: 2026-09-10
-Status: v4.5 — gates G0–G3 passed; analysis plan pre-registered (`docs/preregistration/2026-09-10-analysis-plan.md`, tag `prereg-2026-09-10`); main study pending
+Status: v4.5 — gates G0–G3 passed; analysis plan pre-registered (tag `prereg-2026-09-10`); **main study complete 2026-09-11** (`docs/findings/2026-09-11-main-study.md`)
 Author: Manuel Gamal
 
 ---
@@ -132,6 +132,7 @@ descriptive, not population estimates.
 | **G0, this project** | Exactness at micro-batch-aligned boundaries; architecture-dependent magnitude; compounding on the hybrid | **Strong day-one signal, n=1** |
 | **G1, this project** | Exact set tracks `n_ubatch` (66/66 restores, two architectures); hybrid ~26× dense by median TV; 5/23 vs 0/23 token flips | **Strong — mechanism confirmed; magnitude on one prompt per model** |
 | **G2, this project** | Offline rendering byte-exact vs `/apply-template` (12/12 per model); prompts with tools match server token counts, parsers agree with llama.cpp, 100% tool calls (30/30 per model) | **Strong — measurement path validated** |
+| **Main study, this project** | 3 models × 360 turns, 6,480 proven arms, bit-exact floor. Natural-boundary restore never exact; action changed on 2–12% of ambiguous requests on **all three** architectures, 0 of 1,080 explicit turns; changes concentrate at near-ties (21/73 vs 1/864 confident). Snapping: bit-exact on hybrid and dense, **not** on sliding window at k = 4096 | **Strong — pre-registered, confirmatory** |
 | **llama.cpp server README, `cache_prompt`** | *"the logits are not guaranteed to be bit-for-bit identical for different batch sizes … enabling this option can cause nondeterministic results."* The generic phenomenon is documented | **Strong — prior art** |
 | **llama.cpp #20225** (open) | Hybrid agentic sessions reprocess the full prompt every turn; checkpoint logic written for sliding-window attention fails on recurrent state | Strong — context |
 | **LMCache hybrid-model docs** | Generation "not bit-exact between a cached and a fresh run" on GDN backends; quantifies nothing. vLLM-specific | Motivation |
@@ -554,7 +555,7 @@ leakage; GGUF reading against a synthetic file; the gate against golden files.
 | Tiling is not the mechanism | G1 is designed to falsify it before the main study |
 | Chat templates don't put all three models into tool-calling mode | Resolved in G2: 100% tool-call rate on all three models |
 | Tool decisions too confident for restore to flip them | G2: 90 of 90 explicit requests produced exactly the expected call. Addressed by an ambiguous stratum and a margin covariate (v4.2); v4.3 scores no-call as an action, because the requests that create near-ties also sometimes end in clarifying questions |
-| Dense and sliding-window divergence changes tool calls at scale | Then the claim is architecture-general; reported as such, with magnitudes |
+| Dense and sliding-window divergence changes tool calls at scale | **Occurred** (main study): 2–4% of ambiguous turns on both controls. The claim is reported as architecture-general, with the hybrid larger on a typical turn and in the long band |
 | Few natural boundaries are misaligned-and-divergent | Natural boundaries are misaligned with probability ≈ (U−1)/U; power reported per alignment class |
 | VRAM at `-ub 1024` | Reduce `-c`; record it |
 | Upstream behaviour changes | Build stamped per row; claims scoped to build |
@@ -599,6 +600,18 @@ boundaries to micro-batch multiples.
 > (95% CI [*a*, *b*]) versus *~0*% on quantization-matched dense and
 > sliding-window models; snapping boundaries to micro-batch multiples, at a cost
 > of at most `n_ubatch − 1` re-evaluated tokens, reduced it to *~0*%.
+
+**Result (main study, 2026-09-11)**
+
+> On llama.cpp b10839, restoring saved state at a natural agent-turn boundary was
+> never bit-exact on hybrid recurrent, sliding-window or dense models. It changed
+> the agent's action on 2–12% of ambiguous requests on all three (0 of 1,080
+> explicit-request turns), almost always where the model was near a tie. Snapping
+> the reuse boundary to a multiple of `n_ubatch` — at a median cost of 158–443
+> re-evaluated tokens — made restore bit-exact and removed every change on the
+> hybrid and dense models, but not on the sliding-window model at 4,096 tokens.
+
+The target's "~0% on dense and sliding-window models" was wrong; see the findings.
 
 **Success criteria:** G1 decided either way and reported; all arms proven;
 controls behave or their failure is diagnosed; every effect carries a CI; claims
