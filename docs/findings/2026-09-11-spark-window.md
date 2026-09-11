@@ -2,7 +2,7 @@
 
 Date: 2026-09-11
 Engine: llama.cpp `llama-server` build `b10839-0cae43063`, Windows, CUDA, RTX 4060 Laptop (8 GB)
-Plan and predictions: [`2026-09-11-spark-window-plan.md`](2026-09-11-spark-window-plan.md), committed before any run (`e3de45a`)
+Plan and predictions: [`2026-09-11-spark-window-plan.md`](2026-09-11-spark-window-plan.md), committed before any run (`c3d302a`)
 Raw reports: [`followup/`](followup/) (no local paths). Regenerate with `python scripts/spark_window_analyze.py --dir docs/findings/followup`
 Status: **exploratory** — not pre-registered, one prompt, exact sets rather than rates
 

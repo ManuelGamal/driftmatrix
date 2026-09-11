@@ -3,7 +3,7 @@
 Date: 2026-09-11
 Engine: llama.cpp `llama-server` build `b10839-0cae43063`, Windows, CUDA, RTX 4060 Laptop (8 GB)
 Pre-registration: `docs/preregistration/2026-09-10-analysis-plan.md` (tag `prereg-2026-09-10`)
-Analysis code: commit `4985f42`, committed and tested before the main run (pre-registration 11.3)
+Analysis code: commit `f58d3d6`, committed and tested before the main run (pre-registration 11.3)
 Results: [`study/analysis.json`](study/analysis.json) (every family member, hypothesis, secondary analysis and the per-turn table), [`study/changed_turns.json`](study/changed_turns.json) (every turn whose action changed, with both outputs). Raw records (about 70 MB) are kept locally in `data/study/`.
 Regenerate: `python scripts/analyze_study.py --gguf ornith=… --gguf qwen3=… --gguf spark=…`
 
