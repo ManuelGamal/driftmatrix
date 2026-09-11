@@ -21,8 +21,9 @@ Author: Manuel Gamal
 | v4.1 | G1 passed; magnitude restated over 16 positions (controls: small, not negligible); offline chat-template rendering; per-model tool-call parsers | G1 results (`docs/findings/2026-09-10-g1.md`); `/apply-template` accepts no `tools` |
 | v4.2 | Request stratum S (explicit / ambiguous) replaces continuation C; recompute-arm decision margin as a pre-registered covariate; generation runs to the end of the turn | G2: 90/90 explicit requests gave the exact expected call, so decisions were near-certain; tool calls ended the turn at 81–151 characters, so a 32-token continuation truncates them |
 | v4.3 | Behavioural outcome is the agent's action — a tool call with its arguments, or no call; the action margin includes the act-or-not choice; the ambiguous stratum is held to a 50% call floor instead of the 90% gate | Strata check: tool-choice requests always called a tool (36/36) but were as confident as explicit ones; under-specified requests were the only source of near-ties and sometimes ended in a clarifying question or text answer instead of a call (35/54 calls) |
-| v4.4 | Parser validation by template round trip: every parsed call must reproduce the model's own tool-call text when serialised through its chat template; disagreements with llama.cpp's parser are adjudicated the same way | Ambiguous re-run: llama.cpp's parser dropped the text before ': ' in one Spark string argument; all 161 of our parsed calls round-trip byte for byte |
+| v4.4 | Parser validation by template round trip: every parsed call must reproduce the model's own tool-call text when serialised through its chat template; disagreements with llama.cpp's parser are adjudicated the same way | Ambiguous re-run: one Spark call's arguments differed between our parse and llama.cpp's (first read as a parser loss; corrected 2026-09-11, see below); all 161 of our parsed calls round-trip byte for byte |
 | v4.5 | Pre-registration. Prefix bands are 8 and 60 prior round trips on shared base conversations; natural boundary is the longest common token prefix; tests against a zero floor are exact; family C gains hybrid vs sliding-window (6 members); teacher-forced scoring leaves the confirmatory analysis | Qwen3's template renders the last assistant message differently once a new user turn follows, so requiring the history to be a full prefix would have dropped every Qwen3 turn; a percentile bootstrap cannot bound a rate with no events; spec 6.3.2 attributes the effect to recurrent state only through L3 vs L2, which no family tested |
+| Correction 2026-09-11 | The v4.4 Spark disagreement is re-attributed from llama.cpp's parser to llama-server's tool-call grammar, which forces required arguments into schema order | Offline, llama.cpp's own parser rejects Spark's body-first call and parses the same content in schema order; on the real model, reversing the schema's property order restored the full argument (`docs/findings/2026-09-11-spark-argument-order.md`) |
 
 ---
 
@@ -348,9 +349,11 @@ them, reproduces the model's `<tool_call>` block byte for byte. Every parsed cal
 in G2 must pass. Agreement with llama.cpp's parser is also checked, but a
 disagreement is adjudicated by the same round trip rather than counted as a
 failure: if our reading reproduces the model's text and llama.cpp's does not,
-the loss is llama.cpp's. In the ambiguous re-run, llama.cpp's parser read Spark's
-`record 165: field=beta value=105` as `field=beta value=105`; our reading
-round-trips and llama.cpp's does not.
+the difference is on the server's side. In the ambiguous re-run, llama.cpp returned
+Spark's body as `field=beta value=105` where the model wrote
+`record 165: field=beta value=105`; our reading round-trips and llama.cpp's does not.
+The cause was not parsing: the chat endpoint's tool grammar forced schema argument
+order, so the server parsed a different, constrained generation (`docs/findings/2026-09-11-spark-argument-order.md`).
 
 360 turns per model — 90 base conversations, each in both prefix bands and both strata, so 90 in each
 prefix-length × stratum cell — frozen and content-hashed. The same turns run on every model, which pairs
@@ -569,7 +572,7 @@ leakage; GGUF reading against a synthetic file; the gate against golden files.
 |---|---|---|
 | **G0** ✅ 2026-09-10 | State API round-trips with both arms proven | — passed; divergence observed |
 | **G1** ✅ 2026-09-10 | Exact set tracks `n_ubatch` on Ornith Q4_K_M and Qwen3-4B | — passed: 66/66 restores matched the prediction |
-| **G2** ✅ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Passed** on both strata: ambiguous median action margin below explicit on all three models (4.02 vs 6.92, 7.47 vs 9.76, 2.67 vs 7.77), ambiguous calls 87%/67%/83%, 161/161 parsed calls round-trip, one disagreement attributed to llama.cpp. Pre-registration tagged `prereg-2026-09-10` |
+| **G2** ✅ 2026-09-10 | Chat-templated traces give ≥ 90% tool calls on recompute arms for all three models; recompute floor bit-exact; pre-registration committed | Render and tool-call checks passed on all three models; floors exact in G0/G1. **Passed** on both strata: ambiguous median action margin below explicit on all three models (4.02 vs 6.92, 7.47 vs 9.76, 2.67 vs 7.77), ambiguous calls 87%/67%/83%, 161/161 parsed calls round-trip, one disagreement on the server side (its tool grammar; see the 2026-09-11 correction). Pre-registration tagged `prereg-2026-09-10` |
 | **G3** ✅ 2026-09-10 | On pilot turns (separate seed, never confirmatory): every arm proof holds, snapped boundaries exact, positive control diverges | Passed on all three models: 20 turns and 120 valid arms each, every snapped restore bit-exact in both replicates, Ornith drifted at the natural boundary on 20 of 20 turns (`docs/findings/2026-09-10-g3.md`) |
 
 ---

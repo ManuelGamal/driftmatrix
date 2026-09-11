@@ -47,7 +47,7 @@ def main() -> int:
             rt = "n/a" if s["our_roundtrip_rate"] is None else f"{s['our_roundtrip_rate']:.0%}"
             print(f"{path.name:<38} {before:<27} -> {s['verdict']:<24} round trip {rt:>4} | "
                   f"disagreements {s['parser_disagreements']} "
-                  f"(llama.cpp lossy {s['server_parser_lossy']}, unresolved {s['unresolved_disagreements']})")
+                  f"(server-side {s['server_parser_lossy']}, unresolved {s['unresolved_disagreements']})")
     return 0
 
 

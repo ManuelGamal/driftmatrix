@@ -6,7 +6,8 @@ For each conversation, with tools on and thinking off:
      the study's own path, with no restore involved - and parse the output with
      the model's parser. Top-k logprobs give the action margin (spec 5.1);
   2. send the same conversation to /v1/chat/completions, where the server
-     renders it itself and parses tool calls with llama.cpp's parser.
+     renders it itself, constrains generation with its tool-call grammar, and
+     parses tool calls with llama.cpp's parser.
 
 The agent's action is a tool call with its arguments, or no call (a clarifying
 question or text answer). Checks, in verdict order:
@@ -20,10 +21,13 @@ question or text answer). Checks, in verdict order:
   round trip     every call we parse must reproduce the model's own <tool_call>
                  text when serialised back through its chat template (v4.4).
                  This validates our parser against the model's format itself.
-  parsers        disagreements with llama.cpp's parser are adjudicated by the
-                 same round trip. If our reading reproduces the model's text and
-                 llama.cpp's does not, the disagreement is llama.cpp's loss and
-                 does not fail the gate; anything else does.
+  parsers        disagreements with the server's parsed call are adjudicated by
+                 the same round trip. If our reading reproduces the model's text
+                 and the server's does not, the difference is on the server's side
+                 (labelled server_parser_lossy) and does not fail the gate;
+                 anything else does. The label predates the diagnosis: in G2 the
+                 cause was the chat endpoint's tool grammar forcing schema argument
+                 order, which changed the generation, not a parsing error.
   call rate      share of outputs that are tool calls. Explicit requests must
                  reach 90%: they validate the tool-call pipeline. Ambiguous
                  requests are held to a 50% floor: the requests that create

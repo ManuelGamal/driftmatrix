@@ -5,9 +5,11 @@ chat template - arguments in the order the model emitted them - reproduces the
 <tool_call> block the model generated, byte for byte.
 
 This validates a parser against the model's own format rather than against
-another parser, and it adjudicates disagreements between parsers: in G2's
-ambiguous stratum, llama.cpp's parser dropped the text before ": " in one of
-Spark's string arguments. Our reading round-tripped; llama.cpp's did not.
+another parser, and it adjudicates disagreements with the server's parsed calls:
+in G2's ambiguous stratum, one Spark call returned by llama-server did not
+reproduce the model's text while our reading did. The cause was llama-server's
+tool-call grammar forcing schema argument order during generation, not its
+parser (docs/findings/2026-09-11-spark-argument-order.md).
 """
 from __future__ import annotations
 

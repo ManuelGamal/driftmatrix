@@ -222,10 +222,10 @@ would discard exactly those decisions.
 
 ### Task 29: Parser validation by template round trip (spec v4.4)
 
-**Status: done.** Saved reports were re-scored offline. All 161 parsed calls round-trip; the one disagreement (Spark `a2026_024`) is attributed to llama.cpp; `g2_strata.py` passes on every model.
+**Status: done.** Saved reports were re-scored offline. All 161 parsed calls round-trip; the one disagreement (Spark `a2026_024`) is on the server side (corrected 2026-09-11: the cause is llama-server's tool grammar forcing schema argument order, not its parser; `docs/findings/2026-09-11-spark-argument-order.md`); `g2_strata.py` passes on every model.
 
-**Why:** in the ambiguous re-run, one Spark call parsed differently in llama.cpp,
-whose parser dropped the text before ": " in a string argument. Our parse matched
+**Why:** in the ambiguous re-run, one Spark call's arguments differed between our
+parse and llama.cpp's (first taken for a parser loss; see the correction above). Our parse matched
 the model's text, but the harness had no objective way to establish that.
 
 **Files:**
@@ -239,12 +239,12 @@ the model's text, but the harness had no objective way to establish that.
 **Rule:** a parsed call is faithful when serialising it through the model's chat
 template, arguments in emitted order, reproduces the model's tool-call block byte
 for byte. Every parsed call must be faithful. A disagreement with llama.cpp is
-`server_parser_lossy` when our reading round-trips and llama.cpp's does not,
+`server_parser_lossy` (name kept for report compatibility; it means the server's call does not reproduce the model's text, whatever the cause) when our reading round-trips and llama.cpp's does not,
 `our_parser_lossy` in the reverse case, and `unresolved` otherwise; only the last
 two fail the gate.
 
 **Required tests (write first):** the verbatim G2 Spark call round-trips under our
-reading and not under llama.cpp's; argument order matters and `in_emitted_order`
+reading and not under the chat endpoint's arguments; argument order matters and `in_emitted_order`
 restores it; a template error counts as no round trip; a lossy server parse is
 adjudicated and passes; a call found only by the server fails as unresolved; a
 template that serialises differently from the model fails as

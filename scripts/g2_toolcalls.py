@@ -25,10 +25,10 @@ from driftmatrix.traces.toolcalls import FORMAT_BY_MODEL  # noqa: E402
 
 EXPLAIN = {
     "CHAT_PATH_ERROR": "The server rejected the OpenAI-format conversation; see chat_error in the report. The study path still ran, but prompts with tools are unverified.",
-    "G2_TOOLCALLS_PASS": "Prompts with tools match the server's, every parsed call round-trips through the template, parser disagreements are attributed to llama.cpp, and the call rate meets this stratum's threshold.",
+    "G2_TOOLCALLS_PASS": "Prompts with tools match the server's, every parsed call round-trips through the template, any disagreement with the server's call is on the server's side, and the call rate meets this stratum's threshold.",
     "RENDER_WITH_TOOLS_MISMATCH": "Offline prompts with tools do not tokenize to the server's own prompt length. Do not use offline rendering until explained.",
     "OUR_PARSE_NOT_FAITHFUL": "A call we parsed does not reproduce the model's own tool-call text when serialised through its template. The row is listed first above.",
-    "PARSER_DISAGREES": "Our parser and llama.cpp's read the same output differently, and the template round trip does not show that llama.cpp's reading is the lossy one. The row is listed first above.",
+    "PARSER_DISAGREES": "Our parse and the server's tool call differ, and the template round trip does not show that the server's call is the one that departs from the model's text. The row is listed first above.",
     "TOOL_CALL_RATE_BELOW_GATE": "Fewer than {threshold:.0%} of turns produced a parseable tool call.",
 }
 
@@ -81,7 +81,7 @@ def main() -> int:
     print(f"  prompt tokens match server   {pct(s['prompt_match_rate'])}")
     print(f"  our calls round-trip         {pct(s['our_roundtrip_rate'])}")
     print(f"  parser agrees with llama.cpp {pct(s['parser_agreement_rate'])}   "
-          f"({s['parser_disagreements']} disagreements: {s['server_parser_lossy']} llama.cpp lossy, "
+          f"({s['parser_disagreements']} disagreements: {s['server_parser_lossy']} server-side, "
           f"{s['unresolved_disagreements']} unresolved)")
     print(f"  tool-call rate               {pct(s['tool_call_rate'])}   (threshold for this stratum {s['call_threshold']:.0%})")
     print(f"  no-call rate                 {pct(s['no_call_rate'])}")
@@ -93,7 +93,7 @@ def main() -> int:
 
     problems = sorted((r for r in report["rows"] if severity(r) < 4 or not r["tool_call_made"]),
                       key=severity)
-    labels = {0: "PARSE NOT FAITHFUL", 1: "PARSER DISAGREEMENT", 2: "llama.cpp parse lossy",
+    labels = {0: "PARSE NOT FAITHFUL", 1: "PARSER DISAGREEMENT", 2: "server call differs",
               3: "PROMPT MISMATCH", 4: "no call"}
     for r in problems[:3]:
         print(f"\n  [{labels[severity(r)]}] {r['conv_id']}: prompt {r['offline_prompt_tokens']} offline vs "

@@ -104,8 +104,9 @@ recurrent state carries the difference forward instead of letting it stay local.
   and was bit-exact every time, so any difference is attributable to restore.
 - **Tool-call parsers are validated against the model itself.** A parsed call must
   reproduce the model's exact `<tool_call>` text when written back through its
-  chat template. This caught llama.cpp's own parser dropping text from a Spark
-  argument.
+  chat template. All 161 do. It also exposed a llama-server behaviour: its tool-call
+  grammar forces required arguments into schema order, which changed what Spark's
+  tool received ([details](docs/findings/2026-09-11-spark-argument-order.md)).
 - **Offline prompt rendering is checked against the server**, byte for byte
   without tools and token for token with tools. The check revealed, for example,
   that jinja2's `tojson` sorts keys and HTML-escapes, which would silently rewrite
@@ -155,6 +156,13 @@ recurrent state carries the difference forward instead of letting it stay local.
   Requiring a full prefix would have silently dropped the dense baseline. The reuse
   boundary is instead defined as the longest common token prefix, which is what a
   server actually reuses.
+- **A suspected llama.cpp parser bug was the grammar.** G2 first blamed a shortened
+  tool argument on llama.cpp's parser. Reproducing it inside llama.cpp showed the
+  parser was right: the tool grammar forced Spark to write its arguments in schema
+  order, and the model wrote a different argument. A pending upstream fix,
+  [llama.cpp PR #26472](https://github.com/ggml-org/llama.cpp/pull/26472), resolves
+  it; testing that PR found a regression for the Laguna-XS templates, reported on
+  the PR with a failing test and a change that passes all parser tests.
 - **The planned statistics contradicted the planned power.** Holm-corrected sign
   tests needed 9 changed turns out of 90 to detect anything. Because the
   recompute floor is bit-exact, the pre-registration uses an exact test against a

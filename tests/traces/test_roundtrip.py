@@ -24,9 +24,10 @@ def test_our_reading_of_the_g2_spark_call_round_trips():
     assert round_trips(SPARK_LIKE, block, name, args)
 
 
-def test_llama_cpp_reading_of_the_g2_spark_call_does_not():
-    lossy = {"body": "field=beta value=105", "title": "Record 165"}
-    assert not round_trips(SPARK_LIKE, SPARK_024, "format_report", lossy)
+def test_the_chat_endpoints_call_does_not_reproduce_the_model_text():
+    # what /v1/chat/completions returned: its tool grammar forced title first, and the model wrote a different body
+    grammar_forced = {"body": "field=beta value=105", "title": "Record 165"}
+    assert not round_trips(SPARK_LIKE, SPARK_024, "format_report", grammar_forced)
 
 
 def test_non_string_values_round_trip():
