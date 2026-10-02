@@ -48,3 +48,67 @@ study records 512, which is also the value at which exactness ended in the
 follow-up. The Ornith file inspected is the IQ4_XS quantisation; the Q4_K_M file
 used in the study was not on this machine's search path, and its architecture
 is taken to be the same model.
+
+## Hand-entered numbers
+
+Checked on 2026-10-02 against the file named. Every other number in the paper is
+a macro from `numbers.tex`, generated from the committed result files and pinned
+by `tests/test_papernumbers.py`.
+
+| Value | Where in the paper | Source | Matches |
+|---|---|---|---|
+| about 96% of prompt tokens from cache | Introduction | TraceLab, arXiv 2606.30560, section 7 | yes |
+| 94.2% hit rate | Introduction | vLLM x Mooncake blog post | yes |
+| Prompt tokens 1,245 / 6,439, 786 / 4,298, 992 / 5,316; snapped k 1,024 / 6,144, 512 / 4,096, 512 / 5,120; 180 turns per band | Table 1 | `2026-09-10-study-manifest.md`, "Measured" | yes |
+| Context 8,192; 192 new tokens; top-10 log-probabilities; one slot; n_ubatch 512 | Method | pre-registration, section 2 | yes |
+| 90 bases; 8 and 60 round trips; three tools; five ambiguous types; six arms | Method | pre-registration, sections 3 and 4 | yes |
+| "Look up record 153", "Add up the numbers from earlier" | Method | `README.md`, "Study design" | yes |
+| 6,480 arms passed | Method | `2026-09-11-main-study.md`, "Validity" | yes |
+| Margin bins 0.5 and 2 nats | Method, Introduction | pre-registration, section 5 | yes |
+| Family sizes 24, 16, 6 | Method | pre-registration, section 7 | yes |
+| 180 short-history Spark turns exact | Results | `2026-09-11-main-study.md`, "Hypotheses" | yes |
+| 11 / 10 / 9 changes by kind, none to a different tool | Results | `2026-09-11-main-study.md`, "Where the changes happen"; recounted from `study/changed_turns.json` (11 same tool, 10 call to no call, 9 no call to call) | yes |
+| List of 23 numbers, value 65 dropped; record 73, value 701 | Results, Appendix D | `2026-09-11-main-study.md`, examples | yes |
+| 20 / 8 / 2 changes by request type | Appendix D | `2026-09-11-main-study.md`, "What changed" | yes |
+| All eight natural-boundary family B members claimed | Results | `2026-09-11-main-study.md`, "Family B" | yes |
+| Pairs 360 / 360 / 360 / 360 / 180 / 180 and claimed yes / no / no / yes / no / yes | Table 4 | `study/analysis.json`, family C | yes |
+| G1 prompts of 1,911 and 1,793 tokens; 11 boundaries; 16 positions | Figure 3 caption | `2026-09-10-g1.md`, "Setup" | yes; the caption first said "about 1.9K", corrected to "1.8–1.9K" |
+| At most 511 re-evaluated tokens | Mechanism | follows from k mod 512 | yes |
+| 4,268-token prompt; 13 boundaries; exactness to 2,560 with flash attention off; rules fail 2, 6 and 20 times | Mechanism, Appendix C | `2026-09-11-spark-window.md` | yes |
+| Table 5 grid, 13 rows by 4 runs | Appendix C | `2026-09-11-spark-window.md`, "Exact grid" | yes, checked cell by cell |
+| 161 parsed calls round-trip | Appendix E | `README.md`, "How the measurement is kept honest" | yes |
+| Pilot of 20 turns per model | Appendix E | design spec, section 10.2, gate G3 | yes |
+| 11 against 3 on the hybrid | Limitations | family A, same as the macros | yes |
+
+One difference from the findings text: the main-study findings give Spark's
+median drift on short explicit requests as 3.1e-8. The result file holds
+3.046e-8, so the paper prints 3.0e-8.
+
+## Headline claims
+
+Each claim in `HANDOFF.md`, as the paper prints it.
+
+| Handoff claim | In the paper | Label in the paper |
+|---|---|---|
+| Never bit-exact, 1,080 of 1,080 | Abstract, Introduction, Results "Exactness" | confirmatory |
+| 2–12% of ambiguous requests; 0 of 540 explicit turns | Printed as 2.2–12.2%, and "0 of 1,080 restores" of explicit requests (540 turns, each restored at two boundaries); "540 explicit-request turns" appears only for exactness | confirmatory |
+| 29% of near-tie turns against 0.1% of confident turns | Introduction, Results "Where the changes happen", Figure 2 | pre-registered secondary, stated as descriptive |
+| Micro-batch tiling, 66 of 66 | Mechanism "Test", Figure 3 | exploratory, stated as one prompt per model |
+| Snapping exact on hybrid and dense, median 158–443 tokens; fails on sliding window at 4,096 | Abstract, Mechanism | confirmatory for exactness; the cost is pre-registered secondary |
+| Tool grammar side finding and PR #26472 | Appendix F only. The handoff's "Laguna-XS regression, reported with a failing test and a fix" is **not** in the paper: it was not re-verified on the PR thread | — |
+
+## Honesty rules
+
+| Rule | Met | Where |
+|---|---|---|
+| Failed predictions reported | yes | Introduction, Table 2, Limitations "Predictions that failed" |
+| Pre-registered and exploratory analyses labelled | yes | Method "Evidence labels"; labels in Results and Mechanism paragraph headings and in every figure caption |
+| Scope stated | yes | Abstract, Introduction, Limitations "Scope" |
+| No claim that caching can change output as a finding | yes | Introduction and Related Work attribute it to the llama.cpp documentation |
+| No claim about other engines | yes | Limitations "Scope"; vLLM and SGLang appear only as cited prior reports |
+
+## Build
+
+`python scripts/build_paper.py`: both layouts build, no undefined references,
+the ACM body ends on page 6. The abstract is about 165 words, above the plan's
+150-word target; EuroMLSys 2026 set no abstract limit.

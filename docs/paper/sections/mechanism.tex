@@ -4,8 +4,9 @@
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.82\textwidth]{figures/g1_exactness_grid.pdf}
+% src: docs/findings/2026-09-10-g1.md, "Setup" (1,911 and 1,793 prompt tokens; 11 boundaries; 16 new tokens)
 \caption{Restore is bit-exact when the reuse boundary $k$ is a multiple of
-\nub{} (exploratory, gate G1). One prompt of about 1.9K tokens per model,
+\nub{} (exploratory, gate G1). One prompt of 1.8--1.9K tokens per model,
 11 boundaries, three micro-batch sizes. Inexact cells show the largest total
 variation distance from recompute over 16 generated positions.}
 \label{fig:grid}
