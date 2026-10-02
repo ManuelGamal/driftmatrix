@@ -1,6 +1,8 @@
 % Shared by main.tex (ACM layout) and arxiv.tex (arXiv layout).
+\usepackage{array}
 \input{numbers}
 \newcommand{\nub}{\texttt{n\_ubatch}}
+\emergencystretch=2em
 \settopmatter{printacmref=false}
 \setcopyright{none}
 \renewcommand\footnotetextcopyrightpermission[1]{}
@@ -34,5 +36,8 @@
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{refs}
+
+\appendix
+\input{sections/appendix}
 
 \end{document}

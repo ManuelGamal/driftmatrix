@@ -1,0 +1,197 @@
+\section{Families B and C in Full}
+\label{app:families}
+
+Table~\ref{tab:drift} gives the median drift at natural boundaries. Family~B
+tests the hybrid only; the other two models are shown for reference. At snapped
+boundaries drift was exactly zero on Ornith and Qwen3 in every condition.
+Table~\ref{tab:contrasts} gives the six contrasts of family~C. C2 and C3 are
+numerically identical because snapped drift was exactly zero on both the hybrid
+and the dense model, so the interaction reduces to the natural-boundary
+difference.
+
+\begin{table}[h]
+\caption{Median per-turn mean JSD at natural boundaries, 90 turns per cell
+(confirmatory for Ornith, descriptive for the others).}
+\label{tab:drift}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & \multicolumn{2}{c}{Short history} & \multicolumn{2}{c}{Long history} \\
+Model & explicit & ambiguous & explicit & ambiguous \\
+\midrule
+Ornith & $\DriftOrnithShortExp$ & $\DriftOrnithShortAmb$ & $\DriftOrnithLongExp$ & $\DriftOrnithLongAmb$ \\
+Spark & $\DriftSparkShortExp$ & $\DriftSparkShortAmb$ & $\DriftSparkLongExp$ & $\DriftSparkLongAmb$ \\
+Qwen3 & $\DriftQwenShortExp$ & $\DriftQwenShortAmb$ & $\DriftQwenLongExp$ & $\DriftQwenLongAmb$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table*}[t]
+\caption{Family~C: mechanism contrasts (confirmatory). ``More / less'' counts
+the turns on which the first side of the contrast was larger or smaller. The
+estimate is the mean paired difference in per-turn mean JSD, except for C6,
+which is a difference in action-change rate. Intervals are 95\% paired
+bootstrap intervals.}
+\label{tab:contrasts}
+% src for the Pairs and Claimed columns: docs/findings/2026-09-11-main-study.md, "Family C"
+\small
+\begin{tabular}{@{}llrrrll@{}}
+\toprule
+ & Contrast & Pairs & More & Less & Estimate and 95\% interval & Claimed \\
+\midrule
+C1 & Snapping on the hybrid (natural $-$ snapped) & 360 & \COnePos & \COneNeg & $\COneEst$ \ $[\COneLo,\ \COneHi]$ & yes \\
+C2 & Snapping $\times$ architecture (hybrid vs.\ dense) & 360 & \CTwoPos & \CTwoNeg & $\CTwoEst$ \ $[\CTwoLo,\ \CTwoHi]$ & no \\
+C3 & Hybrid $-$ dense, natural boundary & 360 & \CThreePos & \CThreeNeg & $\CThreeEst$ \ $[\CThreeLo,\ \CThreeHi]$ & no \\
+C4 & Hybrid $-$ sliding window, natural boundary & 360 & \CFourPos & \CFourNeg & $\CFourEst$ \ $[\CFourLo,\ \CFourHi]$ & yes \\
+C5 & Long $-$ short history on the hybrid & 180 & \CFivePos & \CFiveNeg & $\CFiveEst$ \ $[\CFiveLo,\ \CFiveHi]$ & no \\
+C6 & Ambiguous $-$ explicit on the hybrid (action change) & 180 & \CSixPos & \CSixNeg & $\CSixEst$ \ $[\CSixLo,\ \CSixHi]$ & yes \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Per-Turn Drift}
+\label{app:drift}
+
+Figure~\ref{fig:drift} shows the drift of every natural-boundary turn.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\columnwidth]{figures/drift_per_turn.pdf}
+\caption{Per-turn mean JSD between restore and recompute at natural
+boundaries, one point per turn, both history lengths. Black bars and labels are
+medians. Ornith is the hybrid recurrent model, Spark the sliding-window model,
+Qwen3 the dense model.}
+\label{fig:drift}
+\end{figure}
+
+\section{Sliding-Window Follow-Up}
+\label{app:spark}
+
+This follow-up is exploratory. Its plan and predictions were committed before
+it ran, but it was not part of the pre-registration, and it uses one prompt:
+the first long-history main-study turn, 4{,}268 tokens, with 13 reuse
+boundaries and 16 generated tokens per case. Table~\ref{tab:sparkgrid} shows
+which restores were bit-exact. With default settings, the rule ``exact when
+$k$ is a multiple of \nub{} and $k \leq 512$'' fits all \SparkCases{} cases.
+The alternatives fit worse: ``aligned and $k \leq \nub$'' fails twice,
+``$k \leq 512$ regardless of alignment'' six times, and alignment alone 20
+times. In a fifth run without \texttt{-{}-swa-full}, the server saved each slot
+correctly but then evaluated the whole prompt on all 13 restores, so no restore
+was proven and every output equalled recompute.
+
+\begin{table}[h]
+\caption{Spark: bit-exact (E) or inexact (--) restores by reuse boundary $k$
+and server configuration (exploratory). FA off: flash attention disabled.}
+\label{tab:sparkgrid}
+% src: docs/findings/2026-09-11-spark-window.md, "Exact grid"
+\small
+\begin{tabular}{@{}rcccc@{}}
+\toprule
+ & \multicolumn{3}{c}{\nub{} (default settings)} & FA off \\
+$k$ & 256 & 512 & 1{,}024 & 512 \\
+\midrule
+256 & E & -- & -- & -- \\
+384 & -- & -- & -- & -- \\
+512 & E & E & -- & E \\
+640 & -- & -- & -- & -- \\
+768 & -- & -- & -- & -- \\
+1{,}024 & -- & -- & -- & E \\
+1{,}280 & -- & -- & -- & -- \\
+1{,}536 & -- & -- & -- & E \\
+2{,}048 & -- & -- & -- & E \\
+2{,}560 & -- & -- & -- & E \\
+3{,}072 & -- & -- & -- & -- \\
+3{,}584 & -- & -- & -- & -- \\
+4{,}096 & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Examples of Changed Actions}
+\label{app:examples}
+
+% src: docs/findings/2026-09-11-main-study.md, "Where the changes happen", Examples
+Three of the \ChangesTotal{} changes, all on Ornith at natural boundaries:
+
+\begin{itemize}
+\item Long history, ``Pull up that record again'': recompute calls
+  \texttt{lookup\_record(73)}; restore answers in text, ``The record you're
+  referring to is record 73, which has field=beta value=701.''
+\item Short history, ``Write that up for me'': recompute asks ``Could you
+  clarify what you'd like me to write up?''; restore calls
+  \texttt{format\_report} with a summary.
+\item Long history, ``Add up the numbers from earlier'': both call
+  \texttt{compute\_sum}, but restore drops the value 65 from a list of 23
+  numbers, so the tool computes a different total.
+\end{itemize}
+
+By request type, 20 changes were on ``Add up the numbers from earlier'', 8 on
+``Pull up that record again'' and 2 on ``Write that up for me''. The two
+request types that ask the model to choose between tools produced none.
+
+\section{Measurement Safeguards}
+\label{app:safeguards}
+
+% src: README.md, "How the measurement is kept honest"; docs/findings/2026-09-10-g2.md; docs/findings/2026-09-10-g3.md
+\begin{itemize}
+\item \textbf{Prompt rendering.} The server's template endpoint does not accept
+  tool schemas, so prompts are rendered offline from each model's embedded chat
+  template. The offline rendering was checked against the server: byte for byte
+  without tools, and token count for token count with tools.
+\item \textbf{Tool-call parsing.} Each model has its own tool-call syntax. A
+  parsed call is accepted only if writing it back through the model's chat
+  template reproduces the model's exact text. All 161 parsed calls in the
+  validation set did.
+\item \textbf{Blinding.} The runner printed only arm-validity counts while the
+  study ran, wrote whole turns atomically, and refused a server with a different
+  build or model. The analysis script refused to run until all three models had
+  finished.
+\item \textbf{Gates.} Four gate experiments preceded the study: G0 (the state
+  interface works), G1 (the mechanism, \S\ref{sec:mechanism}), G2 (rendering and
+  parsing) and G3, a pilot on 20 separate turns per model that checked the arm
+  proofs, the exactness of snapped restores on short histories, and that the
+  hybrid drifted at natural boundaries. Pilot turns are not in the analysis.
+\item \textbf{Tests.} The harness has a test suite that needs no GPU, including
+  a simulated server in which micro-batch tiling is the only source of
+  divergence.
+\end{itemize}
+
+\section{A Side Finding: Tool-Call Grammar}
+\label{app:grammar}
+
+% src: docs/findings/2026-09-11-spark-argument-order.md
+While validating the parsers we saw one Spark tool call whose arguments
+differed between our parse and the server's. We first attributed this to the
+server's parser. Reproducing it inside llama.cpp showed the parser was correct:
+the server's tool-call grammar for Spark's format requires the required
+arguments in schema order, Spark prefers a different order, and under the
+grammar it wrote a different argument value. Reversing only the order of the
+schema's properties restored the model's unconstrained output. An open pull
+request makes the argument order free~\cite{llamacpp-26472}. The main study
+generates without a tool grammar and is not affected.
+
+\section{Reproduction}
+\label{app:repro}
+
+Code, raw gate reports, the per-turn analysis table and all changed turns are
+at \url{https://github.com/manuelgamal/driftmatrix}. The analysis plan is
+frozen at the Git tag named \texttt{prereg-2026-09-10}.
+The test suite needs no GPU. With a
+model file and a llama.cpp build:
+
+{\small
+\begin{verbatim}
+llama-server -m <model.gguf> --jinja -c 8192
+  -ngl 99 -np 1 -b 2048 -ub 512 --cache-ram 0
+  --ctx-checkpoints 0 --slot-save-path <dir>
+  --port 8090     # add --swa-full for Spark
+
+python scripts/run_study.py --model ornith
+  --gguf <model.gguf> --slot-dir <dir>
+python scripts/analyze_study.py
+  --gguf ornith=<..> --gguf qwen3=<..>
+  --gguf spark=<..>
+python scripts/make_figures.py --paper
+python scripts/paper_numbers.py
+\end{verbatim}
+}
