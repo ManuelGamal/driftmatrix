@@ -8,11 +8,11 @@ The two recompute arms were bit-identical on every turn (\FloorInexact{} of
 attributable to restore. Every restore result reproduced in its second
 replicate, and no action change appeared in only one replicate.
 
-\paragraph{Exactness (confirmatory).}
+\paragraph{Exactness.}
 At natural boundaries, \NatInexact{} of \NatTurns{} restores were not
-bit-exact. That includes all \ExplicitTurns{} explicit-request turns, where
+bit-exact (a descriptive count). That includes all \ExplicitTurns{} explicit-request turns, where
 restore and recompute generated identical tokens but never identical
-log-probabilities. At snapped boundaries every restore was bit-exact on Ornith
+log-probabilities. At snapped boundaries (confirmatory, H1) every restore was bit-exact on Ornith
 and on Qwen3 (\SnapValidOrnith{} of \SnapValidOrnith{} turns each). On Spark,
 the 180 short-history turns were exact and all \SnapInexactSpark{} long-history
 turns were not, which falsifies H1 for that model.
@@ -66,7 +66,7 @@ of \MarginAllContestedN{} contested turns (\MarginAllContestedPct\%) and
 (\MarginAllConfidentPct\%). The predicted ordering holds on each model. This
 analysis was pre-registered with intervals only, so it is descriptive.
 
-\paragraph{What changed.}
+\paragraph{What changed (descriptive).}
 % src: docs/findings/2026-09-11-main-study.md, "Where the changes happen"; recounted from docs/findings/study/changed_turns.json
 Of the \ChangesTotal{} changes, 11 were the same tool called with different
 arguments, 10 were a tool call that became a text reply, and 9 were a text
@@ -78,7 +78,7 @@ different total (Appendix~\ref{app:examples}).
 \paragraph{Distribution drift (confirmatory).}
 Restore shifted the hybrid's output distribution at every natural boundary
 (family~B, all eight natural-boundary members claimed; H2). On explicit
-requests with short histories the median per-turn JSD was
+requests with short histories the median per-turn mean JSD (descriptive) was
 $\DriftOrnithShortExp$ on Ornith against $\DriftQwenShortExp$ on Qwen3 and
 $\DriftSparkShortExp$ on Spark. Of the six contrasts in family~C, three are
 claimed: snapping removes drift on the hybrid (C1), the hybrid drifts more than
@@ -86,7 +86,11 @@ the sliding-window model (C4), and action changes are more frequent on
 ambiguous than explicit requests (C6). The hybrid drifted more than the dense
 model on \CThreePos{} of 360 turns, but the interval of the mean difference
 includes zero ($[\CThreeLo, \CThreeHi]$), so C3 is not claimed: a few
-dense-model turns drifted heavily. Drift did not grow with history length (C5).
+dense-model turns drifted heavily. Drift was not shown
+to grow with history length (C5). The models see different prompt lengths for
+the same conversation (Table~\ref{tab:setup}); in an exploratory check within
+each history length, the hybrid still drifted more than the sliding-window
+model.
 Appendix~\ref{app:families} has the full tables.
 
 \begin{table}[t]
@@ -103,7 +107,7 @@ H1 & Snapped restores are bit-exact on every model & Holds on hybrid and dense; 
 H2 & Restore shifts the hybrid's output distribution & Supported \\
 H3 & Restore changes the hybrid's actions & Partial: ambiguous requests only \\
 H4 & The hybrid diverges more than both controls & Partial: more than sliding window; not shown for dense \\
-H5 & Snapping helps, more on the hybrid than the dense model & Partial: helps; not more on the hybrid \\
+H5 & Snapping helps, more on the hybrid than the dense model & Partial: helps; a larger effect on the hybrid not shown \\
 H6 & Divergence grows with history length & \textbf{Not supported} \\
 H7 & Action changes concentrate in ambiguous requests & Supported \\
 \bottomrule

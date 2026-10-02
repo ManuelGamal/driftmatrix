@@ -18,7 +18,7 @@ adds no error. The difference comes from how the prompt is split into
 micro-batches. Recompute tiles the whole prompt from position 0:
 $[0,U), [U,2U), \dots$ Restore tiled the prefix $[0,k)$ when it was cached, and
 then tiles the suffix afresh starting at $k$. The two tilings coincide only when
-$k$ is a multiple of $U$. Otherwise the same matrix products, attention sums and
+$k$ is a multiple of $U$. Otherwise, we infer, the same matrix products, attention sums and
 recurrent updates are accumulated in a different order, and floating-point
 addition is not associative~\cite{tml-nondeterminism,yuan-nondeterminism}.
 
@@ -37,13 +37,13 @@ model.
 The rule suggests a fix that needs no change to the engine: round the reuse
 boundary down to a multiple of \nub{} and re-evaluate the remainder. In the
 main study this made every restore bit-exact on Ornith and Qwen3, which removed
-all drift and every action change on those models (H1; contrast C1). The cost
+all drift and every action change on those models (H1; contrast C1). The cost (pre-registered secondary)
 is the re-evaluated remainder: a median of \SnapCostOrnithShort{} and
 \SnapCostOrnithLong{} tokens per turn on Ornith (short and long histories),
 \SnapCostQwenShort{} and \SnapCostQwenLong{} on Qwen3, and at most 511 by
 construction.
 
-\paragraph{Where snapping fails.}
+\paragraph{Where snapping fails (confirmatory; follow-up exploratory).}
 On Spark, snapped restores were exact at $k = 512$ and inexact at $k = 4{,}096$,
 on all \SnapInexactSpark{} long-history turns, and \ASparkSnapLongAmb{} action
 changes remained. Alignment to \nub{} is therefore not sufficient on the

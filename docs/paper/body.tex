@@ -3,6 +3,12 @@
 \input{numbers}
 \newcommand{\nub}{\texttt{n\_ubatch}}
 \emergencystretch=2em
+% End of the body: a label for the page check, and the number of body floats so far.
+\providecommand\bodyfloats[2]{}
+\makeatletter
+\newcommand\markendofbody{\phantomsection\label{endofbody}%
+  \immediate\write\@auxout{\string\bodyfloats{\arabic{figure}}{\arabic{table}}}}
+\makeatother
 \settopmatter{printacmref=false}
 \setcopyright{none}
 \renewcommand\footnotetextcopyrightpermission[1]{}
@@ -32,7 +38,7 @@
 \input{sections/conclusion}
 \input{sections/acknowledgements}
 
-\phantomsection\label{endofbody}
+\markendofbody
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{refs}

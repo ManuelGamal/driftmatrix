@@ -1,15 +1,16 @@
 \section{Limitations}
 \label{sec:limits}
 
-\paragraph{Predictions that failed.}
-Four pre-registered expectations did not hold. (1)~We expected action changes on
-the hybrid and none on the dense and sliding-window controls; all three changed
-actions, at similar rates on short histories. Restore-induced action changes are
-a property of near-tie decisions, not of recurrent state alone. (2)~We
-expected snapping to be exact on every model (H1); it fails on the
-sliding-window model beyond its window. (3)~Drift did not grow with history
-length (H6). (4)~The hybrid's mean drift was not shown to exceed the dense
-model's (C3), although it was larger on most turns.
+\paragraph{Expectations that failed.}
+Four expectations did not hold. (1)~Our design document, written before the
+data, expected action changes on the hybrid and none on the dense and
+sliding-window controls; all three changed actions, at similar rates on short
+histories. Restore-induced action changes appear to be a property of near-tie
+decisions, not of recurrent state alone. (2)~We pre-registered that snapping
+would be exact on every model (H1); on the sliding-window model it was inexact
+at every 4{,}096-token boundary. (3)~Drift was not shown to grow with history
+length on the hybrid (H6). (4)~The hybrid's mean drift was not shown to exceed
+the dense model's (C3), although it was larger on most turns.
 
 \paragraph{Scope.}
 One engine build, one quantisation (Q4\_K\_M), one GPU, $\nub = 512$, three

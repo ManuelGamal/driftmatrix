@@ -92,4 +92,5 @@ size. Family~A (24 members) tests action changes per model, boundary, history
 length and request type; family~B (16) tests drift on the hybrid; family~C (6)
 tests paired contrasts with exact sign tests and bootstrap intervals. The Holm
 correction~\cite{holm} is applied within each family. An effect is claimed only
-if the test rejects and its interval excludes zero.
+if the test rejects after correction and its interval excludes zero; a
+family~C contrast must also have the predicted sign.
