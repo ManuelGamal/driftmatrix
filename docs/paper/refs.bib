@@ -1,0 +1,190 @@
+% Every entry here has a row in VERIFICATION.md.
+
+@misc{llamacpp,
+  author       = {Georgi Gerganov and {llama.cpp contributors}},
+  title        = {llama.cpp: {LLM} inference in {C/C++}},
+  howpublished = {GitHub repository, ggml-org/llama.cpp, build b10839},
+  year         = {2026},
+  url          = {https://github.com/ggml-org/llama.cpp},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{llamacpp-server,
+  author       = {{llama.cpp contributors}},
+  title        = {llama.cpp {HTTP} server documentation: the \texttt{cache\_prompt} option and slot save/restore},
+  howpublished = {tools/server/README.md, ggml-org/llama.cpp},
+  year         = {2026},
+  url          = {https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{tml-nondeterminism,
+  author       = {Horace He and {Thinking Machines Lab}},
+  title        = {Defeating Nondeterminism in {LLM} Inference},
+  howpublished = {Thinking Machines Lab: Connectionism},
+  year         = {2025},
+  month        = sep,
+  url          = {https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{yuan-nondeterminism,
+  author        = {Jiayi Yuan and Hao Li and Xinheng Ding and Wenya Xie and Yu-Jhe Li and Wentian Zhao and Kun Wan and Jing Shi and Xia Hu and Zirui Liu},
+  title         = {Understanding and Mitigating Numerical Sources of Nondeterminism in {LLM} Inference},
+  year          = {2025},
+  eprint        = {2506.09501},
+  archivePrefix = {arXiv}
+}
+
+@misc{vllm-batch-invariant,
+  author       = {{vLLM contributors}},
+  title        = {Batch Invariance},
+  howpublished = {vLLM documentation},
+  year         = {2026},
+  url          = {https://docs.vllm.ai/en/latest/features/batch_invariance/},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{tracelab,
+  author        = {Kan Zhu and Mathew Jacob and Chenxi Ma and Yi Pan and Stephanie Wang and Arvind Krishnamurthy and Baris Kasikci},
+  title         = {{TraceLab}: Characterizing Coding Agent Workloads for {LLM} Serving},
+  year          = {2026},
+  eprint        = {2606.30560},
+  archivePrefix = {arXiv}
+}
+
+@misc{policy-runtime,
+  author        = {Rui Zhang and Chaeeun Kim and Liting Hu},
+  title         = {A Policy-Driven Runtime Layer for Agentic {LLM} Serving},
+  year          = {2026},
+  eprint        = {2605.27744},
+  archivePrefix = {arXiv}
+}
+
+@misc{vllm-mooncake,
+  author       = {Yifan Qiao and Trong Dao Le and Ao Shen and Zhewen Li and Bowen Wang},
+  title        = {Serving Agentic Workloads at Scale with {vLLM} x {Mooncake}},
+  howpublished = {vLLM blog},
+  year         = {2026},
+  month        = may,
+  url          = {https://vllm.ai/blog/2026-05-06-mooncake-store},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{lmcache-hybrid,
+  author       = {{LMCache contributors}},
+  title        = {Hybrid Attention Models},
+  howpublished = {LMCache documentation},
+  year         = {2026},
+  url          = {https://docs.lmcache.ai/mp/hybrid_models.html},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{llamacpp-20225,
+  author       = {williamtwomey},
+  title        = {Eval bug: {Qwen} 3.5 Full prompt re-processing on every conversation turn},
+  howpublished = {GitHub issue \#20225, ggml-org/llama.cpp},
+  year         = {2026},
+  url          = {https://github.com/ggml-org/llama.cpp/issues/20225},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{vllm-26201,
+  author       = {bohnstingl},
+  title        = {{[Tracking Issue]}: Prefix Caching for Hybrid Models},
+  howpublished = {GitHub issue \#26201, vllm-project/vllm},
+  year         = {2025},
+  url          = {https://github.com/vllm-project/vllm/issues/26201},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{vllm-40696,
+  author       = {Gaodzlearn},
+  title        = {{[Feature]}: Prefix caching completely ineffective for {Mamba}-hybrid models ({Qwen3.5}) when prompt $<$ block\_size (528 tokens)},
+  howpublished = {GitHub issue \#40696, vllm-project/vllm},
+  year         = {2026},
+  url          = {https://github.com/vllm-project/vllm/issues/40696},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{vllm-43587,
+  author       = {ennka},
+  title        = {{[Bug]}: Prefix caching fails for incremental multimodal requests on {Mamba}-Attention hybrid models ({Qwen3.5})},
+  howpublished = {GitHub issue \#43587, vllm-project/vllm},
+  year         = {2026},
+  url          = {https://github.com/vllm-project/vllm/issues/43587},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{sglang-21846,
+  author       = {hzh0425},
+  title        = {{[Roadmap]}: {SGLang} Distributed {KVCache} System For Agentic Workload},
+  howpublished = {GitHub issue \#21846, sgl-project/sglang},
+  year         = {2026},
+  url          = {https://github.com/sgl-project/sglang/issues/21846},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{llamacpp-26472,
+  author       = {i386},
+  title        = {chat: enforce required tagged tool args in any order via permute()},
+  howpublished = {GitHub pull request \#26472, ggml-org/llama.cpp (open)},
+  year         = {2026},
+  url          = {https://github.com/ggml-org/llama.cpp/pull/26472},
+  note         = {Accessed 2026-10-02}
+}
+
+@article{clopper-pearson,
+  author  = {C. J. Clopper and E. S. Pearson},
+  title   = {The Use of Confidence or Fiducial Limits Illustrated in the Case of the Binomial},
+  journal = {Biometrika},
+  volume  = {26},
+  number  = {4},
+  pages   = {404--413},
+  year    = {1934},
+  doi     = {10.1093/biomet/26.4.404}
+}
+
+@article{holm,
+  author  = {Sture Holm},
+  title   = {A Simple Sequentially Rejective Multiple Test Procedure},
+  journal = {Scandinavian Journal of Statistics},
+  volume  = {6},
+  number  = {2},
+  pages   = {65--70},
+  year    = {1979}
+}
+
+@misc{ornith,
+  author       = {{Ornith AI}},
+  title        = {{Ornith-1.5-9B}},
+  howpublished = {Hugging Face model card, ornith-ai/Ornith-1.5-9B},
+  year         = {2026},
+  url          = {https://huggingface.co/ornith-ai/Ornith-1.5-9B},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{spark,
+  author       = {{SparkLLM Team}},
+  title        = {{Spark-X2.5-4B}},
+  howpublished = {Hugging Face model card, XHToken/Spark-X2.5-4B},
+  year         = {2026},
+  url          = {https://huggingface.co/XHToken/Spark-X2.5-4B},
+  note         = {Accessed 2026-10-02}
+}
+
+@misc{qwen3,
+  author        = {An Yang and Anfeng Li and Baosong Yang and Beichen Zhang and Binyuan Hui and others},
+  title         = {{Qwen3} Technical Report},
+  year          = {2025},
+  eprint        = {2505.09388},
+  archivePrefix = {arXiv}
+}
+
+@misc{prereg,
+  author       = {Manuel Gamal},
+  title        = {driftmatrix: pre-registered analysis plan},
+  howpublished = {Git tag \texttt{prereg-2026-09-10}, docs/preregistration/2026-09-10-analysis-plan.md},
+  year         = {2026},
+  url          = {https://github.com/manuelgamal/driftmatrix}
+}
