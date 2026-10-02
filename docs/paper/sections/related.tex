@@ -23,11 +23,13 @@ traffic~\cite{vllm-mooncake,policy-runtime}. These studies measure speed. Ours
 measures whether the reused state yields the same output.
 
 \paragraph{Hybrid models and prefix caching.}
-Prefix caching for hybrid models is an open problem in several engines: a
-llama.cpp issue reports full prompt reprocessing on every
-turn~\cite{llamacpp-20225}, and vLLM tracks hybrid prefix caching and its
-block-alignment limits~\cite{vllm-26201,vllm-40696,vllm-43587}. SGLang has a
-roadmap for agentic cache management~\cite{sglang-21846}. The LMCache
+Prefix caching for hybrid models has been troublesome in several engines. A
+llama.cpp issue, since closed, reported full prompt reprocessing on every turn
+for a hybrid model~\cite{llamacpp-20225}. vLLM tracks hybrid prefix caching in
+an open issue~\cite{vllm-26201}, with reports that caching works only in
+blocks of 528 tokens~\cite{vllm-40696} and misses on incremental multimodal
+requests~\cite{vllm-43587}. An SGLang roadmap describes its cache's
+compatibility with hybrid models as limited~\cite{sglang-21846}. The LMCache
 documentation notes that for hybrid models generation ``is not bit-exact
 between a cached and a fresh run''~\cite{lmcache-hybrid}, without quantifying
 the difference.

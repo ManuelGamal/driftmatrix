@@ -112,6 +112,9 @@ def _family_c(analysis, out):
         out[name + "Pos"], out[name + "Neg"] = str(v["n_pos"]), str(v["n_neg"])
         out[name + "Est"] = sci(v["estimate"])
         out[name + "Lo"], out[name + "Hi"] = sci(v["interval"]["low"]), sci(v["interval"]["high"])
+    stratum = analysis["families"]["C"]["C6_stratum_L3"]          # a difference of rates, in percentage points
+    out["CSixEstPct"] = pct(stratum["estimate"])
+    out["CSixLoPct"], out["CSixHiPct"] = pct(stratum["interval"]["low"]), pct(stratum["interval"]["high"])
 
 
 def _drift(analysis, out):

@@ -29,10 +29,18 @@ BIN_NAMES = {"near_tie": "near-tie\n< 0.5 nats", "contested": "contested\n0.5–
 JSD_FLOOR = 1e-10        # per-turn drift below this is drawn on the floor line
 # Paper figures: no title (the caption carries it), sized in inches for inclusion at
 # column width (g1_exactness_grid spans both columns).
-PAPER_SIZES = {"g1_exactness_grid": (7.0, 4.4), "action_changes": (4.8, 3.3),
-               "margin_bins": (4.8, 3.0), "drift_per_turn": (4.8, 3.2)}
+PAPER_SIZES = {"g1_exactness_grid": (7.0, 4.6), "action_changes": (4.6, 3.9),
+               "margin_bins": (4.6, 3.1), "drift_per_turn": (4.6, 3.3)}
+# Paper figures are scaled down to the column on the page, so their text is drawn larger:
+# an 8.5 pt label prints at 7 pt or more in a 3.33 in column.
+PAPER_FONT_SCALE = 1.17
 # Shorter labels for the paper's narrower figures; the caption names the architectures in full.
 PAPER_LABELS = {"ornith": "Ornith (hybrid)", "spark": "Spark (window)", "qwen3": "Qwen3 (dense)"}
+
+
+def _pt(size, paper):
+    """Font size in points: as given for the README figure, scaled up for the paper figure."""
+    return size * PAPER_FONT_SCALE if paper else size
 
 
 def _save(fig, path, paper=False):
@@ -52,6 +60,9 @@ def _titles(fig, title, subtitle):
 def _finish(fig, path, title, subtitle, top, paper):
     """Title block and layout for the README figure; neither for the paper figure."""
     if paper:
+        for ax in fig.axes:
+            ax.set_facecolor("white")
+            ax.tick_params(labelsize=_pt(9, True))
         fig.tight_layout()
     else:
         _titles(fig, title, subtitle)
@@ -89,7 +100,7 @@ def plot_exactness_grid(grid, path, paper=False):
                 ax.add_patch(Rectangle((j + 0.03, i + 0.05), 0.94, 0.9, linewidth=0,
                                        facecolor=SERIES[0] if exact else "#efeee9"))
                 ax.text(j + 0.5, i + 0.5, "exact" if exact else f"{tv:.3f}", ha="center", va="center",
-                        fontsize=8.5, color=SURFACE if exact else INK_SECONDARY,
+                        fontsize=_pt(8.5, paper), color=SURFACE if exact else INK_SECONDARY,
                         weight="semibold" if exact else "normal")
         ax.set_xlim(0, len(ubs))
         ax.set_ylim(len(ks), 0)
@@ -98,13 +109,13 @@ def plot_exactness_grid(grid, path, paper=False):
         ax.set_yticks([i + 0.5 for i in range(len(ks))])
         ax.set_yticklabels([str(k) for k in ks])
         ax.xaxis.tick_top()
-        ax.tick_params(length=0, colors=INK_SECONDARY, labelsize=9)
+        ax.tick_params(length=0, colors=INK_SECONDARY, labelsize=_pt(9, paper))
         for side in ax.spines.values():
             side.set_visible(False)
-        ax.set_xlabel("n_ubatch (micro-batch size)", color=INK_SECONDARY, fontsize=9, labelpad=8)
+        ax.set_xlabel("n_ubatch (micro-batch size)", color=INK_SECONDARY, fontsize=_pt(9, paper), labelpad=8)
         ax.xaxis.set_label_position("top")
-        ax.set_title(MODEL_LABELS.get(m, m), loc="left", fontsize=10, color=INK_PRIMARY, pad=34)
-    axes[0][0].set_ylabel("reuse boundary k (tokens)", color=INK_SECONDARY, fontsize=9)
+        ax.set_title(MODEL_LABELS.get(m, m), loc="left", fontsize=_pt(10, paper), color=INK_PRIMARY, pad=34)
+    axes[0][0].set_ylabel("reuse boundary k (tokens)", color=INK_SECONDARY, fontsize=_pt(9, paper))
     _finish(fig, path, "Restore is bit-exact exactly when the reuse boundary is a multiple of n_ubatch",
             "Gate G1 · one ~1.9K-token prompt per model · inexact cells show the worst-position "
             "total variation against recompute", 0.93, paper)
@@ -145,8 +156,9 @@ def plot_action_changes(analysis, path, paper=False):
     _style(ax)
     ax.grid(axis="y", visible=False)
     ax.grid(axis="x", color=GRID, linewidth=0.8)
-    styles = {"natural": (SERIES[1], MARKERS[1], -0.17, "natural boundary" if paper else "natural turn boundary"),
-              "snapped": (SERIES[0], MARKERS[0], 0.17,
+    styles = {"natural": (SERIES[1], MARKERS[1], -0.21 if paper else -0.17,
+                          "natural boundary" if paper else "natural turn boundary"),
+              "snapped": (SERIES[0], MARKERS[0], 0.21 if paper else 0.17,
                           "snapped boundary" if paper else "boundary snapped to a multiple of n_ubatch")}
     for boundary, (color, marker, dy, label) in styles.items():
         sel = [p for p in points if p["boundary"] == boundary]
@@ -157,7 +169,7 @@ def plot_action_changes(analysis, path, paper=False):
         ax.scatter(xs, ys, color=color, marker=marker, s=62, edgecolor=SURFACE, linewidth=1.3,
                    zorder=3, label=label)
         for p, yy in zip(sel, ys):
-            ax.text(100 * p["high"] + 0.5, yy, f"{p['events']}/{p['n']}", va="center", fontsize=8.5,
+            ax.text(100 * p["high"] + 0.5, yy, f"{p['events']}/{p['n']}", va="center", fontsize=_pt(8.5, paper),
                     color=INK_PRIMARY if p["events"] else INK_SECONDARY)
     ax.set_yticks([y_of[r] for r in rows])
     ax.set_yticklabels([f"{PAPER_LABELS[m]} · {b}" if paper else f"{SHORT_LABELS[m]} · {b} history"
@@ -165,8 +177,8 @@ def plot_action_changes(analysis, path, paper=False):
     ax.set_ylim(y - 0.4, -0.6)
     ax.set_xlim(-0.8, max(26.0, 100 * max(p["high"] for p in points) + 4))
     ax.set_xlabel("turns where restore changed the action (%)" if paper
-                  else "turns where restore changed the agent's action (%)", color=INK_SECONDARY, fontsize=9)
-    ax.legend(frameon=False, fontsize=9, labelcolor=INK_SECONDARY, loc="upper center",
+                  else "turns where restore changed the agent's action (%)", color=INK_SECONDARY, fontsize=_pt(9, paper))
+    ax.legend(frameon=False, fontsize=_pt(9, paper), labelcolor=INK_SECONDARY, loc="upper center",
               bbox_to_anchor=(0.4, -0.2) if paper else (0.45, -0.13), ncol=2)   # below the axis: every row carries a label
     changes, turns = explicit_totals(analysis)
     _finish(fig, path, "Restore changed the agent's action on ambiguous requests, on every architecture",
@@ -206,18 +218,19 @@ def plot_margin_bins(analysis, path, paper=False):
             ax.vlines(j + dx, 100 * p["low"], 100 * p["high"], color=WHISKER, linewidth=1.2, zorder=2)
             ax.scatter([j + dx], [100 * p["rate"]], color=SERIES[i], marker=MARKERS[i], s=64,
                        edgecolor=SURFACE, linewidth=1.3, zorder=3, label=labels[m] if j == 0 else None)
-            ax.text(j + dx, 100 * p["high"] + 1.8, f"{p['events']}/{p['n']}", ha="center",
-                    fontsize=7 if paper else 8, color=INK_SECONDARY)
+            lift = 6.0 if paper and i == 1 else 1.8
+            ax.text(j + dx, 100 * p["high"] + lift, f"{p['events']}/{p['n']}", ha="center",
+                    fontsize=_pt(8.5 if paper else 8, paper), color=INK_SECONDARY)
     total = {label: (sum(p["events"] for p in points if p["bin"] == label),
                      sum(p["n"] for p in points if p["bin"] == label)) for label in BIN_LABELS}
     ax.set_xticks(range(len(BIN_LABELS)))
-    ax.set_xticklabels([f"{BIN_NAMES[b]}\nall models {total[b][0]}/{total[b][1]}" for b in BIN_LABELS],
-                       color=INK_SECONDARY)
+    ax.set_xticklabels([BIN_NAMES[b] if paper else f"{BIN_NAMES[b]}\nall models {total[b][0]}/{total[b][1]}"
+                        for b in BIN_LABELS], color=INK_SECONDARY)
     ax.set_xlim(-0.6, len(BIN_LABELS) - 0.4)
     ax.set_ylim(0, max(70.0, 100 * max(p["high"] for p in points) + 8))
     ax.set_ylabel("action changed (% of turns)" if paper else "turns where restore changed the action (%)",
-                  color=INK_SECONDARY, fontsize=9)
-    ax.legend(frameon=False, fontsize=9, labelcolor=INK_SECONDARY, loc="upper right")
+                  color=INK_SECONDARY, fontsize=_pt(9, paper))
+    ax.legend(frameon=False, fontsize=_pt(9, paper), labelcolor=INK_SECONDARY, loc="upper right")
     _finish(fig, path, "Changes happen where the model was already close to a tie",
             "Natural boundaries, all turns · action margin = smallest top-two logprob gap at the decision, "
             "on the recompute arm · 95% Clopper–Pearson intervals", 0.93, paper)
@@ -252,20 +265,22 @@ def plot_drift_per_turn(analysis, path, seed=0, paper=False):
                        label=f"{stratum} requests" if i == 0 else None)
             med = float(np.median(vals))
             ax.hlines(max(med, JSD_FLOOR), i + dx - 0.13, i + dx + 0.13, color=INK_PRIMARY, linewidth=2, zorder=3)
-            ax.text(i + dx + 0.15, max(med, JSD_FLOOR), f"{med:.1e}" if paper else f"median {med:.1e}",
-                    ha="left", va="center", fontsize=7 if paper else 7.5, color=INK_PRIMARY,
-                    bbox={"facecolor": SURFACE, "edgecolor": "none", "alpha": 0.85, "pad": 1.5}, zorder=4)
+            if not paper:
+                ax.text(i + dx + 0.15, max(med, JSD_FLOOR), f"median {med:.1e}", ha="left", va="center",
+                        fontsize=7.5, color=INK_PRIMARY,
+                        bbox={"facecolor": SURFACE, "edgecolor": "none", "alpha": 0.85, "pad": 1.5}, zorder=4)
             floored = int((vals < JSD_FLOOR).sum())
             if floored:
-                ax.text(i + dx, JSD_FLOOR * 0.5, f"{floored} < 1e-10", ha="center", va="top", fontsize=7,
+                ax.text(i + dx, JSD_FLOOR * 0.5, f"{floored} < 1e-10", ha="center", va="top", fontsize=_pt(7, paper),
                         color=INK_SECONDARY)
     ax.set_xticks(range(len(models)))
-    ax.set_xticklabels([PAPER_LABELS[m] if paper else SHORT_LABELS[m] for m in models], color=INK_SECONDARY)
+    ax.set_xticklabels([PAPER_LABELS[m].replace(" (", "\n(") if paper else SHORT_LABELS[m] for m in models],
+                       color=INK_SECONDARY)
     ax.set_xlim(-0.6, len(models) - 0.4)
     ax.set_ylim(JSD_FLOOR * 0.5, 3.0)
     ax.set_ylabel("per-turn mean JSD (nats)" if paper else "per-turn mean JSD, restore vs recompute (nats)",
-                  color=INK_SECONDARY, fontsize=9)
-    ax.legend(frameon=False, fontsize=9, labelcolor=INK_SECONDARY, loc="lower left", markerscale=2.5)
+                  color=INK_SECONDARY, fontsize=_pt(9, paper))
+    ax.legend(frameon=False, fontsize=_pt(9, paper), labelcolor=INK_SECONDARY, loc="upper left" if paper else "lower left", markerscale=2.5)
     _finish(fig, path, "Every natural-boundary restore drifted; the hybrid's median drift is the highest",
             "Main study · one point per turn, both prefix bands · snapped restores were exactly 0 on Ornith and "
             "Qwen3, and on Spark at k = 512", 0.93, paper)

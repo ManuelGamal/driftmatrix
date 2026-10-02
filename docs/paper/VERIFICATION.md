@@ -16,18 +16,18 @@ says what the paper cites it for.
 | `vllm-mooncake` | vllm.ai/blog/2026-05-06-mooncake-store | yes | "94.2% cache hit rate" on 610 Codex/SWE-bench Pro traces. Measures throughput and latency only | verified |
 | `policy-runtime` | arXiv 2605.27744 | yes | Agent runtime layer; reports cache hit-rate lift, TTFT and throughput. Measures speed, not output fidelity | verified |
 | `lmcache-hybrid` | docs.lmcache.ai/mp/hybrid_models.html | yes | Quote: "Generation is **not bit-exact** between a cached and a fresh run: GDN backends do not support vLLM's batch-invariant mode." | verified |
-| `llamacpp-20225` | llama.cpp issue #20225 (closed) | yes | Title: "Eval bug: Qwen 3.5 Full prompt re-processing on every conversation turn" | verified (title and state only; cited for what the title states) |
-| `vllm-26201` | vLLM issue #26201 (open) | yes | "[Tracking Issue]: Prefix Caching for Hybrid Models" | verified (title and state only) |
-| `vllm-40696` | vLLM issue #40696 (open) | yes | Prefix caching ineffective for Mamba-hybrid models below the block size | verified (title and state only) |
-| `vllm-43587` | vLLM issue #43587 (open) | yes | Prefix caching fails for incremental multimodal requests on hybrid models | verified (title and state only) |
-| `sglang-21846` | SGLang issue #21846 (open) | yes | Roadmap for a distributed KV cache for agentic workloads. The repository's quote that hybrid cache compatibility "remains limited" was not re-read in the issue body | reworded: cited only as a roadmap for agentic KV caching |
-| `llamacpp-26472` | llama.cpp PR #26472 (open) | yes | "chat: enforce required tagged tool args in any order via permute()". The regression report on the PR is from the repository's own findings | verified (title and state only) |
+| `llamacpp-20225` | llama.cpp issue #20225 (closed as completed) | yes | Body read: "Qwen 3.5 27B (hybrid attention + Mamba2/SSM architecture) forces **full prompt re-processing on every conversation turn**". The paper says the issue is closed | verified (body read 2026-10-02) |
+| `vllm-26201` | vLLM issue #26201 (open) | yes | Body read: tracks follow-up work for Mamba2 automatic prefix caching, including an open item to relax a block-size constraint | verified (body read) |
+| `vllm-40696` | vLLM issue #40696 (open) | yes | Body read: "vLLM sets the attention block size to **528 tokens**"; "only **fully completed blocks** are cached" | verified (body read) |
+| `vllm-43587` | vLLM issue #43587 (open) | yes | Body read: with incremental multimodal prompts on a hybrid model "num_cached_tokens is always 0"; a pure-attention model works | verified (body read) |
+| `sglang-21846` | SGLang issue #21846 (open) | yes | Body read: "HiCache's compatibility with hybrid models and other evolving features remains limited." | verified (body read) |
+| `llamacpp-26472` | llama.cpp PR #26472 (open) | yes | "chat: enforce required tagged tool args in any order via permute()". The thread has a comment by ManuelGamal dated 2026-09-11 reporting that the change rejects the Laguna-XS-2.1 and Laguna-XS.2 template formats, with the failing output | verified (thread read) |
 | `clopper-pearson` | Biometrika 26(4):404–413, 1934, doi 10.1093/biomet/26.4.404 | yes | The exact binomial interval | verified |
 | `holm` | Scand. J. Statist. 6(2):65–70, 1979 | yes | The sequentially rejective correction | verified |
 | `ornith` | huggingface.co/ornith-ai/Ornith-1.5-9B | yes | Model exists, MIT licence. **The card calls it "a 9B dense model" and gives no layer detail.** The hybrid description in the paper comes from the model file's metadata (below) | reworded: cited for the model; architecture attributed to the file metadata |
 | `spark` | huggingface.co/XHToken/Spark-X2.5-4B | yes | Card: "a hybrid attention architecture that combines one full-attention layer with three sliding-window attention layers". The card does not give the window size | verified; window size attributed to the file metadata |
 | `qwen3` | arXiv 2505.09388 | yes | Qwen3 Technical Report, 14 May 2025 | verified |
-| `prereg` | this repository, tag `prereg-2026-09-10` | yes (local tag) | The frozen analysis plan | verified locally; whether the repository is public was not checked |
+| `prereg` | github.com/ManuelGamal/driftmatrix, tag `prereg-2026-09-10` | yes | The repository is public; the tag is on the remote and points to commit `d45d0b8` ("Pre-register the main-study analysis plan") | verified (`gh repo view`, `git ls-remote --tags`) |
 
 ### Architecture facts read from the model files
 
@@ -39,15 +39,35 @@ Read with `driftmatrix.gguf.read_metadata` on 2026-10-02.
 | | `spark2_5.block_count` | 36 |
 | | `spark2_5.attention.sliding_window` | 512 |
 | | `spark2_5.attention.sliding_window_pattern` | three windowed layers, then one full, repeated (27 windowed, 9 full) |
-| `Ornith-1.5-9B-MTP-IQ4_XS.gguf` | `general.architecture` | `qwen35` |
+| `Ornith-1.5-9B-Q4_K_M.gguf` | `general.architecture` | `qwen35` |
+| | `general.file_type` | 15 (Q4_K_M) |
+| | `qwen35.block_count` | 33 |
 | | `qwen35.full_attention_interval` | 4 |
-| | `qwen35.ssm.state_size` | 128 (recurrent-state layers present) |
+| | `qwen35.ssm.state_size`, `ssm.inner_size`, `ssm.conv_kernel` | 128, 4096, 4 (recurrent-state layers present) |
+| `Qwen3-4B-Q4_K_M.gguf` | `general.architecture` | `qwen3` |
+| | `general.file_type` | 15 (Q4_K_M) |
+| | `qwen3.block_count` | 36 |
+| | keys containing `window`, `ssm` or `recurrent` | none |
+
+All three are the Q4_K_M files named in the committed reports. The Ornith
+IQ4_XS file read earlier carries the same `qwen35` keys.
 
 A third-party GGUF card for Spark states a 128-token window; the file used in the
 study records 512, which is also the value at which exactness ended in the
-follow-up. The Ornith file inspected is the IQ4_XS quantisation; the Q4_K_M file
-used in the study was not on this machine's search path, and its architecture
-is taken to be the same model.
+follow-up.
+
+### Errors confirmed in other repository documents (not changed)
+
+- `README.md` line 40 and the design spec line 36 say "94–96% of prompt tokens
+  served from cache (TraceLab)". TraceLab reports 95.7% overall ("about 96%"),
+  84.4% on user-initiated steps and 97.5% on tool-result steps. The 94.2%
+  figure is from the vLLM x Mooncake post, for 610 Codex/SWE-bench Pro traces.
+- `README.md` says of H5 "helps; no larger on the hybrid". In `analysis.json`,
+  contrast C2 has a positive estimate (1.1e-3), 291 turns larger against 69
+  smaller and a rejected sign test; it is unclaimed only because the bootstrap
+  interval [-1.9e-3, 3.6e-3] includes zero. "Not shown to be larger" is accurate.
+- `2026-09-11-main-study.md` gives Spark's short-history explicit drift as
+  3.1e-8; the result file holds 3.046e-8.
 
 ## Hand-entered numbers
 
@@ -95,7 +115,7 @@ Each claim in `HANDOFF.md`, as the paper prints it.
 | 29% of near-tie turns against 0.1% of confident turns | Introduction, Results "Where the changes happen", Figure 2 | pre-registered secondary, stated as descriptive |
 | Micro-batch tiling, 66 of 66 | Mechanism "Test", Figure 3 | exploratory, stated as one prompt per model |
 | Snapping exact on hybrid and dense, median 158–443 tokens; fails on sliding window at 4,096 | Abstract, Mechanism | confirmatory for exactness; the cost is pre-registered secondary |
-| Tool grammar side finding and PR #26472 | Appendix F only. The handoff's "Laguna-XS regression, reported with a failing test and a fix" is **not** in the paper: it was not re-verified on the PR thread | — |
+| Tool grammar side finding and PR #26472 | Appendix F only, including the Laguna-XS regression report, which was read on the PR thread | exploratory |
 
 ## Honesty rules
 
