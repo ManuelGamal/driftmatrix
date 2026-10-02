@@ -30,7 +30,7 @@ Qwen3 & $\DriftQwenShortExp$ & $\DriftQwenShortAmb$ & $\DriftQwenLongExp$ & $\Dr
 \caption{Family~C: mechanism contrasts (confirmatory). ``More / less'' counts
 the turns on which the first side of the contrast was larger or smaller. The
 estimate is the mean paired difference in per-turn mean JSD, except for C6,
-which is a difference in action-change rate. Intervals are 95\% paired
+which is a difference in action-change rate in percentage points. Intervals are 95\% paired
 bootstrap intervals.}
 \label{tab:contrasts}
 % src for the Pairs and Claimed columns: docs/findings/2026-09-11-main-study.md, "Family C"
@@ -44,7 +44,7 @@ C2 & Snapping $\times$ architecture (hybrid vs.\ dense) & 360 & \CTwoPos & \CTwo
 C3 & Hybrid $-$ dense, natural boundary & 360 & \CThreePos & \CThreeNeg & $\CThreeEst$ \ $[\CThreeLo,\ \CThreeHi]$ & no \\
 C4 & Hybrid $-$ sliding window, natural boundary & 360 & \CFourPos & \CFourNeg & $\CFourEst$ \ $[\CFourLo,\ \CFourHi]$ & yes \\
 C5 & Long $-$ short history on the hybrid & 180 & \CFivePos & \CFiveNeg & $\CFiveEst$ \ $[\CFiveLo,\ \CFiveHi]$ & no \\
-C6 & Ambiguous $-$ explicit on the hybrid (action change) & 180 & \CSixPos & \CSixNeg & $\CSixEst$ \ $[\CSixLo,\ \CSixHi]$ & yes \\
+C6 & Ambiguous $-$ explicit on the hybrid (action change) & 180 & \CSixPos & \CSixNeg & \CSixEstPct{} \ [\CSixLoPct,\ \CSixHiPct] points & yes \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -58,7 +58,7 @@ Figure~\ref{fig:drift} shows the drift of every natural-boundary turn.
 \centering
 \includegraphics[width=\columnwidth]{figures/drift_per_turn.pdf}
 \caption{Per-turn mean JSD between restore and recompute at natural
-boundaries, one point per turn, both history lengths. Black bars and labels are
+boundaries, one point per turn, both history lengths. Black bars are
 medians pooled over both history lengths (descriptive). Ornith is the hybrid recurrent model, Spark the sliding-window model,
 Qwen3 the dense model.}
 \label{fig:drift}
@@ -168,7 +168,8 @@ the server's tool-call grammar for Spark's format requires the required
 arguments in schema order, Spark prefers a different order, and under the
 grammar it wrote a different argument value. Reversing only the order of the
 schema's properties restored the model's unconstrained output. An open pull
-request makes the argument order free~\cite{llamacpp-26472}. The main study
+request makes the argument order free~\cite{llamacpp-26472}; while testing it
+we reported, on its thread, a regression for the Laguna-XS templates. The main study
 generates without a tool grammar and is not affected.
 
 \section{Reproduction}

@@ -40,6 +40,7 @@ def test_headline_values_match_the_handoff(m):
     assert (m["SnapInexactOrnith"], m["SnapInexactQwen"], m["SnapInexactSpark"]) == ("0", "0", "180")
     assert (m["MembersA"], m["ClaimedA"], m["ChangesTotal"]) == ("24", "7", "30")
     assert (m["CThreePos"], m["CThreeNeg"]) == ("291", "69")
+    assert (m["CSixEstPct"], m["CSixLoPct"], m["CSixHiPct"]) == ("7.8", "3.9", "11.7")
 
 
 def test_a_missing_family_member_fails_loudly(inputs):

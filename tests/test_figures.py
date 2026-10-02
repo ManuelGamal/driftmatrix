@@ -115,3 +115,15 @@ def test_default_mode_still_draws_the_title_and_writes_a_png(tmp_path, monkeypat
 
 def test_every_figure_has_a_paper_size():
     assert set(figures_module.PAPER_SIZES) == {"g1_exactness_grid", "action_changes", "margin_bins", "drift_per_turn"}
+
+
+def test_paper_text_is_scaled_and_readme_text_is_not():
+    assert figures_module._pt(9, False) == 9
+    assert figures_module._pt(9, True) == pytest.approx(9 * figures_module.PAPER_FONT_SCALE)
+
+
+@pytest.mark.parametrize("name", ["action_changes", "margin_bins", "drift_per_turn"])
+def test_single_column_paper_labels_print_at_seven_points_or_more(name):
+    column_width = 3.33                      # inches, ACM two-column
+    printed = figures_module._pt(8.5, True) * column_width / figures_module.PAPER_SIZES[name][0]
+    assert printed >= 7.0
