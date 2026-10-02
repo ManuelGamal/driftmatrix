@@ -25,7 +25,10 @@ window is 512 tokens, so the windowed layers need only the most recent 512
 positions.
 Ornith-1.5-9B~\cite{ornith} is a hybrid: its model file declares the
 \texttt{qwen35} architecture, with full attention in every fourth layer and
-linear-attention layers in between that carry a fixed-size recurrent state. A
+linear-attention layers in between that carry a fixed-size recurrent state.
+The model card does not describe this structure and calls the model dense; we
+rely on the file metadata (\texttt{full\_attention\_interval} of 4 and a
+recurrent-state block). A
 recurrent state summarises the whole prefix, so an error in it is carried
 forward to every later token, where a per-position cache keeps errors local to
 the positions that produced them.

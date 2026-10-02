@@ -11,7 +11,7 @@ difference.
 
 \begin{table}[h]
 \caption{Median per-turn mean JSD at natural boundaries, 90 turns per cell
-(confirmatory for Ornith, descriptive for the others).}
+(descriptive; the pre-registered family~B estimate is the mean).}
 \label{tab:drift}
 \small
 \begin{tabular}{@{}lcccc@{}}
@@ -59,7 +59,7 @@ Figure~\ref{fig:drift} shows the drift of every natural-boundary turn.
 \includegraphics[width=\columnwidth]{figures/drift_per_turn.pdf}
 \caption{Per-turn mean JSD between restore and recompute at natural
 boundaries, one point per turn, both history lengths. Black bars and labels are
-medians. Ornith is the hybrid recurrent model, Spark the sliding-window model,
+medians pooled over both history lengths (descriptive). Ornith is the hybrid recurrent model, Spark the sliding-window model,
 Qwen3 the dense model.}
 \label{fig:drift}
 \end{figure}
@@ -125,7 +125,7 @@ Three of the \ChangesTotal{} changes, all on Ornith at natural boundaries:
   numbers, so the tool computes a different total.
 \end{itemize}
 
-By request type, 20 changes were on ``Add up the numbers from earlier'', 8 on
+By request type (descriptive), 20 changes were on ``Add up the numbers from earlier'', 8 on
 ``Pull up that record again'' and 2 on ``Write that up for me''. The two
 request types that ask the model to choose between tools produced none.
 
@@ -160,6 +160,7 @@ request types that ask the model to choose between tools produced none.
 \label{app:grammar}
 
 % src: docs/findings/2026-09-11-spark-argument-order.md
+This observation is exploratory and concerns one conversation.
 While validating the parsers we saw one Spark tool call whose arguments
 differed between our parse and the server's. We first attributed this to the
 server's parser. Reproducing it inside llama.cpp showed the parser was correct:
