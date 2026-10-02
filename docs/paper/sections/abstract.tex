@@ -1,0 +1,17 @@
+\begin{abstract}
+LLM agents resend a growing prompt on every turn, so serving stacks reuse
+cached model state for nearly every request and assume the reuse does not
+change the output. We test that assumption in a pre-registered study on
+llama.cpp, comparing restored state with recomputation on \TurnsPerModel{}
+agent turns with real tool calls, for a hybrid recurrent, a sliding-window and
+a dense model. Restoring at a natural turn boundary was never bit-exact
+(\NatInexact{} of \NatTurns{} turns). It changed the agent's action on
+\ASparkNatShortAmbPct--\AOrnithNatLongAmbPct\% of ambiguous requests on all
+three models and on none of \ExplicitRestores{} explicit-request restores;
+changes concentrated where the model's top two choices were nearly tied. The
+cause is micro-batch tiling: aligning the reuse boundary to the micro-batch
+size made restores bit-exact on the hybrid and dense models, at a median cost
+of \SnapCostMin--\SnapCostMax{} re-evaluated tokens, but not on the
+sliding-window model beyond its window. Results are for one engine build, one
+4-bit quantisation, one GPU and greedy decoding.
+\end{abstract}
