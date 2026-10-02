@@ -1,0 +1,33 @@
+"""Page-limit and undefined-reference checks of the paper build script."""
+import importlib.util
+from pathlib import Path
+
+import pytest
+
+SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "build_paper.py"
+spec = importlib.util.spec_from_file_location("build_paper", SCRIPT)
+build_paper = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(build_paper)
+
+
+def test_body_pages_reads_the_page_of_the_endofbody_label():
+    aux = "\\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}\n" \
+          "\\newlabel{endofbody}{{8}{6}{Conclusion}{section.8}{}}\n"
+    assert build_paper.body_pages(aux) == 6
+
+
+def test_body_pages_fails_when_the_label_is_missing():
+    with pytest.raises(ValueError, match="endofbody"):
+        build_paper.body_pages("\\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}\n")
+
+
+def test_log_problems_finds_undefined_and_duplicate_references():
+    log = ("LaTeX Warning: Citation `tracelab' on page 1 undefined on input line 12.\n"
+           "LaTeX Warning: Reference `fig:grid' on page 4 undefined on input line 40.\n"
+           "LaTeX Warning: Label `tab:h' multiply defined.\n"
+           "Overfull \\hbox (2.0pt too wide) in paragraph at lines 3--4\n")
+    assert len(build_paper.log_problems(log)) == 3
+
+
+def test_log_problems_is_empty_for_a_clean_log():
+    assert build_paper.log_problems("Output written on main.pdf (6 pages).\n") == []
