@@ -1,6 +1,56 @@
 \section{Introduction}
 \label{sec:intro}
 
-Skeleton build: \NatInexact{} of \NatTurns{} natural-boundary restores were inexact,
-and \AOrnithNatLongAmb{} of \AOrnithNatLongAmbN{} (\AOrnithNatLongAmbPct\%) changed the action.
-The engine's documentation notes that cached logits can differ~\cite{llamacpp-server}.
+An LLM agent resends its system prompt, its tool schemas and a growing
+conversation history on every turn. Serving stacks therefore reuse cached model
+state for almost every request: in a trace of coding-agent sessions, about 96\%
+of prompt tokens were served from the prefix cache~\cite{tracelab}, and a
+serving-side study reports a 94.2\% hit rate on agentic traces~\cite{vllm-mooncake}.
+Work on agent serving treats this reuse as a pure speed
+optimisation~\cite{tracelab,vllm-mooncake,policy-runtime}.
+
+The reuse is assumed to be invisible to the model's output. It is known not to
+be exact: the llama.cpp server documentation warns that with prompt caching the
+logits ``are not guaranteed to be bit-for-bit identical for different batch
+sizes''~\cite{llamacpp-server}. What was not known is when reuse is exact, how
+the size of the difference depends on the model architecture, and whether the
+difference is ever large enough to change what an agent does.
+
+We measure this. In a pre-registered study~\cite{prereg} on one build of
+llama.cpp~\cite{llamacpp}, we compare restoring saved state against recomputing
+the prompt from scratch, on agent-shaped traffic with real tool calls, for three
+4-bit-quantised models whose cached state differs in kind: a hybrid model with
+recurrent state, a sliding-window model and a dense model. Each model runs the
+same \TurnsPerModel{} agent turns. We find:
+
+\begin{itemize}
+\item \textbf{Restore at a natural turn boundary was never bit-exact}:
+  \NatInexact{} of \NatTurns{} turns, on all three architectures, while two
+  recomputations of the same prompt were bit-identical on every turn.
+\item \textbf{It changed the agent's action} on
+  \ASparkNatShortAmbPct--\AOrnithNatLongAmbPct\% of ambiguous requests on all
+  three models, and on \ExplicitChanges{} of \ExplicitRestores{} restores of
+  explicit requests.
+\item \textbf{Changes concentrate at near-ties}: \MarginAllNearTiePct\% of
+  turns whose top two choices were within 0.5 nats, against
+  \MarginAllConfidentPct\% of confident turns.
+\item \textbf{The cause is micro-batch tiling.} Restore is exact when the reuse
+  boundary is a multiple of the engine's micro-batch size. Rounding the boundary
+  down to such a multiple made every restore bit-exact on the hybrid and dense
+  models, at a median cost of \SnapCostMin--\SnapCostMax{} re-evaluated tokens.
+\end{itemize}
+
+Two of our pre-registered predictions failed, and we report them as failures
+(\S\ref{sec:limits}). We predicted that the dense and sliding-window models
+would be unaffected; they were not. We predicted that the mitigation would be
+exact on every model; on the sliding-window model it fails once the reused
+prefix exceeds the attention window. All results hold for one engine build, one
+quantisation, one GPU and greedy decoding.
+
+\paragraph{Contributions.}
+(1)~A pre-registered measurement of restore against recompute on agent-shaped
+traffic, across hybrid recurrent, sliding-window and dense models.
+(2)~The behavioural result: action changes on ambiguous requests on all three
+architectures, none on explicit requests, concentrated at near-tie decisions.
+(3)~The mechanism, micro-batch tiling, and the alignment rule it implies.
+(4)~A mitigation, its cost, and the case where it fails.
