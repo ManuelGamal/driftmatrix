@@ -1,0 +1,33 @@
+\section{Related Work}
+\label{sec:related}
+
+\paragraph{Cache nondeterminism in the engine.}
+The llama.cpp server documentation states that prompt caching can make results
+nondeterministic because logits differ across batch
+sizes~\cite{llamacpp-server}. We do not claim to have discovered that. We
+measure when reuse is exact, how the difference varies with architecture,
+whether it changes agent actions, and what a mitigation costs.
+
+\paragraph{Numerical nondeterminism.}
+He et al.\ trace nondeterminism in LLM serving to kernels whose results depend
+on batch size~\cite{tml-nondeterminism}, and Yuan et al.\ show that
+floating-point non-associativity changes outputs across batch sizes and
+hardware~\cite{yuan-nondeterminism}. vLLM ships a batch-invariant
+mode~\cite{vllm-batch-invariant}. Micro-batch tiling at a reuse boundary is an
+instance of the same effect, reached through the prompt cache.
+
+\paragraph{Agent workloads and caching.}
+TraceLab characterises coding-agent traces and their prefix-cache hit
+rates~\cite{tracelab}; other work improves hit rates and latency for agent
+traffic~\cite{vllm-mooncake,policy-runtime}. These studies measure speed. Ours
+measures whether the reused state yields the same output.
+
+\paragraph{Hybrid models and prefix caching.}
+Prefix caching for hybrid models is an open problem in several engines: a
+llama.cpp issue reports full prompt reprocessing on every
+turn~\cite{llamacpp-20225}, and vLLM tracks hybrid prefix caching and its
+block-alignment limits~\cite{vllm-26201,vllm-40696,vllm-43587}. SGLang has a
+roadmap for agentic cache management~\cite{sglang-21846}. The LMCache
+documentation notes that for hybrid models generation ``is not bit-exact
+between a cached and a fresh run''~\cite{lmcache-hybrid}, without quantifying
+the difference.

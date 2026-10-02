@@ -1,0 +1,15 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+On one build of llama.cpp, restoring cached state at a natural agent-turn
+boundary was never bit-exact, and it changed the agent's action on a few
+percent of ambiguous requests on hybrid, sliding-window and dense models alike,
+almost always where the model was already close to a tie. The cause we
+identified is the tiling of the prompt into micro-batches. Aligning the reuse
+boundary to the micro-batch size restores exactness on the hybrid and dense
+models for a few hundred re-evaluated tokens per turn, but not on the
+sliding-window model once the prefix exceeds its window. A serving stack can
+apply the alignment today where the architecture allows it, and can treat
+low-margin decisions as the ones exposed to cache reuse. The cause of the
+sliding-window behaviour, and whether other engines behave the same way, remain
+open.
