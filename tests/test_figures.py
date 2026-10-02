@@ -76,3 +76,42 @@ def test_every_figure_renders(tmp_path):
     plot_drift_per_turn(a, tmp_path / "drift.png")
     for name in ("grid", "actions", "margins", "drift"):
         assert (tmp_path / f"{name}.png").stat().st_size > 10_000
+
+
+import pytest
+
+import driftmatrix.figures as figures_module
+
+
+def _plotters():
+    grid = {"ornith": {256: {256: (True, 0.0), 384: (False, 0.2)}},
+            "qwen3": {256: {256: (True, 0.0), 384: (False, 0.01)}}}
+    a = analysis()
+    return {"g1_exactness_grid": lambda path, **kw: plot_exactness_grid(grid, path, **kw),
+            "action_changes": lambda path, **kw: plot_action_changes(a, path, **kw),
+            "margin_bins": lambda path, **kw: plot_margin_bins(a, path, **kw),
+            "drift_per_turn": lambda path, **kw: plot_drift_per_turn(a, path, **kw)}
+
+
+@pytest.mark.parametrize("name", ["g1_exactness_grid", "action_changes", "margin_bins", "drift_per_turn"])
+def test_paper_mode_writes_a_pdf_with_no_title(tmp_path, monkeypatch, name):
+    titled = []
+    monkeypatch.setattr(figures_module, "_titles", lambda *args, **kwargs: titled.append(args))
+    path = tmp_path / f"{name}.pdf"
+    _plotters()[name](path, paper=True)
+    assert path.read_bytes().startswith(b"%PDF")
+    assert titled == []
+
+
+@pytest.mark.parametrize("name", ["g1_exactness_grid", "action_changes", "margin_bins", "drift_per_turn"])
+def test_default_mode_still_draws_the_title_and_writes_a_png(tmp_path, monkeypatch, name):
+    titled = []
+    monkeypatch.setattr(figures_module, "_titles", lambda *args, **kwargs: titled.append(args))
+    path = tmp_path / f"{name}.png"
+    _plotters()[name](path)
+    assert path.read_bytes().startswith(b"\x89PNG")
+    assert len(titled) == 1
+
+
+def test_every_figure_has_a_paper_size():
+    assert set(figures_module.PAPER_SIZES) == {"g1_exactness_grid", "action_changes", "margin_bins", "drift_per_turn"}
