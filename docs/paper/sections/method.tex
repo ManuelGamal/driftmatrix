@@ -1,0 +1,95 @@
+\section{Method}
+\label{sec:method}
+
+\paragraph{Pre-registration.}
+Seven hypotheses (H1--H7, Table~\ref{tab:hypotheses}), the outcomes, three
+families of tests, the decision rules and a commitment to report a null result
+were frozen in a tagged commit before any main-study turn ran~\cite{prereg}. The
+analysis code was committed and tested on synthetic data before the run. At the
+freeze we had seen restore only on raw-text prompts in two gate experiments
+(G0, G1), and chat-templated agent traffic only on the recompute path (G2).
+
+\paragraph{Evidence labels.}
+\label{sec:labels}
+We label every result. \emph{Confirmatory} results are the pre-registered test
+families A, B and C and the hypotheses. \emph{Pre-registered secondary} results
+are analyses the plan listed with intervals only and no corrected test.
+\emph{Exploratory} results were not pre-registered: the gates that ran before
+the freeze, and a follow-up that ran after the main study.
+
+\begin{table}[t]
+\caption{Models and prompt sizes. All models are Q4\_K\_M quantisations. Token
+counts are medians over 180 turns per band; the snapped boundary is the natural
+boundary rounded down to a multiple of 512.}
+\label{tab:setup}
+% src: docs/findings/2026-09-10-study-manifest.md, "Measured"
+\small
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+ & & \multicolumn{2}{c}{Prompt tokens} & \multicolumn{2}{c}{Snapped $k$} \\
+Model & Cached state & short & long & short & long \\
+\midrule
+Ornith-1.5-9B & hybrid recurrent & 1{,}245 & 6{,}439 & 1{,}024 & 6{,}144 \\
+Spark-X2.5-4B & sliding window & 786 & 4{,}298 & 512 & 4{,}096 \\
+Qwen3-4B & dense & 992 & 5{,}316 & 512 & 5{,}120 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Models and engine.}
+Table~\ref{tab:setup} lists the models. All runs use \texttt{llama-server},
+build \texttt{b10839}, on one RTX 4060 Laptop GPU (8\,GB) with all layers
+offloaded, a context of 8{,}192 tokens, one slot, $\nub = 512$, and the
+server's own prompt cache and context checkpoints disabled. Spark additionally
+runs with \texttt{-{}-swa-full}. Decoding is greedy, for at most 192 new tokens,
+recording the top-10 log-probabilities at every generated position.
+
+\paragraph{Traffic.}
+We generate 90 base conversations between a user and an agent with three
+deterministic mock tools (look up a record, sum a list of numbers, format a
+report). Each conversation is a sequence of completed tool round trips, rendered
+through the model's own chat template with the tool schemas. Each base appears
+with a short history (8 round trips) and a long one (60), and ends with either
+an \emph{explicit} request (``Look up record 153'') or an \emph{ambiguous} one
+drawn from five types (for example ``Add up the numbers from earlier''). That
+gives \TurnsPerModel{} turns per model, and every model receives the same turns.
+
+\paragraph{Boundaries and arms.}
+The \emph{natural} boundary of a turn is the longest common token prefix of the
+history rendered alone and the full prompt, which is what a server can reuse.
+(Qwen3's template renders the last assistant message differently once a new user
+message follows, so the history is not itself a prefix.) The \emph{snapped}
+boundary is $k - (k \bmod 512)$. Each turn runs six arms: recompute, restore at
+the natural boundary and restore at the snapped boundary, each twice. A restore
+arm evaluates the first $k$ tokens, saves the slot, erases it, restores it and
+then completes the prompt.
+
+\paragraph{Arm proofs.}
+A server can silently reprocess a prompt it was asked to restore. A restore arm
+therefore counts only if the server reports evaluating exactly the suffix and
+the saved slot holds exactly $k$ tokens; a recompute arm counts only if the
+server reports evaluating the whole prompt.
+% src: docs/findings/2026-09-11-main-study.md, "Validity"
+All 6{,}480 arms passed. Further safeguards are in Appendix~\ref{app:safeguards}.
+
+\paragraph{Outcomes.}
+The primary outcome is an \emph{action change}: the restore arm's action differs
+from the recompute arm's in both replicates. An action is the first complete
+tool call, with its name and canonical arguments, or no call. Secondary outcomes
+are bit-exactness (identical tokens and bitwise-identical top-10
+log-probabilities at every position) and distribution drift, the per-turn mean
+and maximum Jensen--Shannon divergence (JSD) over positions where both arms
+share the same context. The \emph{action margin} is a covariate: the smallest
+gap between the top two log-probabilities over the positions that decide the
+action, on the recompute arm, binned as near-tie ($<0.5$ nats), contested
+(0.5--2) and confident ($\geq 2$).
+
+\paragraph{Tests.}
+The noise floor is measured: recompute runs twice per turn. When the floor is
+zero, a single reproducible change cannot arise under the null, so the test
+rejects and the Clopper--Pearson interval~\cite{clopper-pearson} carries the
+size. Family~A (24 members) tests action changes per model, boundary, history
+length and request type; family~B (16) tests drift on the hybrid; family~C (6)
+tests paired contrasts with exact sign tests and bootstrap intervals. The Holm
+correction~\cite{holm} is applied within each family. An effect is claimed only
+if the test rejects and its interval excludes zero.

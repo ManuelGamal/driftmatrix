@@ -1,13 +1,12 @@
 % Shared by main.tex (ACM layout) and arxiv.tex (arXiv layout).
 \input{numbers}
+\newcommand{\nub}{\texttt{n\_ubatch}}
 \settopmatter{printacmref=false}
 \setcopyright{none}
 \renewcommand\footnotetextcopyrightpermission[1]{}
-\pagestyle{plain}
-
 \begin{document}
 
-\title{Does Restoring a Prompt Cache Change What an Agent Does? A Pre-Registered Study of Cache Fidelity in llama.cpp}
+\title[Cache Fidelity in llama.cpp]{Does Restoring a Prompt Cache Change What an Agent Does? A Pre-Registered Study of Cache Fidelity in llama.cpp}
 
 \author{Manuel Gamal}
 \affiliation{%
@@ -17,8 +16,11 @@
 \email{manuelaziz27@gmail.com}
 
 \maketitle
+\pagestyle{plain}
 
 \input{sections/introduction}
+\input{sections/background}
+\input{sections/method}
 
 \phantomsection\label{endofbody}
 
