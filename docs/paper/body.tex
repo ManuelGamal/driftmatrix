@@ -1,0 +1,55 @@
+% Shared by main.tex (ACM layout) and arxiv.tex (arXiv layout).
+\usepackage{array}
+\input{numbers}
+\newcommand{\nub}{\texttt{n\_ubatch}}
+\emergencystretch=2em
+% Let columns end short instead of stretching the space between paragraphs.
+\raggedbottom
+% End of the body: a label for the page check, and the number of body floats so far.
+\providecommand\bodyfloats[2]{}
+\makeatletter
+\newcommand\markendofbody{\phantomsection\label{endofbody}%
+  \immediate\write\@auxout{\string\bodyfloats{\arabic{figure}}{\arabic{table}}}}
+\makeatother
+\settopmatter{printacmref=false}
+\setcopyright{none}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+\begin{document}
+
+\title[Cache Fidelity in llama.cpp]{Does Restoring a Prompt Cache Change What an Agent Does? A Pre-Registered Study of Cache Fidelity in llama.cpp}
+
+\author{Manuel Gamal}
+\affiliation{%
+  \institution{Ain Shams University}
+  \city{Cairo}
+  \country{Egypt}}
+\email{manuelaziz27@gmail.com}
+
+\input{sections/abstract}
+
+\ccsdesc[500]{Computing methodologies~Natural language processing}
+\ccsdesc[300]{Computer systems organization~Reliability}
+\keywords{LLM inference, prompt caching, KV cache, LLM agents, numerical reproducibility, llama.cpp}
+
+\maketitle
+\pagestyle{plain}
+
+\input{sections/introduction}
+\input{sections/background}
+\input{sections/method}
+\input{sections/results}
+\input{sections/mechanism}
+\input{sections/limitations}
+\input{sections/related}
+\input{sections/conclusion}
+\input{sections/acknowledgements}
+
+\markendofbody
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{refs}
+
+\appendix
+\input{sections/appendix}
+
+\end{document}

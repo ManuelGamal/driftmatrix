@@ -1,0 +1,38 @@
+\section{Limitations}
+\label{sec:limits}
+
+\paragraph{Expectations that failed.}
+Four expectations did not hold. (1)~Our design document, written before the
+data, expected action changes on the hybrid and none on the dense and
+sliding-window controls; all three changed actions, at similar rates on short
+histories. Restore-induced action changes appear to be a property of near-tie
+decisions, not of recurrent state alone. (2)~We pre-registered that snapping
+would be exact on every model (H1); on the sliding-window model it was inexact
+at every 4{,}096-token boundary. (3)~Drift was not shown to grow with history
+length on the hybrid (H6). (4)~The hybrid's mean drift was not shown to exceed
+the dense model's (C3), although it was larger on most turns.
+
+\paragraph{Scope.}
+One engine build, one quantisation (Q4\_K\_M), one GPU, $\nub = 512$, three
+models. Exactness is a property of numerical kernels and can differ on other
+builds, backends and hardware. We make no claim about other inference engines.
+
+\paragraph{Traffic.}
+The traffic is synthetic: three mock tools and five ambiguous request types.
+Real agent traffic may contain more or fewer near-tie decisions. The relation
+between action margin and action change is the part we expect to transfer; the
+rates are not.
+
+\paragraph{Few events.}
+Each rate rests on 2--11 changed turns out of 90, so the intervals are wide.
+No test compares action-change rates between architectures, and the larger
+count on the hybrid's long histories (11 against 3) is descriptive.
+
+\paragraph{Decoding.}
+Decoding was greedy. Under sampling, drift would shift sampled tokens instead
+of flipping the most likely one; we did not measure that.
+
+\paragraph{Exploratory evidence.}
+The tiling mechanism (G1) and the sliding-window rule each rest on a single
+prompt per configuration and were not pre-registered. The cause of the
+sliding-window behaviour inside llama.cpp is not identified.
