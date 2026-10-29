@@ -60,7 +60,7 @@ def _pt(size, paper):
 def _save(fig, path, paper=False):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     if paper:
-        fig.savefig(path, facecolor="white", bbox_inches="tight", pad_inches=0.02)
+        fig.savefig(path, dpi=250, facecolor="white", bbox_inches="tight", pad_inches=0.04)
     else:
         fig.savefig(path, dpi=160, facecolor=SURFACE, bbox_inches="tight", pad_inches=0.25)
     plt.close(fig)

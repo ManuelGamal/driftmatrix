@@ -8,6 +8,10 @@ tool calls.
 
 ![Restore changed the agent's action on ambiguous requests, on every architecture](docs/figures/action_changes.png)
 
+*Restore changed the agent's action on ambiguous requests, on every architecture.
+90 turns per point, both replicates; 95% Clopper–Pearson intervals. Explicit
+requests: 0 changes in 1,080 restores.*
+
 ## Result
 
 On llama.cpp build `b10839` (Q4_K_M weights, one RTX 4060 Laptop GPU, greedy
@@ -60,6 +64,10 @@ matrix multiplications, attention and the recurrent scan accumulate
 floating-point error in a different order, and addition is not associative.
 
 ![Restore is bit-exact exactly when the reuse boundary is a multiple of n_ubatch](docs/figures/g1_exactness_grid.png)
+
+*Restore is bit-exact exactly when the reuse boundary is a multiple of
+`n_ubatch`. Gate G1, one ~1.9K-token prompt per model; inexact cells show the
+worst-position total variation against recompute.*
 
 Gate G1 tested this directly by changing `n_ubatch`. The set of exact boundaries
 moved with it: all 66 restores matched the prediction, on a hybrid and a dense
@@ -124,7 +132,15 @@ recurrent state carries the difference forward instead of letting it stay local.
 
 ![Changes happen where the model was already close to a tie](docs/figures/margin_bins.png)
 
+*Changes happen where the model was already close to a tie. Natural boundaries,
+all turns; the action margin is the smallest top-two log-probability gap at the
+decision, on the recompute arm; 95% Clopper–Pearson intervals.*
+
 ![Every natural-boundary restore drifted; the hybrid's median drift is the highest](docs/figures/drift_per_turn.png)
+
+*Every natural-boundary restore drifted; the hybrid's median drift is the
+highest. One point per turn, both prefix bands; black bars are medians. Snapped
+restores were exactly 0 on Ornith and Qwen3, and on Spark at k = 512.*
 
 | Pre-registered hypothesis | Verdict |
 |---|---|
