@@ -8,12 +8,34 @@ sizes~\cite{llamacpp-server}. We do not claim to have discovered that. We
 measure when reuse is exact, how the difference varies with architecture,
 whether it changes agent actions, and what a mitigation costs.
 
+\paragraph{Cached versus recomputed outputs.}
+Chodavarapu and Xu find that KV-cached and cache-free decoding diverge on every
+token under FP16 and that FP32 removes the token flips~\cite{chodavarapu-fp16};
+Lorup finds the same for a retained cache against a re-prefill in BF16 and
+shows that the boundary cache carries the divergent
+trajectory~\cite{lorup-stage-replay}. Closest to our work, Patodiya runs a
+multi-turn agentic tool-use workload on llama.cpp and vLLM and finds that
+cache-hit and recompute paths diverge, increasingly with weight
+quantisation~\cite{patodiya-cache-divergence}. That study measures divergence
+of trajectories on dense models; we measure changes in the agent's action,
+compare hybrid recurrent, sliding-window and dense state, identify the
+micro-batch alignment that makes reuse exact, and test a mitigation. Zhang and
+Yang reach a changed action by another route: a KV cache kept after an
+aborted branch, with the decision tokens held identical, flipped a protected
+tool effect in 25 of 63 audited cells, and rebuilding the cache removed
+it~\cite{zhang-rollback}. There the cache holds content that the transcript no
+longer contains; in our study the cached and recomputed paths see the same
+tokens. Concurrently, Gu et al.\ show that approximate, non-prefix KV reuse
+makes answers depend on the order of earlier requests~\cite{gu-request-order}.
+
 \paragraph{Numerical nondeterminism.}
 He et al.\ trace nondeterminism in LLM serving to kernels whose results depend
 on batch size~\cite{tml-nondeterminism}, and Yuan et al.\ show that
 floating-point non-associativity changes outputs across batch sizes and
 hardware~\cite{yuan-nondeterminism}. vLLM ships a batch-invariant
-mode~\cite{vllm-batch-invariant}. Micro-batch tiling at a reuse boundary is an
+mode~\cite{vllm-batch-invariant}, and SGLang aligns chunked-prefill
+truncation points to a multiple of the split-KV size for
+determinism~\cite{sglang-deterministic}. Micro-batch tiling at a reuse boundary is an
 instance of the same effect, reached through the prompt cache.
 
 \paragraph{Agent workloads and caching.}

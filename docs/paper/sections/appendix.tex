@@ -107,27 +107,92 @@ $k$ & 256 & 512 & 1{,}024 & 512 \\
 \end{tabular}
 \end{table}
 
-\section{Examples of Changed Actions}
+\section{Changed Actions}
 \label{app:examples}
 
-% src: docs/findings/2026-09-11-main-study.md, "Where the changes happen", Examples
-Three of the \ChangesTotal{} changes, all on Ornith at natural boundaries:
+% src: docs/findings/study/changed_turns.json; probabilities from data/study/*.jsonl (replicate 1, top-10 log-probabilities)
+Table~\ref{tab:examples} shows three changed turns side by side, all on Ornith
+at natural boundaries, and Table~\ref{tab:census} lists all \ChangesTotal{}.
+Decoding is greedy, so each arm emits its more probable token, and every change
+reproduced in both replicates. The two request types that ask the model to
+choose between tools produced no changes.
 
-\begin{itemize}
-\item Long history, ``Pull up that record again'': recompute calls
-  \texttt{lookup\_record(73)}; restore answers in text, ``The record you're
-  referring to is record 73, which has field=beta value=701.''
-\item Short history, ``Write that up for me'': recompute asks ``Could you
-  clarify what you'd like me to write up?''; restore calls
-  \texttt{format\_report} with a summary.
-\item Long history, ``Add up the numbers from earlier'': both call
-  \texttt{compute\_sum}, but restore drops the value 65 from a list of 23
-  numbers, so the tool computes a different total.
-\end{itemize}
+\begin{table*}[p]
+\caption{Three changed turns on Ornith at natural boundaries. ``At
+token'' gives the two most probable tokens, with probabilities in
+percent, at the first generated position where the arms differ; \textsc{call}
+is the token that opens a tool call. Values in bold are where the outputs
+part.}
+\label{tab:examples}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.15\textwidth}>{\raggedright\arraybackslash}p{0.39\textwidth}>{\raggedright\arraybackslash}p{0.39\textwidth}@{}}
+\toprule
+ & Recompute & Restore \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{(a) Long history, ``Pull up that record again'', $k=6{,}416$, action margin 0.09}} \\
+At token 0 & \textbf{\textsc{call} 41.0}, `The' 37.4 & \textbf{`The' 53.3}, \textsc{call} 40.3 \\
+Output & calls \texttt{lookup\_record(73)} & ``The record you're referring to is record 73, which has field=beta value=701.'' \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{(b) Short history, ``Write that up for me'', $k=1{,}212$, action margin 0.61}} \\
+At token 0 & \textbf{`I' 44.6}, \textsc{call} 24.2 & \textbf{\textsc{call} 34.0}, another token 28.8 \\
+Output & ``I'm not sure which task or information you're referring to. Could you clarify what you'd like me to write up?'' & calls \texttt{format\_report} with the title ``Record Lookup Summary'' and three records from the history \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{(c) Long history, ``Add up the numbers from earlier'', $k=6{,}351$, action margin 0.22}} \\
+At token 38 & \textbf{`6' 55.4}, `9' 44.4 & \textbf{`9' 65.4}, `6' 34.3 \\
+Output & \texttt{compute\_sum([68, 110, 72, 118, 36, \textbf{65}, 90, \ldots, 74])}, 23 values & \texttt{compute\_sum([68, 110, 72, 118, 36, \textbf{90}, \ldots, 74])}, 22 values; 65 is missing \\
+\bottomrule
+\end{tabular}
 
-By request type (descriptive), 20 changes were on ``Add up the numbers from earlier'', 8 on
-``Pull up that record again'' and 2 on ``Write that up for me''. The two
-request types that ask the model to choose between tools produced none.
+\bigskip
+\caption{All \ChangesTotal{} changed actions. History: prefix band. Request:
+``Add up the numbers from earlier'', ``Pull up that record again'' or ``Write
+that up for me''. $k$: reuse boundary. Pos.: first generated position where
+the arms differ. The two token columns give the two most probable tokens there,
+with probabilities in percent; \textsc{call} opens a tool call and
+\textit{other} is a token that neither arm emitted. Arguments: the same tool
+with different arguments. The three snapped rows are Spark at
+$k=4{,}096$, where snapping is not exact (\S\ref{sec:mechanism}). Turn
+identifiers and full outputs are in the repository.}
+\label{tab:census}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llllrrrlll@{}}
+\toprule
+Model & History & Request & Boundary & $k$ & Margin & Pos. & Recompute top two & Restore top two & Change \\
+\midrule
+Ornith & long & Add up & natural & 6{,}387 & 0.07 & 29 & `7' 35.6, `2' 33.4 & `2' 46.9, `9' 31.5 & arguments \\
+Ornith & long & Record & natural & 6{,}388 & 1.44 & 0 & \textsc{call} 76.9, \textit{other} 18.1 & `I' 37.9, \textit{other} 32.6 & tool$\to$text \\
+Ornith & long & Add up & natural & 6{,}467 & 0.21 & 16 & `6' 53.6, `2' 42.4 & `2' 60.4, `6' 34.2 & tool$\to$text \\
+Ornith & long & Record & natural & 6{,}294 & 0.13 & 0 & \textsc{call} 45.3, `The' 39.6 & `The' 63.1, \textsc{call} 22.8 & tool$\to$text \\
+Ornith & long & Add up & natural & 6{,}420 & 0.03 & 55 & `9' 58.2, `3' 41.0 & `3' 53.0, `9' 46.3 & arguments \\
+Ornith & long & Add up & natural & 6{,}482 & 0.03 & 30 & `5' 55.0, `6' 45.0 & `6' 50.8, `5' 49.2 & arguments \\
+Ornith & long & Add up & natural & 6{,}506 & $<$0.01 & 16 & `6' 46.3, `2' 45.9 & `2' 65.9, `6' 24.5 & arguments \\
+Ornith & long & Record & natural & 6{,}416 & 0.09 & 0 & \textsc{call} 41.0, `The' 37.4 & `The' 53.3, \textsc{call} 40.3 & tool$\to$text \\
+Ornith & long & Add up & natural & 6{,}515 & 0.06 & 130 & `8' 46.2, `4' 43.4 & `4' 45.9, `8' 44.2 & arguments \\
+Ornith & long & Add up & natural & 6{,}351 & 0.22 & 38 & `6' 55.4, `9' 44.4 & `9' 65.4, `6' 34.3 & arguments \\
+Ornith & long & Add up & natural & 6{,}384 & $<$0.01 & 33 & `4' 59.9, `1' 36.7 & `1' 49.0, `4' 48.0 & arguments \\
+Ornith & short & Write up & natural & 1{,}212 & 0.61 & 0 & `I' 44.6, \textsc{call} 24.2 & \textsc{call} 34.0, \textit{other} 28.8 & text$\to$tool \\
+Ornith & short & Add up & natural & 1{,}233 & 0.46 & 16 & `4' 61.0, `9' 38.5 & `9' 64.8, `4' 34.7 & arguments \\
+Ornith & short & Record & natural & 1{,}242 & 0.19 & 17 & `1' 54.5, `7' 45.1 & `7' 52.7, `1' 46.9 & arguments \\
+Spark & long & Add up & natural & 4{,}300 & 0.14 & 0 & `The' 31.7, \textsc{call} 27.7 & \textsc{call} 34.6, `The' 31.8 & text$\to$tool \\
+Spark & long & Add up & snapped & 4{,}096 & 0.11 & 0 & `The' 30.9, \textsc{call} 27.6 & \textsc{call} 32.0, `The' 22.6 & text$\to$tool \\
+Spark & long & Add up & snapped & 4{,}096 & 0.11 & 0 & `The' 36.4, \textsc{call} 32.6 & \textsc{call} 31.7, `The' 28.8 & text$\to$tool \\
+Spark & long & Add up & natural & 4{,}383 & 0.14 & 0 & `The' 24.7, \textit{other} 21.4 & \textsc{call} 30.5, `The' 20.3 & text$\to$tool \\
+Spark & long & Add up & snapped & 4{,}096 & 0.14 & 0 & `The' 24.7, \textit{other} 21.4 & \textsc{call} 35.3, `The' 17.5 & text$\to$tool \\
+Spark & long & Record & natural & 4{,}264 & 0.31 & 0 & \textsc{call} 47.5, `The' 34.7 & `The' 43.1, \textsc{call} 36.0 & tool$\to$text \\
+Spark & long & Add up & natural & 4{,}242 & 0.64 & 0 & `The' 31.9, \textit{other} 16.8 & \textsc{call} 28.0, `The' 23.9 & text$\to$tool \\
+Spark & short & Record & natural & 773 & 0.05 & 10 & `3' 51.2, `4' 48.8 & `4' 61.4, `3' 38.6 & arguments \\
+Spark & short & Add up & natural & 782 & 0.15 & 0 & \textsc{call} 43.8, `The' 37.9 & `The' 39.9, \textsc{call} 30.3 & tool$\to$text \\
+Qwen3 & long & Write up & natural & 5{,}340 & 3.09 & 0 & `The' 87.0, \textsc{call} 4.0 & \textsc{call} 32.3, \textit{other} 26.3 & text$\to$tool \\
+Qwen3 & long & Record & natural & 5{,}296 & 1.25 & 0 & \textsc{call} 72.9, `I' 21.0 & `I' 43.2, \textsc{call} 41.1 & tool$\to$text \\
+Qwen3 & long & Record & natural & 5{,}265 & 0.13 & 0 & \textsc{call} 45.7, `I' 40.2 & `I' 62.3, \textit{other} 23.2 & tool$\to$text \\
+Qwen3 & short & Add up & natural & 958 & 0.17 & 0 & `I' 50.1, `The' 42.4 & `The' 67.9, `I' 21.2 & text$\to$tool \\
+Qwen3 & short & Add up & natural & 936 & 1.52 & 23 & `]' 87.5, `,' 12.5 & `,' 94.3, `]' 5.7 & arguments \\
+Qwen3 & short & Add up & natural & 963 & 0.48 & 0 & \textsc{call} 47.0, `The' 29.1 & `The' 40.7, \textit{other} 34.0 & tool$\to$text \\
+Qwen3 & short & Add up & natural & 965 & 0.20 & 0 & `The' 54.5, `I' 44.5 & `I' 56.6, `The' 42.0 & tool$\to$text \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 \section{Measurement Safeguards}
 \label{app:safeguards}
@@ -181,18 +246,16 @@ frozen at the Git tag named \texttt{prereg-2026-09-10}.
 The test suite needs no GPU. With a
 model file and a llama.cpp build:
 
-{\small
+{\footnotesize
 \begin{verbatim}
-llama-server -m <model.gguf> --jinja -c 8192
-  -ngl 99 -np 1 -b 2048 -ub 512 --cache-ram 0
+llama-server -m <model.gguf> --jinja -c 8192 -ngl 99
+  -np 1 -b 2048 -ub 512 --cache-ram 0
   --ctx-checkpoints 0 --slot-save-path <dir>
   --port 8090     # add --swa-full for Spark
-
 python scripts/run_study.py --model ornith
   --gguf <model.gguf> --slot-dir <dir>
-python scripts/analyze_study.py
-  --gguf ornith=<..> --gguf qwen3=<..>
-  --gguf spark=<..>
+python scripts/analyze_study.py --gguf ornith=<..>
+  --gguf qwen3=<..> --gguf spark=<..>
 python scripts/make_figures.py --paper
 python scripts/paper_numbers.py
 \end{verbatim}
