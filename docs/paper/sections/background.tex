@@ -1,0 +1,34 @@
+\section{Background}
+\label{sec:background}
+
+\paragraph{Prefix reuse.}
+A server that has processed a prompt keeps the resulting model state. When the
+next prompt starts with the same tokens, it evaluates only the new suffix. In
+llama.cpp this happens implicitly within a slot (\texttt{cache\_prompt}), and
+explicitly through endpoints that save a slot's state to a file and restore
+it~\cite{llamacpp-server}. We use explicit save and restore, because it lets us
+force each condition and then prove from the server's own counters which one
+ran. We call the number of reused tokens the \emph{reuse boundary} $k$.
+
+\paragraph{Micro-batches.}
+llama.cpp evaluates a prompt in physical micro-batches of \nub{} tokens
+(512 in this study). A prompt of length $n$ is split into
+$[0,U), [U,2U), \dots$ with $U = \nub$.
+
+\paragraph{What the state is.}
+The three models differ in what a cached prefix consists of.
+Qwen3-4B~\cite{qwen3} is a dense transformer: the state is the keys and values
+of every prefix position in every layer.
+Spark-X2.5-4B~\cite{spark} interleaves three sliding-window attention layers
+with one full-attention layer; according to the model file's metadata the
+window is 512 tokens, so the windowed layers need only the most recent 512
+positions.
+Ornith-1.5-9B~\cite{ornith} is a hybrid: its model file declares the
+\texttt{qwen35} architecture, with full attention in every fourth layer and
+linear-attention layers in between that carry a fixed-size recurrent state.
+The model card does not describe this structure and calls the model dense; we
+rely on the file metadata (\texttt{full\_attention\_interval} of 4 and a
+recurrent-state block). A
+recurrent state summarises the whole prefix, so an error in it is carried
+forward to every later token, where a per-position cache keeps errors local to
+the positions that produced them.
