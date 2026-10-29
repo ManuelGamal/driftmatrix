@@ -15,7 +15,7 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
 
 from driftmatrix.figures import (  # noqa: E402
-    load_g1, plot_action_changes, plot_drift_per_turn, plot_exactness_grid, plot_margin_bins,
+    load_g1, plot_action_changes, plot_drift_per_turn, plot_exactness_grid, plot_margin_bins, use_paper_style,
 )
 
 
@@ -26,6 +26,8 @@ def main() -> int:
     args = parser.parse_args()
     out = REPO / "docs" / "paper" / "figures" if args.paper else REPO / "docs" / "figures"
     ext = "pdf" if args.paper else "png"
+    if args.paper:
+        use_paper_style()
     grid = load_g1(sorted((REPO / "docs" / "findings" / "g1").glob("g1_*.json")))
     analysis = json.loads((REPO / "docs" / "findings" / "study" / "analysis.json").read_text(encoding="utf-8"))
     plot_exactness_grid(grid, out / f"g1_exactness_grid.{ext}", paper=args.paper)
