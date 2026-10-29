@@ -71,9 +71,14 @@ analysis was pre-registered with intervals only, so it is descriptive.
 Of the \ChangesTotal{} changes, 11 were the same tool called with different
 arguments, 10 were a tool call that became a text reply, and 9 were a text
 reply or clarifying question that became a tool call. None switched to a
-different tool. In one case both arms summed a list of 23 numbers from the
-history, but the restore arm omitted one of them, so the tool returned a
-different total (Appendix~\ref{app:examples}).
+different tool. In one turn on Ornith, the user asked ``Pull up that record
+again'' after a long history. Recomputed, the model gave 41.0\% to opening a
+tool call and 37.4\% to the word ``The'', and the agent called
+\texttt{lookup\_record(73)}. Restored, the two swapped, 53.3\% against 40.3\%,
+and the agent answered from the history in text. In another, both arms summed
+23 numbers from the history, but restore skipped one, so the tool returned a
+different total. Appendix~\ref{app:examples} shows these side by side and
+lists all \ChangesTotal{}.
 
 \paragraph{Distribution drift (confirmatory).}
 Restore shifted the hybrid's output distribution at every natural boundary
