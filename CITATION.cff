@@ -8,7 +8,9 @@ authors:
     affiliation: "Ain Shams University"
 version: 1.0.0
 date-released: 2026-10-30
-license: MIT
+license:
+  - MIT
+  - CC-BY-4.0
 repository-code: "https://github.com/ManuelGamal/driftmatrix"
 abstract: >-
   Measures whether restoring a llama.cpp prompt cache changes the tool calls an LLM agent
