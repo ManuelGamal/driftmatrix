@@ -1,0 +1,11 @@
+The recorded runs, analysis outputs and figures in docs/findings/ and docs/figures/
+are Copyright (c) 2026 Manuel Gamal and licensed under the Creative Commons
+Attribution 4.0 International License (CC BY 4.0).
+
+You may share and adapt them for any purpose, provided you give appropriate credit
+(cite this repository as described in CITATION.cff), link to the license, and
+indicate if changes were made.
+
+Full license text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+All other files (code, scripts, tests) are licensed under the MIT License in LICENSE.
