@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software or data, please cite it as below."
+title: "driftmatrix: a pre-registered audit of prompt-cache fidelity in llama.cpp under agent traffic"
+type: software
+authors:
+  - family-names: Gamal
+    given-names: Manuel
+    affiliation: "Ain Shams University"
+version: 1.0.0
+date-released: 2026-10-30
+license: MIT
+repository-code: "https://github.com/ManuelGamal/driftmatrix"
+abstract: >-
+  Measures whether restoring a llama.cpp prompt cache changes the tool calls an LLM agent
+  makes, across hybrid recurrent, sliding-window and dense models. Includes the
+  pre-registered analysis plan (tag prereg-2026-09-10), the measurement harness, and the
+  recorded runs and analysis outputs.
+keywords:
+  - llama.cpp
+  - prompt caching
+  - KV cache
+  - LLM agents
+  - tool calling
+  - determinism
+  - reproducibility
