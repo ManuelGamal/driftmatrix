@@ -242,3 +242,9 @@ usage.
   between cached and fresh runs on GDN backends, without quantifying it.
 - **llama.cpp #20225**, **vLLM #43587, #40696, #26201**, **SGLang #21846**: hybrid
   prefix-caching limitations on three engines.
+
+## License
+
+Code is under the [MIT License](LICENSE). The recorded runs, analysis outputs and
+figures in `docs/findings/` and `docs/figures/` are under [CC BY 4.0](LICENSE-DATA);
+please cite the repository (see `CITATION.cff`) if you reuse them.
