@@ -17,3 +17,7 @@ outputs/
 # Paper build output and the LaTeX engine's cache
 output/
 .tectonic-cache/
+
+# Local files
+ManuelGamalCV-optimized.tex
+tools/

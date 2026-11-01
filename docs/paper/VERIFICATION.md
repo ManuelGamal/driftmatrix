@@ -112,9 +112,9 @@ median drift on short explicit requests as 3.1e-8. The result file holds
 
 ## Headline claims
 
-Each claim in `HANDOFF.md`, as the paper prints it.
+Each headline claim, as the paper prints it.
 
-| Handoff claim | In the paper | Label in the paper |
+| Claim | In the paper | Label in the paper |
 |---|---|---|
 | Never bit-exact, 1,080 of 1,080 | Abstract, Introduction, Results "Exactness" | confirmatory |
 | 2–12% of ambiguous requests; 0 of 540 explicit turns | Printed as 2.2–12.2%, and "0 of 1,080 restores" of explicit requests (540 turns, each restored at two boundaries); "540 explicit-request turns" appears only for exactness | confirmatory |
