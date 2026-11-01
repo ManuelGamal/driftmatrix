@@ -1,20 +1,23 @@
 \section{Method}
 \label{sec:method}
 
-\paragraph{Pre-registration.}
+\paragraph{Analysis plan.}
 Seven hypotheses (H1--H7, Table~\ref{tab:hypotheses}), the outcomes, three
 families of tests, the decision rules and a commitment to report a null result
-were frozen in a tagged commit before any main-study turn ran~\cite{prereg}. The
+were frozen in a tagged commit before any main-study turn ran~\preregcite{},
+and the plan has not changed since. The commit's date is self-reported: no
+independent registry holds the plan, and the repository became public after
+the results. The
 analysis code was committed and tested on synthetic data before the run. At the
 freeze we had seen restore only on raw-text prompts in two gate experiments
 (G0, G1), and chat-templated agent traffic only on the recompute path (G2).
 
 \paragraph{Evidence labels.}
 \label{sec:labels}
-We label every result. \emph{Confirmatory} results are the pre-registered test
-families A, B and C and the hypotheses. \emph{Pre-registered secondary} results
+We label every result. \emph{Confirmatory} results are the pre-specified test
+families A, B and C and the hypotheses. \emph{Pre-specified secondary} results
 are analyses the plan listed with intervals only and no corrected test.
-\emph{Exploratory} results were not pre-registered: the gates that ran before
+\emph{Exploratory} results were not pre-specified: the gates that ran before
 the freeze, and a follow-up that ran after the main study.
 
 \begin{table}[t]

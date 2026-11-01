@@ -2,6 +2,11 @@
 \usepackage{array}
 \input{numbers}
 \newcommand{\nub}{\texttt{n\_ubatch}}
+\newcommand{\preregcite}{\cite{prereg}}
+\newcommand{\onitsthread}{, on its thread,}
+\newcommand{\artifactnote}{Code, raw gate reports, the per-turn analysis table and all changed turns are
+at \url{https://github.com/manuelgamal/driftmatrix}. The analysis plan is
+frozen at the Git tag named \texttt{prereg-2026-09-10}.}
 \emergencystretch=2em
 % Let columns end short instead of stretching the space between paragraphs.
 \raggedbottom
@@ -16,7 +21,7 @@
 \renewcommand\footnotetextcopyrightpermission[1]{}
 \begin{document}
 
-\title[Cache Fidelity in llama.cpp]{Does Restoring a Prompt Cache Change What an Agent Does? A Pre-Registered Study of Cache Fidelity in llama.cpp}
+\title[Cache Fidelity in llama.cpp]{Does Restoring a Prompt Cache Change What an Agent Does? A Measurement of Cache Fidelity in llama.cpp}
 
 \author{Manuel Gamal}
 \affiliation{%

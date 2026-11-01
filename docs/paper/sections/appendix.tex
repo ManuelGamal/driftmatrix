@@ -11,7 +11,7 @@ difference.
 
 \begin{table}[h]
 \caption{Median per-turn mean JSD at natural boundaries, 90 turns per cell
-(descriptive; the pre-registered family~B estimate is the mean).}
+(descriptive; the pre-specified family~B estimate is the mean).}
 \label{tab:drift}
 \small
 \begin{tabular}{@{}lcccc@{}}
@@ -68,7 +68,7 @@ Qwen3 the dense model.}
 \label{app:spark}
 
 This follow-up is exploratory. Its plan and predictions were committed before
-it ran, but it was not part of the pre-registration, and it uses one prompt:
+it ran, but it was not part of the analysis plan, and it uses one prompt:
 the first long-history main-study turn, 4{,}268 tokens, with 13 reuse
 boundaries and 16 generated tokens per case. Table~\ref{tab:sparkgrid} shows
 which restores were bit-exact. With default settings, the rule ``exact when
@@ -233,16 +233,14 @@ the server's tool-call grammar for Spark's format requires the required
 arguments in schema order, Spark prefers a different order, and under the
 grammar it wrote a different argument value. Reversing only the order of the
 schema's properties restored the model's unconstrained output. An open pull
-request makes the argument order free~\cite{llamacpp-26472}; while testing it
-we reported, on its thread, a regression for the Laguna-XS templates. The main study
+request makes the argument order free~\cite{llamacpp-26472}; a regression for
+the Laguna-XS templates was reported\onitsthread{} during its testing. The main study
 generates without a tool grammar and is not affected.
 
 \section{Reproduction}
 \label{app:repro}
 
-Code, raw gate reports, the per-turn analysis table and all changed turns are
-at \url{https://github.com/manuelgamal/driftmatrix}. The analysis plan is
-frozen at the Git tag named \texttt{prereg-2026-09-10}.
+\artifactnote{}
 The test suite needs no GPU. With a
 model file and a llama.cpp build:
 

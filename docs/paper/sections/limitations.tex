@@ -6,7 +6,7 @@ Four expectations did not hold. (1)~Our design document, written before the
 data, expected action changes on the hybrid and none on the dense and
 sliding-window controls; all three changed actions, at similar rates on short
 histories. Restore-induced action changes appear to be a property of near-tie
-decisions, not of recurrent state alone. (2)~We pre-registered that snapping
+decisions, not of recurrent state alone. (2)~We pre-specified that snapping
 would be exact on every model (H1); on the sliding-window model it was inexact
 at every 4{,}096-token boundary. (3)~Drift was not shown to grow with history
 length on the hybrid (H6). (4)~The hybrid's mean drift was not shown to exceed
@@ -34,5 +34,5 @@ of flipping the most likely one; we did not measure that.
 
 \paragraph{Exploratory evidence.}
 The tiling mechanism (G1) and the sliding-window rule each rest on a single
-prompt per configuration and were not pre-registered. The cause of the
+prompt per configuration and were not pre-specified. The cause of the
 sliding-window behaviour inside llama.cpp is not identified.

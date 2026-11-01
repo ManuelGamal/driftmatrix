@@ -21,7 +21,7 @@ open is when reuse is exact and why, how the difference depends on
 architectures beyond dense transformers, whether a cache of exactly the same
 tokens changes which action an agent takes, and how to prevent it.
 
-We measure this. In a pre-registered study~\cite{prereg} on one build of
+We measure this. In a pre-specified study~\preregcite{} on one build of
 llama.cpp~\cite{llamacpp}, we compare restoring saved state against recomputing
 the prompt from scratch, on synthetic agent-shaped traffic with tool calls
 against mock tools, for three 4-bit-quantised models whose cached state differs
@@ -48,13 +48,13 @@ dense model. Each model runs the same \TurnsPerModel{} agent turns. We find:
 
 Several of our expectations failed, and we report them as failures
 (\S\ref{sec:limits}). Our design document expected the dense and sliding-window
-models to be unaffected; they were not. We pre-registered that the mitigation
+models to be unaffected; they were not. We pre-specified that the mitigation
 would be exact on every model; on the sliding-window model it was inexact at
 every 4{,}096-token boundary. All results hold for synthetic traffic, one
 engine build, one quantisation, one GPU and greedy decoding.
 
 \paragraph{Contributions.}
-(1)~A pre-registered measurement of whether restoring cached state changes an
+(1)~A pre-specified measurement of whether restoring cached state changes an
 agent's action, across hybrid recurrent, sliding-window and dense models.
 (2)~The behavioural result: action changes on ambiguous requests on all three
 architectures, none on explicit requests, concentrated at near-tie decisions.

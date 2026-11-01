@@ -1,7 +1,7 @@
 \begin{abstract}
 LLM agents resend a growing prompt on every turn, so serving stacks reuse
 cached model state for nearly every request and assume the reuse does not
-change the output. We test that assumption in a pre-registered study on
+change the output. We test that assumption in a pre-specified study on
 llama.cpp, comparing restored state with recomputation on \TurnsPerModel{}
 synthetic agent turns with tool calls, for a hybrid recurrent, a sliding-window
 and a dense model. Restoring at a natural turn boundary was never bit-exact

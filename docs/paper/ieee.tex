@@ -1,0 +1,80 @@
+% IEEE layout for AIPerf @ ICSE 2027: research paper, 8 pages excluding references.
+\documentclass[10pt,conference]{IEEEtran}
+\usepackage{fontspec}  % Tectonic is XeTeX-based: Times via TeX Gyre Termes, as IEEEtran expects
+\setmainfont{texgyretermes}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold,
+  ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\setmonofont{texgyrecursor}[Extension=.otf, UprightFont=*-regular, BoldFont=*-bold,
+  ItalicFont=*-italic, BoldItalicFont=*-bolditalic]
+\usepackage{amsmath,amssymb}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\input{numbers}
+\newcommand{\nub}{\texttt{n\_ubatch}}
+% AIPerf review is anonymous: set to \anonymousfalse for the camera-ready version.
+\newif\ifanonymous
+\anonymoustrue
+\ifanonymous
+  \newcommand{\preregcite}{\cite{prereg-anon}}
+  \newcommand{\onitsthread}{}
+  \newcommand{\artifactnote}{Code, raw gate reports, the per-turn analysis table and all changed
+    turns are in a public repository, withheld here for anonymous review, as is the Git tag
+    that freezes the analysis plan.}
+\else
+  \newcommand{\preregcite}{\cite{prereg}}
+  \newcommand{\onitsthread}{, on its thread,}
+  \newcommand{\artifactnote}{Code, raw gate reports, the per-turn analysis table and all changed
+    turns are at \url{https://github.com/manuelgamal/driftmatrix}. The analysis plan is
+    frozen at the Git tag named \texttt{prereg-2026-09-10}.}
+\fi
+\newenvironment{acks}{\section*{Acknowledgment}}{}
+\emergencystretch=2em
+% The shared tables were set for wider columns.
+\setlength{\tabcolsep}{3.5pt}
+% The shared headings end in a period; IEEEtran's own \paragraph would add a colon.
+\renewcommand{\paragraph}[1]{\par\smallskip\textit{#1}\enskip}
+\begin{document}
+
+\title{Does Restoring a Prompt Cache Change What an Agent Does? A Measurement of Cache Fidelity in llama.cpp}
+
+\ifanonymous
+\author{\IEEEauthorblockN{Anonymous Author(s)}}
+\else
+\author{\IEEEauthorblockN{Manuel Gamal}
+\IEEEauthorblockA{Ain Shams University\\
+Cairo, Egypt\\
+manuelaziz27@gmail.com}}
+\fi
+
+\maketitle
+
+\input{sections/abstract}
+
+\begin{IEEEkeywords}
+LLM inference, prompt caching, KV cache, LLM agents, numerical reproducibility, llama.cpp
+\end{IEEEkeywords}
+
+\input{sections/introduction}
+\input{sections/background}
+\input{sections/method}
+\input{sections/results}
+\input{sections/mechanism}
+\input{sections/limitations}
+\input{sections/related}
+\input{sections/conclusion}
+
+\appendix
+\input{sections/appendix}
+
+\input{sections/acknowledgements}
+
+% Keep the appendix's full-page table ahead of the references.
+\clearpage
+\label{startofrefs}
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}

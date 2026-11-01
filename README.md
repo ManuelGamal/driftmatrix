@@ -3,7 +3,7 @@
 
 **Does serving an LLM agent from a restored prompt cache change what the agent does?**
 
-A pre-registered measurement of prompt-cache fidelity in llama.cpp, across hybrid
+A pre-specified measurement of prompt-cache fidelity in llama.cpp, across hybrid
 recurrent, sliding-window and dense models, on agent-shaped traffic with real
 tool calls.
 
@@ -95,10 +95,12 @@ recurrent state carries the difference forward instead of letting it stay local.
   no call. A secondary outcome is distribution drift (JSD) at context-matched
   positions. The recompute arm's action margin (top-two logprob gap at the
   decision) is a covariate.
-- **Pre-registered:** outcomes, three Holm-corrected test families, decision rules
+- **Pre-specified:** outcomes, three Holm-corrected test families, decision rules
   and a null-result commitment were frozen in a tagged commit
   ([`docs/preregistration/`](docs/preregistration/2026-09-10-analysis-plan.md))
-  before any main-study turn ran. The analysis code was committed and tested
+  before any main-study turn ran. The commit's date is self-reported: no independent
+  registry holds the plan, and this repository became public after the results.
+  The analysis code was committed and tested
   before the run, too.
 
 ## How the measurement is kept honest
@@ -143,7 +145,7 @@ decision, on the recompute arm; 95% Clopper–Pearson intervals.*
 highest. One point per turn, both prefix bands; black bars are medians. Snapped
 restores were exactly 0 on Ornith and Qwen3, and on Spark at k = 512.*
 
-| Pre-registered hypothesis | Verdict |
+| Pre-specified hypothesis | Verdict |
 |---|---|
 | H1 Snapped restores are bit-exact | Holds on hybrid and dense; **fails on sliding window** at k = 4,096 |
 | H2 Restore shifts the hybrid's output distribution | Supported |
@@ -182,7 +184,7 @@ restores were exactly 0 on Ornith and Qwen3, and on Spark at k = 512.*
   the PR with a failing test and a change that passes all parser tests.
 - **The planned statistics contradicted the planned power.** Holm-corrected sign
   tests needed 9 changed turns out of 90 to detect anything. Because the
-  recompute floor is bit-exact, the pre-registration uses an exact test against a
+  recompute floor is bit-exact, the analysis plan uses an exact test against a
   zero floor, with Clopper–Pearson intervals.
 
 ## Scope and limits
@@ -200,7 +202,7 @@ restores were exactly 0 on Ornith and Qwen3, and on Spark at k = 512.*
 pip install -e ".[dev]"
 pytest -q                                      # GPU-free
 
-# start the server with the pre-registered flags (add --swa-full for Spark)
+# start the server with the pre-specified flags (add --swa-full for Spark)
 llama-server -m <model.gguf> --jinja -c 8192 -ngl 99 -np 1 -b 2048 -ub 512 \
   --cache-ram 0 --ctx-checkpoints 0 --slot-save-path <slot-dir> --port 8090
 
@@ -224,7 +226,7 @@ usage.
 | [`docs/preregistration/`](docs/preregistration/2026-09-10-analysis-plan.md) | The frozen analysis plan (tag `prereg-2026-09-10`) |
 | [`docs/superpowers/specs/`](docs/superpowers/specs/2026-09-10-hybrid-cache-fidelity-design.md) | Design spec and its revision history (v1–v4.5) |
 | `src/driftmatrix/runner/llamaserver.py` | Stdlib llama-server client and arm proofs |
-| `src/driftmatrix/servergrid.py`, `analysis.py` | Main-study runner and pre-registered analysis |
+| `src/driftmatrix/servergrid.py`, `analysis.py` | Main-study runner and pre-specified analysis |
 | `src/driftmatrix/traces/` | Conversation generator, offline chat-template rendering, reuse boundaries, tool-call parsers and round trip |
 | `src/driftmatrix/stats/` | Exact tests, Clopper–Pearson, paired bootstrap, Holm families, power |
 | `src/driftmatrix/g0.py` … `g3.py` | The gates |

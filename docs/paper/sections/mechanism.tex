@@ -23,7 +23,7 @@ recurrent updates are accumulated in a different order, and floating-point
 addition is not associative~\cite{tml-nondeterminism,yuan-nondeterminism}.
 
 \paragraph{Test (exploratory).}
-The gate experiment G1, run before the pre-registration, tested this prediction
+The gate experiment G1, run before the plan was frozen, tested this prediction
 by changing \nub. If tiling is the cause, the set of exact boundaries must move
 with it: $k = 512$ is exact at $\nub = 256$ and 512 but not at 1{,}024;
 $k = 768$ only at 256. Figure~\ref{fig:grid} shows the outcome on the hybrid
@@ -37,7 +37,7 @@ model.
 The rule suggests a fix that needs no change to the engine: round the reuse
 boundary down to a multiple of \nub{} and re-evaluate the remainder. In the
 main study this made every restore bit-exact on Ornith and Qwen3, which removed
-all drift and every action change on those models (H1; contrast C1). The cost (pre-registered secondary)
+all drift and every action change on those models (H1; contrast C1). The cost (pre-specified secondary)
 is the re-evaluated remainder: a median of \SnapCostOrnithShort{} and
 \SnapCostOrnithLong{} tokens per turn on Ornith (short and long histories),
 \SnapCostQwenShort{} and \SnapCostQwenLong{} on Qwen3, and at most 511 by
